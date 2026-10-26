@@ -20,10 +20,14 @@ import java.io.File
 import java.text.SimpleDateFormat
 
 /**
- * Sync of saves, states, "Continue playing" and favorites through the network share of the library (both variants).
+ * Sync of saves, states, "Continue playing" and favorites through a network share (both variants): the one of the
+ * library, or with the library in a folder of the device, the one configured for the sync.
  *
  * Saves and states go next to their game on the share: in the folder of the game, or of its system when the game has
- * none. States carry the core in their name, so the ones of two cores of the same game don't mix:
+ * none. With the library in a folder of the device, they go in the folder of the same game on the share, so all the
+ * devices share the same saves: written in [METADATA_FILE] by the devices with their library there, or else found by
+ * this device on the share (the folder with the same ROM file) and written there too. A game that is not on the share
+ * uses a folder of its system ("snes"). States carry the core in their name, so the ones of two cores of the same game don't mix:
  * "Game (USA).cue.pcsx_rearmed.state", ".slot1", their ".metadata" and the ".jpg" preview of each slot.
  * A file only on one side is copied to the other; on both, the side that changed since the last sync wins, or the most
  * recent when both changed. "Continue playing" and favorites go in [METADATA_FILE] at the root of the library.
@@ -43,9 +47,82 @@ class SmbSaveSync(
     /** Name shown as the sync provider. */
     fun getProvider(): String = appContext.getString(R.string.smb_storage)
 
-    /** Only when the library comes from a network share: the saves go next to its games. */
-    fun isConfigured(): Boolean =
-        configStore.librarySource == SmbConfigStore.LibrarySource.SMB && configStore.load()?.isValid() == true
+    /** With a network share configured, as the library or only for the sync. */
+    fun isConfigured(): Boolean = configStore.load()?.isValid() == true
+
+    private fun isLibraryOnShare(): Boolean = configStore.librarySource == SmbConfigStore.LibrarySource.SMB
+
+    /** The games of the library on the share, or all the games of a library in a folder of the device. */
+    private suspend fun libraryGames(config: SmbConfig): List<Game> =
+        if (isLibraryOnShare()) {
+            retrogradeDb.gameDao().selectByFileUriPrefix(libraryPrefix(config))
+        } else {
+            retrogradeDb.gameDao().selectByFileUriPrefix("").filter { !it.fileUri.startsWith("${SmbStorageProvider.SCHEME}:") }
+        }
+
+    /** Folder of the saves of a [game] on the share; see the class documentation. */
+    private fun gameFolder(
+        game: Game,
+        config: SmbConfig,
+        remoteJson: JSONObject?,
+        foundFolders: Map<String, String>,
+    ): String =
+        if (isLibraryOnShare()) {
+            romFolder(game)
+        } else {
+            remoteJson?.let { metadata.romFolderOf(it, game) }
+                ?: foundFolders[gameKey(game)]
+                ?: SmbShare.join(config.folder, game.systemId)
+        }
+
+    private fun gameKey(game: Game): String = "${game.systemId}/${game.fileName}"
+
+    /**
+     * With the library in a folder of the device: the folders of the share with the ROM of the games that have
+     * something to sync but no folder in [METADATA_FILE] yet, by game key. Looked for in the folders of the share up to
+     * [MAX_SEARCH_DEPTH] levels ("PSX/Game (USA)/Game (USA).cue"), each listed once, and only until all are found;
+     * once written in [METADATA_FILE] they are not looked for again.
+     */
+    private fun findGameFolders(
+        share: SmbShare,
+        config: SmbConfig,
+        games: List<Game>,
+        cores: Set<CoreID>,
+        remoteJson: JSONObject?,
+    ): Map<String, String> {
+        if (isLibraryOnShare()) return emptyMap()
+        val missing =
+            games
+                .filter { game -> remoteJson?.let { metadata.romFolderOf(it, game) } == null }
+                .filter { game -> localFiles(game, cores).any { it.exists() } }
+                .groupBy { it.fileName.lowercase() }
+                .toMutableMap()
+        if (missing.isEmpty()) return emptyMap()
+
+        val found = mutableMapOf<String, String>()
+        var level = listOf(config.folder)
+        repeat(MAX_SEARCH_DEPTH + 1) {
+            val next = mutableListOf<String>()
+            level.forEach { folder ->
+                if (missing.isEmpty()) return found
+                runCatching { share.list(folder) }
+                    .onFailure { Timber.w(it, "Can't list $folder") }
+                    .getOrDefault(emptyList())
+                    .forEach { entry ->
+                        if (entry.isDirectory) {
+                            next += entry.path
+                        } else {
+                            missing.remove(entry.name.lowercase())?.forEach { found[gameKey(it)] = folder }
+                        }
+                    }
+            }
+            level = next
+        }
+        return found
+    }
+
+    private fun romFolder(game: Game): String =
+        SmbStorageProvider.pathInShare(Uri.parse(game.fileUri)).substringBeforeLast(SmbConfig.SMB_SEPARATOR, "")
 
     fun getConfigInfo(): String {
         val config = configStore.load()?.takeIf { isConfigured() }
@@ -73,8 +150,7 @@ class SmbSaveSync(
     ) {
         if (!isConfigured()) return
         val config = configStore.load() ?: return
-        val prefix = libraryPrefix(config)
-        val games = retrogradeDb.gameDao().selectByFileUriPrefix(prefix)
+        val games = libraryGames(config)
         val metadataPath = SmbShare.join(config.folder, METADATA_FILE)
 
         SmbShare.open(config).use { share ->
@@ -96,22 +172,28 @@ class SmbSaveSync(
 
             var changedRemote = false
             val folders = RemoteFolders(share)
+            val foundFolders = findGameFolders(share, config, games, cores, remoteJson)
             games.forEach { game ->
-                runCatching { changedRemote = syncGame(share, folders, game, cores) || changedRemote }
+                runCatching {
+                    val folder = gameFolder(game, config, remoteJson, foundFolders)
+                    changedRemote = syncGame(share, folders, game, cores, folder) || changedRemote
+                }
                     .onFailure { Timber.e(it, "Error while syncing ${game.fileName}") }
             }
 
             if (remoteJson == null) {
                 // The saves and states are synced anyway; "Continue playing" and favorites wait for a readable file.
-                metadata.setReadable(false, fingerprint(retrogradeDb.gameDao().selectByFileUriPrefix(prefix), cores))
+                metadata.setReadable(false, fingerprint(libraryGames(config), cores))
             } else {
-                changedRemote = metadata.merge(remoteJson, games) || changedRemote
+                val romFolders =
+                    if (isLibraryOnShare()) games.associate { gameKey(it) to romFolder(it) } else foundFolders
+                changedRemote = metadata.merge(remoteJson, games, romFolders) || changedRemote
                 metadata.prepareWrite(remoteJson, changedRemote)
                 if (changedRemote) {
                     share.openWrite(metadataPath).use { it.write(remoteJson.toString().encodeToByteArray()) }
                 }
                 // After the downloads, the changes to the library and the write, so they don't count as changes.
-                metadata.commit(remoteJson, fingerprint(retrogradeDb.gameDao().selectByFileUriPrefix(prefix), cores))
+                metadata.commit(remoteJson, fingerprint(libraryGames(config), cores))
             }
             records.edit { putLong(KEY_LAST_SYNC, System.currentTimeMillis()) }
         }
@@ -121,7 +203,7 @@ class SmbSaveSync(
     suspend fun hasChanges(cores: Set<CoreID>): Boolean {
         if (!isConfigured()) return false
         val config = configStore.load() ?: return false
-        val games = retrogradeDb.gameDao().selectByFileUriPrefix(libraryPrefix(config))
+        val games = libraryGames(config)
         return SmbShare.open(config).use { share ->
             val remoteJson = readMetadata(share, SmbShare.join(config.folder, METADATA_FILE))
             val localFingerprint = fingerprint(games, cores)
@@ -173,15 +255,14 @@ class SmbSaveSync(
     private fun localFiles(
         game: Game,
         cores: Set<CoreID>,
-    ): List<File> = filePairs(game, cores).map { it.first }
+    ): List<File> = filePairs(game, cores, "").map { it.first }
 
-    /** Local files of a [game] with their path on the share. */
+    /** Local files of a [game] with their path in the [folder] of the share. */
     private fun filePairs(
         game: Game,
         cores: Set<CoreID>,
+        folder: String,
     ): List<Pair<File, String>> {
-        val romPath = SmbStorageProvider.pathInShare(Uri.parse(game.fileUri))
-        val folder = romPath.substringBeforeLast(SmbConfig.SMB_SEPARATOR, "")
         val saveName = "${game.fileName.substringBeforeLast(".")}.srm"
         val pairs = mutableListOf(File(directoriesManager.getSavesDirectory(), saveName) to SmbShare.join(folder, saveName))
 
@@ -212,10 +293,14 @@ class SmbSaveSync(
         folders: RemoteFolders,
         game: Game,
         cores: Set<CoreID>,
+        folder: String,
     ): Boolean {
         var uploaded = false
-        filePairs(game, cores).forEach { (local, remotePath) ->
-            uploaded = syncFile(share, local, remotePath, folders.entry(remotePath)) || uploaded
+        filePairs(game, cores, folder).forEach { (local, remotePath) ->
+            val remote = folders.entry(remotePath)
+            // The folder of a system may not exist yet (library in a folder of the device).
+            if (remote == null && local.exists()) folders.makeFolder(remotePath)
+            uploaded = syncFile(share, local, remotePath, remote) || uploaded
         }
         return uploaded
     }
@@ -226,15 +311,26 @@ class SmbSaveSync(
      */
     private class RemoteFolders(private val share: SmbShare) {
         private val folders = mutableMapOf<String, Map<String, SmbShare.Entry>>()
+        private val missingFolders = mutableSetOf<String>()
 
         fun entry(path: String): SmbShare.Entry? {
             val folder = path.substringBeforeLast(SmbConfig.SMB_SEPARATOR, "")
             val files =
                 folders.getOrPut(folder) {
+                    if (!share.folderExists(folder)) {
+                        missingFolders += folder
+                        return@getOrPut emptyMap()
+                    }
                     // Names on a share are not case sensitive.
                     share.list(folder).filter { !it.isDirectory }.associateBy { it.name.lowercase() }
                 }
             return files[path.substringAfterLast(SmbConfig.SMB_SEPARATOR).lowercase()]
+        }
+
+        /** Creates the folder of [path] when it was found missing, before uploading the file. */
+        fun makeFolder(path: String) {
+            val folder = path.substringBeforeLast(SmbConfig.SMB_SEPARATOR, "")
+            if (missingFolders.remove(folder)) share.makeDirectories(folder)
         }
     }
 
@@ -300,5 +396,8 @@ class SmbSaveSync(
         private const val KEY_LAST_SYNC = "last_sync"
         private const val PART_SUFFIX = ".part"
         private const val MAX_SLOTS = 4
+
+        // Levels of folders below the root where the ROM of a game is looked for: system, then game.
+        private const val MAX_SEARCH_DEPTH = 3
     }
 }

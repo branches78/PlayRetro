@@ -139,7 +139,7 @@
     <string name="shortcut_binding_update_description">Paina ensimmäistä, sitten toista painiketta sitomaan combo sinun \"%1$s\"</string>
     <string name="tv_search_results">Pelit</string>
     <string name="tv_game_message_missing_gamepad">Pelitassut vaaditaan pelaamaan. Ole hyvä ja yhdistä yksi.</string>
-    <string name="game_interactory_busy">Odota, että vireillä olevat toimet saatetaan päätökseen</string>
+    <string name="game_interactory_busy">Tarkistetaan synkronointia, odota</string>
     <string name="lemuroid_crash_disclamer">Näyttää siltä, että Libretro ydin on kokenut odottamattoman ongelman. Jos se on pysyvä, kokeile seuraavasti:\n
         \n\u2022 Poista automaattinen tallennus ja käynnistä peli
         \n\u2022 Mene Android-asetuksiin ja tyhjennä sovelluksen välimuisti

@@ -166,4 +166,5 @@
     <string name="save_sync_provider">Sincronitza amb</string>
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Sincronitzant partides, espera si us plau</string>
+    <string name="game_interactory_busy">Verificant la sincronització, espera si us plau</string>
 </resources>

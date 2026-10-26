@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">\"%1$s\" karakterinize bir kombo atamak için önce birinci, sonra ikinci düğmeye basın</string>
     <string name="tv_search_results">Oyunlar</string>
     <string name="tv_game_message_missing_gamepad">Gamepad\'ler oynamak için gerekli. Lütfen birini bağlayın.</string>
-    <string name="game_interactory_busy">çalışmakta olan işlemlerin bitmesini bekleyin!</string>
+    <string name="game_interactory_busy">Eşitleme denetleniyor, lütfen bekle</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;PlayRetro\'i nasıl kullanırım?</b><br/>
         Tüm ROMları bir klasör içinde kopyalayın ve PlayRetro içerisinden seçin. Bu klasörün, yalnızca alt klasör olmasına izin verilir. Tarama tamamlandıktan sonra oyunlarınızı görmelisiniz.<br/><br/>
         <b>&#8226; Neden oyunlarım tespit edilmedi?</b><br/>

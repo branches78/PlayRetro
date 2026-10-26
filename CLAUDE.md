@@ -174,6 +174,13 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   `CoreChecksums.kt`, junto a él). Para añadir o actualizar un core: subirlo a `master` de PlayRetroCores, crear una
   etiqueta nueva, cambiar `CORES_VERSION` y regenerar las huellas (si no coinciden, la app rechaza el core).
   PlayStation tiene dos cores: PCSX ReARMed (por defecto) y SwanStation (necesita BIOS scph5500/5501/5502).
+  SwanStation dibuja por software (`swanstation_GPU_Renderer` = Software en sus `defaultSettings`): con Auto/OpenGL
+  pide un contexto de OpenGL de escritorio, LibretroDroid se lo da y sus shaders GLSL 130 no compilan en OpenGL ES
+  (pantalla negra con sonido). Resolución interna y PGXP (solo OpenGL) se ocultaron; sus textos siguen en strings.
+  Pendiente: compilar LibretroDroid en el proyecto y rechazar OPENGL/OPENGL_CORE para que pase a OpenGL ES.
+  SwanStation tampoco da el disco actual: `getCurrentDisk` de LibretroDroid hacía caer el proceso del juego al abrir
+  el menú (L3+R3) y al guardar el estado al salir. `SystemCoreConfig.supportsDiskControl = false`: no se consulta
+  el disco y el menú no muestra "Cambiar disco" (para varios discos, PCSX ReARMed).
   Los archivos extra de PSP (`assets/ppsspp.zip`, versión 1.15) también se bajan de PlayRetroCores, por el commit
   de esa versión (`PPSSPPAssetsManager.kt`). Las descargas de cores se hacen a un `.part` y se renombran al terminar.
 - **Carpeta de red (SMB):** "Directorio" en Ajustes (móvil y TV) abre "Origen de tus juegos"
@@ -196,7 +203,11 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   Mientras se ve "Cargando tus juegos" en la TV no se muestran la captura ni los textos de la lista inmersiva.
   **Sincronización por SMB** (`lib/savesync/SmbSaveSync.kt`): en la variante sin Google es la única
   (`lemuroid-app-ext-free/.../SaveSyncManagerImpl.kt`); en la de Play se elige Google Drive o la carpeta de red
-  (`pref_key_save_sync_provider`, "Sincronizar con" en Ajustes → Sincronización). Solo con la biblioteca en SMB. Partidas
+  (`pref_key_save_sync_provider`, "Sincronizar con" en Ajustes → Sincronización). Con la biblioteca en SMB o en el dispositivo: "Configurar"
+  abre directamente el formulario SMB (`LibrarySourceActivity.showSyncFolder`); con biblioteca local, guardarlo no cambia
+  el origen de los juegos (`SmbSettingsViewModel(syncOnly)`). Con biblioteca local, las partidas de cada juego van a su
+  carpeta en la red, que los dispositivos con la biblioteca en SMB escriben en `playretro-sync.json` (campo `folder`); si
+  el juego no está en la red, a `<raíz>\<sistema>` (se crea al subir). Partidas
   (`.srm`) y estados (con el núcleo en el nombre: `Juego.cue.pcsx_rearmed.state`, `.slotN`, `.metadata` y la `.jpg` de
   cada ranura) van junto a la ROM en el NAS; si existe en un lado se copia, y si cambió en los dos gana el más reciente
   (lo sincronizado se recuerda en las preferencias `smb_save_sync`). Continuar jugando (la fecha más reciente) y
@@ -229,8 +240,22 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   (`utils/android/WorkManagerUtils.kt`, `withNotificationInBackground`). Nube de la TV: `ic_tv_sync_orb` (24 dp, sin
   color fijo, la tiñe el orbe). Sonido de navegación en las pantallas Compose de TV (Ajustes, Acerca de, ficha,
   menú contextual y menú de partida): `utils/android/TVNavigationSounds.kt`.
+  **Consolas no soportadas:** el escaneo (local, SAF y SMB) no entra en carpetas como PS2, PS3, GCN/GameCube, Wii,
+  WiiU, Switch, Xbox o Steam (`lib/storage/IgnoredFolders.kt`; "NGC" no, es Neo Geo Pocket Color). Además
+  `SerialScanner.isPS2Disc` lee el SYSTEM.CNF de los discos con "PLAYSTATION" (sectores de 2048 o 2352 bytes, en los
+  primeros 4 MB): si arranca con "BOOT2" es de PS2 y `DocumentFileParser` lanza `UnsupportedGameException`, así que
+  no entra en la biblioteca.
   **Filtro del escaneo SMB:** solo se tienen en cuenta archivos con extensiones de ROMs de los sistemas, discos (`bin`,
   `cue`, `img`, `chd`, `m3u`…), BIOS y `zip`; el resto (p. ej. juegos de PC) se salta sin leerlo.
+- **Juegos movidos de carpeta:** un archivo nuevo con el mismo nombre y tamaño que un juego cuyo archivo ya no está en
+  la biblioteca se toma como ese juego movido (`LemuroidLibrary.findMovedGame`, `GameDao.selectByFileSize`): se
+  conserva su fila con la ruta nueva, y con ella favorito, fecha de juego, nombre, carátula y núcleo propio (todo va
+  por el id del juego). Con dos candidatos no se adivina: entra como juego nuevo. Si además se renombró ("Top Gear
+  (USA).sfc" → "Top Gear.sfc"), se reconoce al identificarlo: misma consola, mismo título y mismo tamaño
+  (`findRenamedGame`); se conserva la fila y se renombran en el dispositivo su partida `.srm`, sus estados y sus
+  capturas (`renameLocalFiles`, sin sustituir nada). En `D:\Juegos` (la carpeta compartida
+  `\\192.168.18.254\juegos`, este PC) los juegos de N64,
+  NES y SNES están en una carpeta por juego, con sus partidas y estados.
 - **Progreso del escaneo:** `LemuroidLibrary.indexLibrary` lista primero todos los archivos y después los procesa,
   avisando del progreso (`IndexProgress`, por cada archivo nuevo identificado, no solo por lote de 200); después `LibraryIndexWork` descarga los cores de los sistemas encontrados
   (antes lo hacía `CoreUpdateWork` aparte). Publica las dos etapas con `setProgress` (`LibraryLoadingProgress`:

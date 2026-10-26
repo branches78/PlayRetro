@@ -8,10 +8,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.shared.savesync.SaveSyncChanges
 import com.swordfish.lemuroid.app.shared.savesync.SaveSyncWork
 import com.swordfish.lemuroid.app.shared.settings.LibrarySourceActivity
+import com.swordfish.lemuroid.app.utils.android.ComposableLifecycle
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidCardSettingsGroup
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsList
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsListMultiSelect
@@ -35,6 +37,11 @@ fun SaveSyncSettingsScreen(
             .value
 
     val hasChanges = SaveSyncChanges.hasChanges.collectAsState().value
+
+    // Back from the network share form: shows the folder just configured.
+    ComposableLifecycle { _, event ->
+        if (event == Lifecycle.Event.ON_RESUME) viewModel.refresh()
+    }
 
     val isSyncInProgress =
         viewModel.saveSyncInProgress
@@ -75,14 +82,14 @@ fun SaveSyncSettingsScreen(
                     )
                 },
                 subtitle = { Text(text = saveSyncState.configInfo) },
-                // The network share is configured with "Directory": the same chooser of the source of the games.
+                // The network share form at once: with a local library it only sets the folder of the sync.
                 onClick = onClick@{
                     if (isSyncInProgress) return@onClick
                     val activity = saveSyncState.settingsActivity
                     if (activity != null) {
                         context.startActivity(Intent(context, activity))
                     } else {
-                        LibrarySourceActivity.show(context)
+                        LibrarySourceActivity.showSyncFolder(context)
                     }
                 },
             )

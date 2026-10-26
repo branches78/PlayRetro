@@ -15,7 +15,14 @@ import kotlin.math.roundToInt
 object SerialScanner {
     private val READ_BUFFER_SIZE = 64.kiloBytes()
 
-    data class DiskInfo(val serial: String?, val systemID: SystemID?)
+    // Where the root folder of a disc and its SYSTEM.CNF are looked for: they are near the start of the disc.
+    private val PS2_CHECK_LIMIT = 4.megaBytes()
+    private const val ISO_SECTOR_SIZE = 2048
+    private const val ROOT_RECORD_OFFSET = 156
+    private const val ROOT_RECORD_SIZE = 34
+
+    /** [unsupported]: a disc of a console that the app doesn't support (PS2), which must not become a game. */
+    data class DiskInfo(val serial: String?, val systemID: SystemID?, val unsupported: Boolean = false)
 
     @ExperimentalUnsignedTypes
     private val MAGIC_NUMBERS =
@@ -177,8 +184,13 @@ object SerialScanner {
                     .getOrDefault(DiskInfo(null, SystemID.SEGACD))
 
             SystemID.PSX ->
-                runCatching { extractInfoForPSX(openedStream) }
-                    .getOrDefault(DiskInfo(null, SystemID.PSX))
+                if (runCatching { isPS2Disc(header, openedStream) }.getOrDefault(false)) {
+                    Timber.i("PlayStation 2 disc, not supported")
+                    DiskInfo(null, null, unsupported = true)
+                } else {
+                    runCatching { extractInfoForPSX(openedStream) }
+                        .getOrDefault(DiskInfo(null, SystemID.PSX))
+                }
 
             SystemID.PSP ->
                 runCatching { extractInfoForPSP(openedStream) }
@@ -242,6 +254,73 @@ object SerialScanner {
         Timber.i("SegaCD final serial: $finalSerial")
         return DiskInfo(finalSerial, SystemID.SEGACD)
     }
+
+    /**
+     * PS2 discs say "PLAYSTATION" like PS1 ones, and use the same serials ("SLUS"). Their SYSTEM.CNF, found in the root
+     * folder of the disc, starts the game with "BOOT2" instead of "BOOT". Images with 2048 or 2352 bytes sectors; the
+     * stream is left at the start.
+     */
+    private fun isPS2Disc(
+        header: ByteArray,
+        openedStream: InputStream,
+    ): Boolean {
+        val (sectorSize, dataOffset) = if (header.size > 0x8013 && header.hasText(0x8008, "PLAYSTATION")) 2048 to 0 else 2352 to 24
+        val volumeDescriptor = 16 * sectorSize + dataOffset
+        val rootRecord = volumeDescriptor + ROOT_RECORD_OFFSET
+        if (header.size < rootRecord + ROOT_RECORD_SIZE) return false
+        val rootLba = header.readInt32(rootRecord + 2)
+
+        openedStream.mark(PS2_CHECK_LIMIT)
+        try {
+            val rootFolder = readAt(openedStream, rootLba.toLong() * sectorSize + dataOffset, ISO_SECTOR_SIZE) ?: return false
+            var position = 0
+            while (position < rootFolder.size) {
+                val length = rootFolder[position].toInt() and 0xFF
+                if (length == 0 || position + length > rootFolder.size) break
+                val nameLength = rootFolder[position + 32].toInt() and 0xFF
+                val name = String(rootFolder, position + 33, nameLength.coerceAtMost(length - 33), Charsets.US_ASCII)
+                if (name.uppercase().startsWith("SYSTEM.CNF")) {
+                    val fileLba = rootFolder.readInt32(position + 2)
+                    val content = readAt(openedStream, fileLba.toLong() * sectorSize + dataOffset, 64) ?: return false
+                    return String(content, Charsets.US_ASCII).trimStart().startsWith("BOOT2")
+                }
+                position += length
+            }
+            return false
+        } finally {
+            openedStream.reset()
+        }
+    }
+
+    /** [size] bytes at [offset] from the mark of the stream, or null when they are beyond [PS2_CHECK_LIMIT]. */
+    private fun readAt(
+        openedStream: InputStream,
+        offset: Long,
+        size: Int,
+    ): ByteArray? {
+        if (offset < 0 || offset + size > PS2_CHECK_LIMIT) return null
+        openedStream.reset()
+        var remaining = offset
+        while (remaining > 0) {
+            val skipped = openedStream.skip(remaining)
+            if (skipped <= 0) return null
+            remaining -= skipped
+        }
+        val bytes = readByteArray(openedStream, ByteArray(size))
+        return bytes.takeIf { it.size == size }
+    }
+
+    private fun ByteArray.hasText(
+        offset: Int,
+        text: String,
+    ): Boolean = String(this, offset, text.length, Charsets.US_ASCII) == text
+
+    // Little endian, as in the ISO 9660 records.
+    private fun ByteArray.readInt32(offset: Int): Int =
+        (this[offset].toInt() and 0xFF) or
+            ((this[offset + 1].toInt() and 0xFF) shl 8) or
+            ((this[offset + 2].toInt() and 0xFF) shl 16) or
+            ((this[offset + 3].toInt() and 0xFF) shl 24)
 
     private fun extractInfoForPSX(openedStream: InputStream): DiskInfo {
         val headerSize = 64.kiloBytes()

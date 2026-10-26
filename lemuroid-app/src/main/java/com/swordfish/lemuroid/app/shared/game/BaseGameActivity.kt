@@ -222,14 +222,12 @@ abstract class BaseGameActivity : ImmersiveActivity() {
             Intent(this, getDialogClass()).apply {
                 this.putExtra(GameMenuContract.EXTRA_CORE_OPTIONS, options.toTypedArray())
                 this.putExtra(GameMenuContract.EXTRA_ADVANCED_CORE_OPTIONS, advancedOptions.toTypedArray())
-                this.putExtra(
-                    GameMenuContract.EXTRA_CURRENT_DISK,
-                    baseGameScreenViewModel.retroGameView.retroGameView?.getCurrentDisk() ?: 0,
-                )
-                this.putExtra(
-                    GameMenuContract.EXTRA_DISKS,
-                    baseGameScreenViewModel.retroGameView.retroGameView?.getAvailableDisks() ?: 0,
-                )
+                // Without disc control (see SystemCoreConfig.supportsDiskControl) the menu has no "Change disc".
+                val retroView =
+                    baseGameScreenViewModel.retroGameView.retroGameView
+                        ?.takeIf { systemCoreConfig.supportsDiskControl }
+                this.putExtra(GameMenuContract.EXTRA_CURRENT_DISK, retroView?.getCurrentDisk() ?: 0)
+                this.putExtra(GameMenuContract.EXTRA_DISKS, retroView?.getAvailableDisks() ?: 0)
                 this.putExtra(GameMenuContract.EXTRA_GAME, game)
                 this.putExtra(GameMenuContract.EXTRA_SYSTEM_CORE_CONFIG, systemCoreConfig)
                 this.putExtra(

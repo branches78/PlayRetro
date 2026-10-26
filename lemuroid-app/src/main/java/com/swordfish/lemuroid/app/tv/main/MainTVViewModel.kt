@@ -24,4 +24,14 @@ class MainTVViewModel(appContext: Context) : ViewModel() {
                 started = SharingStarted.Eagerly,
                 initialValue = false,
             )
+
+    // Same as the "Syncing games" banner (see SaveSyncBanner).
+    val saveSyncBannerShown =
+        PendingOperationsMonitor(appContext)
+            .saveSyncRunning()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 }

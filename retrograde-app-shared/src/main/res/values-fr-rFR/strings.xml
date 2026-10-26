@@ -124,7 +124,7 @@
     <string name="value_aspect_ratio_widescreen">Écran large</string>
     <string name="smb_storage">Dossier réseau (SMB)</string>
     <string name="smb_sync_connected">Dossier réseau : %1$s</string>
-    <string name="smb_sync_not_configured">Choisis un dossier réseau comme source de tes jeux dans Répertoire</string>
+    <string name="smb_sync_not_configured">Choisis le dossier réseau où sont gardées tes sauvegardes</string>
     <string name="smb_sync_last">Dernière synchronisation : %1$s</string>
     <string name="sync_metadata_unreadable">%1$s est endommagé : les sauvegardes sont synchronisées, mais pas Continuer à jouer ni les favoris. Supprime-le pour recommencer</string>
 </resources>

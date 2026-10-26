@@ -204,4 +204,5 @@
     <string name="save_sync_provider">סנכרון עם</string>
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">מסנכרן משחקים, נא להמתין</string>
+    <string name="game_interactory_busy">בודק סנכרון, נא להמתין</string>
 </resources>

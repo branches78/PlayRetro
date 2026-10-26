@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">اضغط على الزر الأول، ثم ثانية لربط مجموعة على \"%1$s\"</string>
     <string name="tv_search_results">الأعاب</string>
     <string name="tv_game_message_missing_gamepad">وحدة التحكم مطلوبة للعب. الرجاء توصيل واحدة منها.</string>
-    <string name="game_interactory_busy">انتظر حتى تكتمل العمليات المعلقة</string>
+    <string name="game_interactory_busy">جارٍ التحقق من المزامنة، يُرجى الانتظار</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;كيف أستخدم PlayRetro؟</b><br/>
         نسخ جميع ملفات الالعاب الخاصة بك في مجلد على جهازك واختيارها داخل تطبيق PlayRetro. يسمح لهذا المجلد بأن يحتوي على دلائل فرعية. بعد الانتهاء من الفحص، لابد ان ترى ألعابك.<br/><br/>
         <b>&#8226;لماذا لم يتم اكتشاف ألعابي؟</b><br/>

@@ -191,7 +191,15 @@ abstract class LemuroidApplicationModule {
             gameMetadataProvider: Lazy<GameMetadataProvider>,
             biosManager: BiosManager,
             customCoverManager: CustomCoverManager,
-        ) = LemuroidLibrary(db, storageProviderRegistry, gameMetadataProvider, biosManager, customCoverManager)
+            directoriesManager: DirectoriesManager,
+        ) = LemuroidLibrary(
+            db,
+            storageProviderRegistry,
+            gameMetadataProvider,
+            biosManager,
+            customCoverManager,
+            directoriesManager,
+        )
 
         @Provides
         @PerApp

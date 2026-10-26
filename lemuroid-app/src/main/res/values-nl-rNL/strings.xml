@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">Druk op de eerste, dan de tweede knop om een combinatie te koppelen aan je \"%1$s\"</string>
     <string name="tv_search_results">Spellen</string>
     <string name="tv_game_message_missing_gamepad">Gamepads zijn vereist om te spelen. Gelieve er een te verbinden.</string>
-    <string name="game_interactory_busy">Wacht tot de lopende opdrachten zijn voltooid</string>
+    <string name="game_interactory_busy">Synchronisatie controleren, even geduld</string>
     <string name="game_interactor_notification_permission_required">Schakel meldingen van Start in om door te gaan</string>
     <string name="game_process_another_game_running">Sluit het huidige spel voor je een andere begint</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Hoe gebruik ik PlayRetro?</b><br/>

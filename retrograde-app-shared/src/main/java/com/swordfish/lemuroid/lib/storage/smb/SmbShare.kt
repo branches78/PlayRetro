@@ -78,6 +78,17 @@ class SmbShare private constructor(
         }
     }
 
+    fun folderExists(path: String): Boolean = path.isEmpty() || share.folderExists(path)
+
+    /** Creates [path] and the folders above it that don't exist yet. */
+    fun makeDirectories(path: String) {
+        var current = ""
+        path.split(SmbConfig.SMB_SEPARATOR).filter { it.isNotEmpty() }.forEach { part ->
+            current = join(current, part)
+            if (!share.folderExists(current)) share.mkdir(current)
+        }
+    }
+
     /** Size and last change of a file of the share, null when it doesn't exist. */
     fun info(path: String): Entry? {
         if (!share.fileExists(path)) return null

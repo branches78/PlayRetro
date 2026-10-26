@@ -57,6 +57,7 @@ object DocumentFileParser {
         Timber.d("Processing zipped entry: ${entry.name}")
 
         val diskInfo = SerialScanner.extractInfo(entry.name, zipInputStream)
+        if (diskInfo.unsupported) throw UnsupportedGameException(entry.name)
 
         return StorageFile(
             entry.name,
@@ -76,6 +77,7 @@ object DocumentFileParser {
         val diskInfo =
             openInputStream(baseStorageFile.uri)
                 ?.use { inputStream -> SerialScanner.extractInfo(baseStorageFile.name, inputStream) }
+        if (diskInfo?.unsupported == true) throw UnsupportedGameException(baseStorageFile.name)
 
         val crc32 =
             if (baseStorageFile.size < MAX_SIZE_CRC32 && diskInfo?.serial == null) {
@@ -121,3 +123,6 @@ object DocumentFileParser {
         return (entry.compressedSize.toFloat() / fileSize.toFloat()) > SINGLE_ARCHIVE_THRESHOLD
     }
 }
+
+/** A file of a console that the app doesn't support (e.g. a PS2 disc): the scan leaves it out of the library. */
+class UnsupportedGameException(fileName: String) : Exception("Not supported: $fileName")

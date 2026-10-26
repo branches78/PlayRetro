@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">Trykk først og så andre-knappen for å binde en combo på din \"%1$s\"</string>
     <string name="tv_search_results">Spill</string>
     <string name="tv_game_message_missing_gamepad">Spillkontroller er påkrevd for å spille. Vennligst koble til en.</string>
-    <string name="game_interactory_busy">Vent på at pågående operasjoner fullføres</string>
+    <string name="game_interactory_busy">Kontrollerer synkronisering, vent litt</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Hvordan bruker jeg PlayRetro?</b><br/>
         Kopier alle ROM-filene dine til en mappe på enheten din og velg denne mappen i PlayRetro. Undermapper i denne mappen støttes også. Etter at skanningen er fullført, skal du se spillene dine.<br/><br/>
         <b>&#8226;Hvorfor blir ikke spillene mine oppdaget?</b><br/>

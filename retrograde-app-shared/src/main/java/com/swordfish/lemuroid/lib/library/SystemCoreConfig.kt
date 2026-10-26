@@ -19,4 +19,6 @@ data class SystemCoreConfig(
     val skipDuplicateFrames: Boolean = true,
     val supportedOnlyArchitectures: Set<String>? = null,
     val supportsMicrophone: Boolean = false,
+    // False when the core doesn't give the current disc: LibretroDroid asks it anyway and the game process crashes.
+    val supportsDiskControl: Boolean = true,
 ) : Serializable

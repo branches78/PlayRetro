@@ -13,13 +13,15 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/tv_navigation" />
 
-    <!-- "Syncing games, please wait" over every screen while the saves are synced. -->
+    <!-- "Syncing games, please wait" over every screen while the saves are synced. Compose makes its inner view
+         focusable: blocked, or ↓ from the tabs would move the focus to the banner while it is shown. -->
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/tv_save_sync_banner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="32dp"
+        android:descendantFocusability="blocksDescendants"
         android:focusable="false" />
 
 </FrameLayout>

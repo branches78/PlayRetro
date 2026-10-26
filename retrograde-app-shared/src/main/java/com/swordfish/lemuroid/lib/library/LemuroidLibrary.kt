@@ -19,6 +19,7 @@
 
 package com.swordfish.lemuroid.lib.library
 
+import android.net.Uri
 import com.swordfish.lemuroid.common.coroutines.batchWithSizeAndTime
 import com.swordfish.lemuroid.lib.bios.BiosManager
 import com.swordfish.lemuroid.lib.library.covers.CustomCoverManager
@@ -28,12 +29,14 @@ import com.swordfish.lemuroid.lib.library.db.entity.Game
 import com.swordfish.lemuroid.lib.library.metadata.GameMetadata
 import com.swordfish.lemuroid.lib.library.metadata.GameMetadataProvider
 import com.swordfish.lemuroid.lib.storage.BaseStorageFile
+import com.swordfish.lemuroid.lib.storage.DirectoriesManager
 import com.swordfish.lemuroid.lib.storage.GroupedStorageFiles
 import com.swordfish.lemuroid.lib.storage.RomFiles
 import com.swordfish.lemuroid.lib.storage.StorageFile
 import com.swordfish.lemuroid.lib.storage.StorageProvider
 import com.swordfish.lemuroid.lib.storage.StorageProviderRegistry
 import dagger.Lazy
+import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -55,6 +58,7 @@ class LemuroidLibrary(
     private val gameMetadataProvider: Lazy<GameMetadataProvider>,
     private val biosManager: BiosManager,
     private val customCoverManager: CustomCoverManager,
+    private val directoriesManager: DirectoriesManager,
 ) {
     /** Progress of an indexing: [processed] of [total] files. [total] is null while the files are being listed. */
     data class IndexProgress(val processed: Int, val total: Int?)
@@ -95,6 +99,8 @@ class LemuroidLibrary(
         onProgress(IndexProgress(0, null))
         val providersFiles = enabledProviders.map { it to listGroupedFiles(it) }
         val total = providersFiles.sumOf { (_, files) -> files.size }
+        scannedUris = providersFiles.flatMap { (_, files) -> files.map { it.primaryFile.uri.toString() } }.toSet()
+        movedGameIds.clear()
         onProgress(IndexProgress(0, total))
 
         // Batches finish in parallel: counting and reporting together keeps the progress from going back.
@@ -160,9 +166,107 @@ class LemuroidLibrary(
 
     private fun fetchEntriesFromDatabase(storageFile: GroupedStorageFiles): ScanEntry {
         Timber.d("Retrieving scan entry for uri: ${storageFile.primaryFile}")
-        val game = retrogradedb.gameDao().selectByFileUri(storageFile.primaryFile.uri.toString())
+        val game =
+            retrogradedb.gameDao().selectByFileUri(storageFile.primaryFile.uri.toString())
+                ?: findMovedGame(storageFile)
         return buildScanEntry(storageFile, game)
     }
+
+    // Files of the current scan, and the games already matched to a file moved to another folder.
+    private var scannedUris: Set<String> = emptySet()
+    private val movedGameIds = mutableSetOf<Int>()
+
+    /**
+     * The game of a file moved to another folder (e.g. a game put in its own folder): same name and size, and its old
+     * file is not in the library anymore. Its row is kept with the new path, so favorites, play history, custom name,
+     * cover and core (all bound to the id of the game) are not lost, as they would be with a new game.
+     */
+    private fun findMovedGame(storageFile: GroupedStorageFiles): Game? {
+        val primaryFile = storageFile.primaryFile
+        if (primaryFile.size <= 0) return null
+        val candidates =
+            retrogradedb.gameDao().selectByFileSize(primaryFile.size)
+                .filter { fileNameOf(it.fileUri) == primaryFile.name && it.fileUri !in scannedUris }
+        // With two possible games nothing is guessed: the file is indexed as a new game.
+        val game = candidates.singleOrNull() ?: return null
+        synchronized(movedGameIds) {
+            if (!movedGameIds.add(game.id)) return null
+        }
+        Timber.i("Game moved: ${game.fileUri} -> ${primaryFile.uri}")
+        // Saved with the new path by updateGames, like the other games found in this scan.
+        return game.copy(fileUri = primaryFile.uri.toString())
+    }
+
+    /**
+     * The game of a file that was renamed (and maybe moved), e.g. "Top Gear (USA).sfc" to "Top Gear.sfc": a game of the
+     * same system, identified with the same title, with a file of the same size that is not in the library anymore.
+     */
+    private fun findRenamedGame(newGame: Game): Game? {
+        val fileSize = newGame.fileSize?.takeIf { it > 0 } ?: return null
+        val game =
+            retrogradedb.gameDao().selectByFileSize(fileSize)
+                .filter { it.systemId == newGame.systemId && it.title == newGame.title && it.fileUri !in scannedUris }
+                .singleOrNull()
+                ?: return null
+        synchronized(movedGameIds) {
+            if (!movedGameIds.add(game.id)) return null
+        }
+        return game
+    }
+
+    /** The row of [oldGame] with the file of [newGame]; its user data and its saves and states go with it. */
+    private fun renameGame(
+        oldGame: Game,
+        newGame: Game,
+    ): Game {
+        Timber.i("Game renamed: ${oldGame.fileUri} -> ${newGame.fileUri}")
+        if (oldGame.fileName != newGame.fileName) renameLocalFiles(oldGame.fileName, newGame.fileName)
+        return oldGame.copy(
+            fileName = newGame.fileName,
+            fileUri = newGame.fileUri,
+            title = newGame.title,
+            developer = newGame.developer,
+            coverFrontUrl = newGame.coverFrontUrl,
+            lastIndexedAt = newGame.lastIndexedAt,
+            fileSize = newGame.fileSize,
+            fileLastModified = newGame.fileLastModified,
+        )
+    }
+
+    /**
+     * Saves ("Game.srm"), states of every core ("Game.sfc.state", ".slot1", ".metadata") and their previews
+     * ("Game.sfc.slot1.jpg") are named after the file of the game: they follow its new name. Nothing is replaced.
+     */
+    private fun renameLocalFiles(
+        oldFileName: String,
+        newFileName: String,
+    ) {
+        fun rename(
+            file: File,
+            newName: String,
+        ) {
+            val target = File(file.parentFile, newName)
+            if (!target.exists() && !file.renameTo(target)) Timber.w("Unable to rename $file")
+        }
+
+        val oldSave = File(directoriesManager.getSavesDirectory(), "${oldFileName.substringBeforeLast(".")}.srm")
+        if (oldSave.exists()) rename(oldSave, "${newFileName.substringBeforeLast(".")}.srm")
+
+        listOf(
+            directoriesManager.getStatesDirectory(),
+            directoriesManager.getInternalStatesDirectory(),
+            directoriesManager.getStatesPreviewDirectory(),
+        ).forEach { directory ->
+            directory.walkTopDown()
+                .filter { it.isFile && it.name.startsWith("$oldFileName.") }
+                .toList()
+                .forEach { rename(it, newFileName + it.name.removePrefix(oldFileName)) }
+        }
+    }
+
+    // Last part of the path: "content://…/document/primary%3AJuegos%2FSNES%2FTop%20Gear.sfc" or
+    // "smb://server/share/SNES/Top%20Gear.sfc" -> "Top Gear.sfc".
+    private fun fileNameOf(fileUri: String): String? = Uri.parse(fileUri).lastPathSegment?.substringAfterLast('/')
 
     private fun buildScanEntry(
         storageFile: GroupedStorageFiles,
@@ -295,19 +399,30 @@ class LemuroidLibrary(
     }
 
     private fun handleNewGames(
-        pairs: List<ScanEntry.GameFile>,
+        allPairs: List<ScanEntry.GameFile>,
         startedAtMs: Long,
     ) {
+        // Files of games that were renamed keep the game they had (see findRenamedGame).
+        val (renamed, pairs) = allPairs.map { it to findRenamedGame(it.game) }.partition { it.second != null }
+        if (renamed.isNotEmpty()) {
+            retrogradedb.gameDao().update(renamed.map { (entry, oldGame) -> renameGame(oldGame!!, entry.game) })
+            retrogradedb.dataFileDao().insert(
+                renamed.flatMap { (entry, oldGame) ->
+                    entry.file.dataFiles.map { convertIntoDataFile(oldGame!!.id, it, startedAtMs) }
+                },
+            )
+        }
+
         val games =
             pairs
-                .map { it.game }
+                .map { it.first.game }
 
         games.forEach { Timber.d("Insert: $it") }
 
         val gameIds = retrogradedb.gameDao().insert(games)
         val dataFiles =
             pairs
-                .map { it.file.dataFiles }
+                .map { it.first.file.dataFiles }
                 .zip(gameIds)
                 .flatMap { (files, gameId) ->
                     files.map {

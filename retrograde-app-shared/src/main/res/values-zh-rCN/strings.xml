@@ -124,7 +124,7 @@
     <string name="value_aspect_ratio_widescreen">宽屏</string>
     <string name="smb_storage">网络文件夹 (SMB)</string>
     <string name="smb_sync_connected">网络文件夹：%1$s</string>
-    <string name="smb_sync_not_configured">请在“目录”中选择网络文件夹作为游戏来源</string>
+    <string name="smb_sync_not_configured">选择用于保存存档的网络文件夹</string>
     <string name="smb_sync_last">上次同步：%1$s</string>
     <string name="sync_metadata_unreadable">%1$s 已损坏：存档会同步，但“继续游戏”和收藏不会同步。删除它即可重新开始</string>
 </resources>

@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">Pressione o primeiro, depois o segundo botão para vincular um combo no seu \"%1$s\"</string>
     <string name="tv_search_results">Jogos</string>
     <string name="tv_game_message_missing_gamepad">É necessário comandos para jogar. Por favor, conecte um.</string>
-    <string name="game_interactory_busy">Aguarde pela conclusão das operações pendentes</string>
+    <string name="game_interactory_busy">A verificar a sincronização, aguarda</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Como usar o PlayRetro?</b><br/>
         Copie todas as suas ROMs para um directório no seu dispositivo e seleccione-o dentro do PlayRetro. Esse directório pode ter subdirectórios. Após a conclusão do scan, você deve ver os seus jogos.<br/><br/>
         <b>&#8226;Porque é que os meus jogos não são detectados?</b><br/>

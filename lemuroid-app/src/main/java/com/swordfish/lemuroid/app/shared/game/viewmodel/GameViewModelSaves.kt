@@ -115,7 +115,7 @@ class GameViewModelSaves(
     private fun getCurrentSaveState(useEmulationThread: Boolean = true): SaveState? {
         val retroGameView = retroGameView.retroGameView ?: return null
         val currentDisk =
-            if (system.hasMultiDiskSupport) {
+            if (system.hasMultiDiskSupport && systemCoreConfig.supportsDiskControl) {
                 retroGameView.getCurrentDisk(useEmulationThread)
             } else {
                 0
@@ -157,6 +157,7 @@ class GameViewModelSaves(
         }
 
         if (system.hasMultiDiskSupport &&
+            systemCoreConfig.supportsDiskControl &&
             retroGameView.getAvailableDisks() > 1 &&
             retroGameView.getCurrentDisk() != saveState.metadata.diskIndex
         ) {

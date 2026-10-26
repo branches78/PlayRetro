@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">Притисните први па онда други тастер да повежете комбо на Вашем \"%1$s\"</string>
     <string name="tv_search_results">Игре</string>
     <string name="tv_game_message_missing_gamepad">Гејмпадови су неопходни за игру. Молимо Вас да их повежете.</string>
-    <string name="game_interactory_busy">Сачекајте за текуће операције да се заврше</string>
+    <string name="game_interactory_busy">Провера синхронизације, сачекајте</string>
     <string name="lemuroid_help_content"><![CDATA[<b>&#8226;Како да користим PlayRetro?</b><br/>
         Копирајте све Ваше ROM датотеке у директоријум на Вашем уређају и изаберите га унутар PlayRetro-а. Овај директоријум може имати поддиректоријуме. Када се скенирање заврши треба да видите Ваше игре.<br/><br/>
         <b>&#8226;Зашто моје игре нису детектоване?</b><br/>

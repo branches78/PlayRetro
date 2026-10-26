@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">Appuyez sur le premier, puis sur le deuxième bouton pour lier une combinaison sur votre «%1$s»</string>
     <string name="tv_search_results">Jeux</string>
     <string name="tv_game_message_missing_gamepad">Les manettes sont nécessaires pour jouer. Veuillez en connecter une.</string>
-    <string name="game_interactory_busy">Attendez que l\'opération se termine</string>
+    <string name="game_interactory_busy">Vérification de la synchronisation, veuillez patienter</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Comment utiliser PlayRetro?</b><br/>
         Copiez tous vos fichiers ROMs dans un dossier de votre appareil et sélectionnez-le dans l\'onglet \'paramètres\'. Ce dossier peut avoir des sous-dossiers. Une fois l\'analyse terminée, vous verrez vos jeux apparaître dans le menu.<br/><br/>
         <b>&#8226;Pourquoi mes jeux ne sont-ils pas détectés?</b><br/>

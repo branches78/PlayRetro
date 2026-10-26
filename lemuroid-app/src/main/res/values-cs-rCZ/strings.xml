@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">Stiskněte první, poté druhé tlačítko pro navázání kombinace na \"%1$s\"</string>
     <string name="tv_search_results">Hry</string>
     <string name="tv_game_message_missing_gamepad">Gamepad je zapotřebí k hraní. Prosím připojte nějaký.</string>
-    <string name="game_interactory_busy">Vyčkejte pro dokončení zbývajících operací</string>
+    <string name="game_interactory_busy">Kontrola synchronizace, čekejte prosím</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Jak se používá PlayRetro</b><br/>
         Zkopírujte veškeré vaše ROM soubory do složky na vašem zařízení a vyberte ji v PlayRetrou. Tahle složka může mít podsložky. Až sken zkončí, měli by jste vidět vaše hry.<br/><br/>
         <b>&#8226;Proč to nenašlo žádné hry?</b><br/>

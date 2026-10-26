@@ -141,7 +141,7 @@
     <string name="shortcut_binding_update_description">最初のボタンを押し、次に2番目のボタンを押してコンボ\"%1$s\"をバインドします</string>
     <string name="tv_search_results">ゲーム</string>
     <string name="tv_game_message_missing_gamepad">ゲームパッドが必要です。接続してください。</string>
-    <string name="game_interactory_busy">保留中の操作が完了するまで待ちます</string>
+    <string name="game_interactory_busy">同期を確認しています。お待ちください</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;PlayRetroの使い方は？</b><br/>
         すべてのROMファイルをお使いのデバイス内のディレクトリにコピーし、PlayRetroでそのディレクトリを選択してください。このディレクトリ内にサブディレクトリがあっても問題ありません。スキャンが完了すると、ゲームが表示されるはずです。<br/><br/>
         <b>&#8226;・ゲームが認識されないのはなぜ？</b><br/>

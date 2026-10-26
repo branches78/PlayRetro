@@ -62,6 +62,8 @@ class MainTVActivity : BaseTVActivity(), BusyActivity {
 
     override fun isBusy(): Boolean = mainViewModel?.inProgress?.value ?: false
 
+    override fun isSaveSyncBannerShown(): Boolean = mainViewModel?.saveSyncBannerShown?.value ?: false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tv_main)

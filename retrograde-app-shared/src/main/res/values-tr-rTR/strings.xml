@@ -124,7 +124,7 @@
     <string name="value_aspect_ratio_widescreen">Geniş ekran</string>
     <string name="smb_storage">Ağ klasörü (SMB)</string>
     <string name="smb_sync_connected">Ağ klasörü: %1$s</string>
-    <string name="smb_sync_not_configured">Dizin bölümünde oyunlarının kaynağı olarak bir ağ klasörü seç</string>
+    <string name="smb_sync_not_configured">Kayıtlarının tutulacağı ağ klasörünü seç</string>
     <string name="smb_sync_last">Son eşitleme: %1$s</string>
     <string name="sync_metadata_unreadable">%1$s bozuk: kayıtlar eşitleniyor, ancak Oynamaya devam et ve favoriler eşitlenmiyor. Baştan başlamak için sil</string>
 </resources>

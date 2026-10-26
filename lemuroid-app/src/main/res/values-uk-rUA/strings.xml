@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">Натисніть першою, а потім другу кнопку, щоб пов\'язати комбо на вашому \"%1$s\"</string>
     <string name="tv_search_results">Ігри</string>
     <string name="tv_game_message_missing_gamepad">Для гри потрібен ґеймпад. Будь ласка, під\'єднайте його.</string>
-    <string name="game_interactory_busy">Дочекайтеся завершення операції</string>
+    <string name="game_interactory_busy">Перевірка синхронізації, зачекайте</string>
     <string name="game_interactor_notification_permission_required">Будь ласка, увімкніть сповіщення з Головної, щоб продовжити</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Як я використовую Лемуроїд?</b><br/>
         Скопіюйте всі файли ROM в каталог на вашому пристрої і виберіть його в PlayRetro. Цей каталог може містити підкаталоги. Після того, як сканування завершиться, ви повинні побачити свої ігри.<br/><br/>,        <b>&#8226;Чому не виявлено моїх ігор?</b><br/>

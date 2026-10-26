@@ -129,7 +129,7 @@
     <string name="gamepad_binding_update_description">Nhấn một nút trên \"%1$s\" của bạn</string>
     <string name="tv_search_results">Trò chơi</string>
     <string name="tv_game_message_missing_gamepad">Yêu cầu có gamepad để chơi. Vui lòng kết nối một cái.</string>
-    <string name="game_interactory_busy">Hãy đợi các hoạt động đang chờ được hoàn tất</string>
+    <string name="game_interactory_busy">Đang kiểm tra đồng bộ, vui lòng chờ</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Tôi sử dụng PlayRetro như thế nào?</b><br/>
         Sao chép tất cả tệp ROM vào một thư mục trên thiết bị và chọn nó từ trong PlayRetro. Thư mục này có thể có các thư mục con. Sau khi việc quét hoàn tất thì bạn sẽ thấy các trò chơi của bạn.<br/><br/>
         <b>&#8226;Tại sao các trò chơi của tôi không được phát hiện?</b><br/>

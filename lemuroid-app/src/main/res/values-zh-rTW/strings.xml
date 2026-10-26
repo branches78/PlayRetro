@@ -132,7 +132,7 @@
     <string name="gamepad_binding_update_description">按下按鈕 \"%1$s\"</string>
     <string name="tv_search_results">遊戲</string>
     <string name="tv_game_message_missing_gamepad">需要遊戲手柄才能玩，請進行連接。</string>
-    <string name="game_interactory_busy">操作處理中，請稍待片刻。</string>
+    <string name="game_interactory_busy">正在檢查同步，請稍候</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;如何使用PlayRetro？</ b> <br/>
          將所有 ROM 複製到設備上的資料夾中，然後在 PlayRetro 中選擇該資料夾。 這個資料夾允許有子資料夾。 掃描完成後，您應該會看到您的遊戲。<br/><br/>
          <b>&#8226;為什麼我的遊戲沒有被偵測到？</b><br/>

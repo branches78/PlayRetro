@@ -13,19 +13,20 @@ import com.swordfish.lemuroid.lib.library.GameSystem
 import com.swordfish.lemuroid.lib.library.db.entity.DataFile
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import com.swordfish.lemuroid.lib.storage.BaseStorageFile
+import com.swordfish.lemuroid.lib.storage.IgnoredFolders
 import com.swordfish.lemuroid.lib.storage.RomFiles
 import com.swordfish.lemuroid.lib.storage.StorageFile
 import com.swordfish.lemuroid.lib.storage.StorageProvider
 import com.swordfish.lemuroid.lib.storage.local.DocumentFileParser
 import com.swordfish.lemuroid.lib.storage.local.GameCacheUtils
 import com.swordfish.lemuroid.lib.storage.local.StorageAccessFrameworkProvider
+import java.io.File
+import java.io.InputStream
+import java.util.zip.ZipInputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import java.io.File
-import java.io.InputStream
-import java.util.zip.ZipInputStream
 
 /**
  * Games library on a network share (SMB), used instead of the local folder when it is the chosen source
@@ -63,7 +64,8 @@ class SmbStorageProvider(private val context: Context) : StorageProvider {
                         .onFailure { Timber.e(it, "Error while listing $directory") }
                         .getOrDefault(emptyList())
 
-                directories += entries.filter { it.isDirectory }.map { it.path }
+                // Consoles that the app doesn't support (e.g. PS2) and PC games are not entered.
+                directories += entries.filter { it.isDirectory && !IgnoredFolders.isIgnored(it.name) }.map { it.path }
                 // Folders on a network share often have other things too (e.g. PC games): those files are skipped
                 // without reading them, since each file read goes through the network.
                 emit(

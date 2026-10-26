@@ -13,17 +13,18 @@ import com.swordfish.lemuroid.lib.library.db.entity.DataFile
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
 import com.swordfish.lemuroid.lib.storage.BaseStorageFile
+import com.swordfish.lemuroid.lib.storage.IgnoredFolders
 import com.swordfish.lemuroid.lib.storage.RomFiles
 import com.swordfish.lemuroid.lib.storage.StorageFile
 import com.swordfish.lemuroid.lib.storage.StorageProvider
 import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
+import java.io.File
+import java.io.InputStream
+import java.util.zip.ZipInputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
-import java.io.File
-import java.io.InputStream
-import java.util.zip.ZipInputStream
 
 class StorageAccessFrameworkProvider(private val context: Context) : StorageProvider {
     override val id: String = "access_framework"
@@ -108,7 +109,7 @@ class StorageAccessFrameworkProvider(private val context: Context) : StorageProv
                 val lastModified = if (it.isNull(4)) 0L else it.getLong(4)
 
                 if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-                    resultDirectories.add(documentId)
+                    if (!IgnoredFolders.isIgnored(documentName)) resultDirectories.add(documentId)
                 } else {
                     val documentUri =
                         DocumentsContract.buildDocumentUriUsingTree(

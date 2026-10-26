@@ -19,7 +19,7 @@
     <string name="value_aspect_ratio_widescreen">Wyeskerm</string>
     <string name="smb_storage">Netwerkgids (SMB)</string>
     <string name="smb_sync_connected">Netwerkgids: %1$s</string>
-    <string name="smb_sync_not_configured">Kies ’n netwerkgids as die bron van jou speletjies in Gids</string>
+    <string name="smb_sync_not_configured">Kies die netwerkgids waar jou stoorlêers gehou word</string>
     <string name="smb_sync_last">Laaste sinkronisering: %1$s</string>
     <string name="sync_metadata_unreadable">%1$s is beskadig: stoorlêers word gesinkroniseer, maar nie Speel verder en gunstelinge nie. Vee dit uit om oor te begin</string>
 </resources>

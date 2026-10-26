@@ -140,7 +140,7 @@
     <string name="shortcut_binding_update_description">Naciśnij pierwszy, a następnie drugi przycisk, aby powiązać kombinację \"%1$s\"</string>
     <string name="tv_search_results">Gry</string>
     <string name="tv_game_message_missing_gamepad">Gamepady są wymagane do gry. Prosimy o podłączenie jednego z nich.</string>
-    <string name="game_interactory_busy">Poczekaj na zakończenie trwających operacji</string>
+    <string name="game_interactory_busy">Sprawdzanie synchronizacji, proszę czekać</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Jak korzystać z PlayRetro?</b><br/>
         Skopiuj wszystkie pliki ROM do katalogu na swoim urządzeniu i wybierz go w PlayRetro. Katalog ten może mieć podkatalogi. Po zakończeniu skanowania powinieneś/powinnaś zobaczyć swoje gry.<br/><br/>
         <b>&#8226;Dlaczego moje gry nie są wykrywane?</b><br/>

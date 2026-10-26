@@ -124,7 +124,7 @@
     <string name="value_aspect_ratio_widescreen">Ευρεία οθόνη</string>
     <string name="smb_storage">Φάκελος δικτύου (SMB)</string>
     <string name="smb_sync_connected">Φάκελος δικτύου: %1$s</string>
-    <string name="smb_sync_not_configured">Επίλεξε φάκελο δικτύου ως πηγή των παιχνιδιών σου στον Κατάλογο</string>
+    <string name="smb_sync_not_configured">Επίλεξε τον φάκελο δικτύου όπου φυλάσσονται οι αποθηκεύσεις σου</string>
     <string name="smb_sync_last">Τελευταίος συγχρονισμός: %1$s</string>
     <string name="sync_metadata_unreadable">Το %1$s έχει καταστραφεί: οι αποθηκεύσεις συγχρονίζονται, αλλά όχι η Συνέχεια παιχνιδιού και τα αγαπημένα. Διάγραψέ το για να ξεκινήσεις ξανά</string>
 </resources>

@@ -837,18 +837,6 @@ data class GameSystem(
                                         ),
                                     ),
                                     ExposedSetting(
-                                        "swanstation_GPU_ResolutionScale",
-                                        R.string.setting_swanstation_resolution_scale,
-                                    ),
-                                    ExposedSetting(
-                                        "swanstation_GPU_PGXPEnable",
-                                        R.string.setting_swanstation_pgxp,
-                                        arrayListOf(
-                                            ExposedSetting.Value("true", R.string.value_swanstation_enabled),
-                                            ExposedSetting.Value("false", R.string.value_swanstation_disabled),
-                                        ),
-                                    ),
-                                    ExposedSetting(
                                         "swanstation_GPU_WidescreenHack",
                                         R.string.setting_swanstation_widescreen,
                                         arrayListOf(
@@ -875,6 +863,10 @@ data class GameSystem(
                             defaultSettings =
                                 listOf(
                                     CoreVariable("swanstation_CPU_ExecutionMode", "Recompiler"),
+                                    // With "Auto" or "OpenGL" this core asks for a desktop OpenGL context, and its shaders
+                                    // don't compile with the OpenGL ES of Android: the screen stays black. Drawn by the
+                                    // CPU it works everywhere; the resolution scale and PGXP (OpenGL only) are hidden.
+                                    CoreVariable("swanstation_GPU_Renderer", "Software"),
                                 ),
                             // Checked before launching, so a missing BIOS shows the usual "missing BIOS" message.
                             regionalBIOSFiles =
@@ -885,6 +877,9 @@ data class GameSystem(
                                 ),
                             rumbleSupported = true,
                             skipDuplicateFrames = false,
+                            // Asking it for the current disc crashes the game (when opening the menu or saving the
+                            // state on exit): it has no "Change disc" in the menu.
+                            supportsDiskControl = false,
                         ),
                     ),
                     uniqueExtensions = listOf(),

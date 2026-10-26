@@ -134,7 +134,7 @@ class GameInteractor(
 
     private fun ensureNotBusy(): Boolean {
         if (activity.isBusy()) {
-            activity.activity().displayToast(R.string.game_interactory_busy)
+            if (!activity.isSaveSyncBannerShown()) activity.activity().displayToast(R.string.game_interactory_busy)
             return false
         }
         return true

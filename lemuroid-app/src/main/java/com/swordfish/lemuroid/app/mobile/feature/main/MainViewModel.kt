@@ -44,6 +44,16 @@ class MainViewModel(appContext: Context, private val saveSyncManager: SaveSyncMa
 
     val state = buildStateFlow()
 
+    // Same as the "Syncing games" banner (see SaveSyncBanner).
+    val saveSyncBannerShown =
+        PendingOperationsMonitor(appContext)
+            .saveSyncRunning()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
+
     private fun buildStateFlow(): StateFlow<UiState> {
         val combinedFlows =
             combine(

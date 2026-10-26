@@ -41,6 +41,10 @@ interface GameDao {
     fun selectByFileUri(fileUri: String): Game?
 
     /** Games whose file is under [prefix] (e.g. the games of a network share, "smb://server/share/"). */
+    /** Games whose file has this size: candidates when a file was moved to another folder (see LemuroidLibrary). */
+    @Query("SELECT * FROM games WHERE fileSize = :fileSize")
+    fun selectByFileSize(fileSize: Long): List<Game>
+
     @Query("SELECT * FROM games WHERE fileUri LIKE :prefix || '%'")
     suspend fun selectByFileUriPrefix(prefix: String): List<Game>
 

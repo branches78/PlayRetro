@@ -48,6 +48,19 @@ class SyncMetadata(
             (revision(remoteJson) == lastRevision && writer(remoteJson) != lastWriter)
     }
 
+    /**
+     * Folder of the [game] on the network share (from the share root), written by the devices with their library there:
+     * a device with its library in a folder of its own keeps the saves of a game with the ones of the others.
+     */
+    fun romFolderOf(
+        remoteJson: JSONObject,
+        game: Game,
+    ): String? =
+        remoteJson.optJSONObject(KEY_GAMES)
+            ?.optJSONObject("${game.systemId}/${game.fileName}")
+            ?.optString(KEY_FOLDER)
+            ?.takeIf { it.isNotEmpty() }
+
     /** Whether the file couldn't be read in the last sync (see [setReadable]), shown in the settings. */
     fun isUnreadable(): Boolean = records.getBoolean(KEY_UNREADABLE, false)
 
@@ -78,6 +91,7 @@ class SyncMetadata(
     suspend fun merge(
         remoteJson: JSONObject,
         games: List<Game>,
+        romFolders: Map<String, String> = emptyMap(),
     ): Boolean {
         val overwritten = isOverwritten(remoteJson)
         if (overwritten) Timber.w("Save sync: the last write of this device was replaced by another device")
@@ -111,12 +125,16 @@ class SyncMetadata(
                 updatedGames += game.copy(lastPlayedAt = lastPlayed, isFavorite = favorite)
                 fromRemote++
             }
+            // Folder of the game on the network share: set by the devices with the library there, or found on the share by
+            // the others (see SmbSaveSync), and kept.
+            val folder = romFolders[key] ?: entry.optString(KEY_FOLDER).takeIf { it.isNotEmpty() }
             remoteGames.put(
                 key,
                 JSONObject().apply {
                     lastPlayed?.let { put(KEY_LAST_PLAYED, it) }
                     put(KEY_FAVORITE, favorite)
                     put(KEY_FAVORITE_AT, favoriteChangedAt)
+                    folder?.let { put(KEY_FOLDER, it) }
                 },
             )
             favorites[key] = favorite
@@ -173,6 +191,7 @@ class SyncMetadata(
         private const val KEY_LAST_PLAYED = "lastPlayedAt"
         private const val KEY_FAVORITE = "favorite"
         private const val KEY_FAVORITE_AT = "favoriteChangedAt"
+        private const val KEY_FOLDER = "folder"
 
         /** Played dates and favorites of the [games], sorted so the same library always gives the same text. */
         fun gamesFingerprint(games: List<Game>): StringBuilder {

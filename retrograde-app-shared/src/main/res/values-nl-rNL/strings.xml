@@ -124,7 +124,7 @@
     <string name="value_aspect_ratio_widescreen">Breedbeeld</string>
     <string name="smb_storage">Netwerkmap (SMB)</string>
     <string name="smb_sync_connected">Netwerkmap: %1$s</string>
-    <string name="smb_sync_not_configured">Kies bij Map een netwerkmap als bron van je games</string>
+    <string name="smb_sync_not_configured">Kies de netwerkmap waarin je opgeslagen spellen worden bewaard</string>
     <string name="smb_sync_last">Laatste synchronisatie: %1$s</string>
     <string name="sync_metadata_unreadable">%1$s is beschadigd: opgeslagen spellen worden gesynchroniseerd, maar Verder spelen en favorieten niet. Verwijder het om opnieuw te beginnen</string>
 </resources>

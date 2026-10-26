@@ -124,7 +124,7 @@
     <string name="value_aspect_ratio_widescreen">Ecrã panorâmico</string>
     <string name="smb_storage">Pasta de rede (SMB)</string>
     <string name="smb_sync_connected">Pasta de rede: %1$s</string>
-    <string name="smb_sync_not_configured">Escolhe uma pasta de rede como origem dos teus jogos em Diretório</string>
+    <string name="smb_sync_not_configured">Escolhe a pasta de rede onde os teus jogos guardados ficam</string>
     <string name="smb_sync_last">Última sincronização: %1$s</string>
     <string name="sync_metadata_unreadable">%1$s está danificado: os jogos guardados são sincronizados, mas não Continuar a jogar e Favoritos. Elimina-o para recomeçar</string>
 </resources>

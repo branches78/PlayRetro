@@ -124,7 +124,7 @@
     <string name="value_aspect_ratio_widescreen">寬螢幕</string>
     <string name="smb_storage">網路資料夾 (SMB)</string>
     <string name="smb_sync_connected">網路資料夾：%1$s</string>
-    <string name="smb_sync_not_configured">請在「目錄」中選擇網路資料夾作為遊戲來源</string>
+    <string name="smb_sync_not_configured">選擇用來保存存檔的網路資料夾</string>
     <string name="smb_sync_last">上次同步：%1$s</string>
     <string name="sync_metadata_unreadable">%1$s 已損壞：存檔會同步，但「繼續遊戲」和最愛不會同步。刪除它即可重新開始</string>
 </resources>

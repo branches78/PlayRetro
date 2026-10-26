@@ -16,11 +16,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Settings of the network share with the games library: test the connection and use it as the library source. */
-class SmbSettingsViewModel(private val appContext: Context) : ViewModel() {
-    class Factory(private val appContext: Context) : ViewModelProvider.Factory {
+/**
+ * Settings of the network share: test the connection and use it as the library source, or only for the sync of the
+ * saves ([syncOnly], with the library in a folder of the device).
+ */
+class SmbSettingsViewModel(
+    private val appContext: Context,
+    private val syncOnly: Boolean = false,
+) : ViewModel() {
+    class Factory(
+        private val appContext: Context,
+        private val syncOnly: Boolean = false,
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SmbSettingsViewModel(appContext) as T
+            return SmbSettingsViewModel(appContext, syncOnly) as T
         }
     }
 
@@ -64,9 +73,10 @@ class SmbSettingsViewModel(private val appContext: Context) : ViewModel() {
         }
     }
 
-    /** Saves the share and makes it the source of the library, which is scanned again. */
+    /** Saves the share and makes it the source of the library, which is scanned again (unless [syncOnly]). */
     fun save() {
         store.save(state.value.config)
+        if (syncOnly) return
         store.librarySource = SmbConfigStore.LibrarySource.SMB
         LibraryIndexScheduler.scheduleLibrarySync(appContext)
     }

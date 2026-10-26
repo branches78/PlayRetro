@@ -188,7 +188,7 @@
     <string name="tv_game_message_missing_gamepad">Gamepads are required to play. Please connect one.</string>
 
 
-    <string name="game_interactory_busy">Wait for the pending operations to complete</string>
+    <string name="game_interactory_busy">Checking sync, please wait</string>
     <string name="game_interactor_notification_permission_required">Please enable notifications from Home to continue</string>
 
     <string name="game_process_another_game_running">Please close the current game before starting another</string>

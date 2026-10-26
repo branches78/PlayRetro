@@ -141,7 +141,7 @@
     <string name="shortcut_binding_update_description">Premi il primo, poi il secondo pulsante per associare una combinazione sul tuo \"%1$s\"</string>
     <string name="tv_search_results">Giochi</string>
     <string name="tv_game_message_missing_gamepad">I controller sono necessari per giocare. Si prega di collegarne uno.</string>
-    <string name="game_interactory_busy">Attendere che le operazioni in sospeso siano completate</string>
+    <string name="game_interactory_busy">Verifica della sincronizzazione, attendere prego</string>
     <string name="game_interactor_notification_permission_required">Abilita le notifiche da Home per continuare</string>
     <string name="lemuroid_help_content"><![CDATA[        <b>&#8226;Come si usa PlayRetro?</b><br/>
         Copia tutte le ROM in una cartella sul dispositivo e selezionala all\'interno di PlayRetro. Questa cartella può avere sotto-cartelle. Una volta completata la scansione, dovresti vedere i tuoi giochi.<br/><br/>

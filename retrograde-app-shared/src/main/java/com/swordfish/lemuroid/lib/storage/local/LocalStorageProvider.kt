@@ -31,16 +31,17 @@ import com.swordfish.lemuroid.lib.library.db.entity.Game
 import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
 import com.swordfish.lemuroid.lib.storage.BaseStorageFile
 import com.swordfish.lemuroid.lib.storage.DirectoriesManager
+import com.swordfish.lemuroid.lib.storage.IgnoredFolders
 import com.swordfish.lemuroid.lib.storage.RomFiles
 import com.swordfish.lemuroid.lib.storage.StorageFile
 import com.swordfish.lemuroid.lib.storage.StorageProvider
 import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
 import java.io.File
 import java.io.InputStream
 import java.util.zip.ZipInputStream
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 
 class LocalStorageProvider(
     private val context: Context,
@@ -83,7 +84,7 @@ class LocalStorageProvider(
                         ?.filterNot { it.name.startsWith(".") }
                         ?.groupBy { it.isDirectory } ?: mapOf()
 
-                val newDirectories = groups[true] ?: listOf()
+                val newDirectories = (groups[true] ?: listOf()).filterNot { IgnoredFolders.isIgnored(it.name) }
                 val newFiles = groups[false] ?: listOf()
 
                 directories.addAll(newDirectories)
