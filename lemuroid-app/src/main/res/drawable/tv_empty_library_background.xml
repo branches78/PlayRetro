@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Same look as the mobile elevated card. -->
+<!-- Same look as the mobile card, with the thin border of the settings cards. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <corners android:radius="@dimen/tv_card_corner_radius" />
     <solid android:color="@color/md_theme_dark_surfaceContainerLow" />
+    <stroke android:width="1dp" android:color="@color/md_theme_dark_outlineVariant" />
 </shape>

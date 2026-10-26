@@ -34,7 +34,9 @@ import com.swordfish.lemuroid.lib.storage.DirectoriesManager
 import com.swordfish.lemuroid.lib.storage.RomFiles
 import com.swordfish.lemuroid.lib.storage.StorageFile
 import com.swordfish.lemuroid.lib.storage.StorageProvider
+import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import java.io.File
 import java.io.InputStream
@@ -54,8 +56,11 @@ class LocalStorageProvider(
 
     override val enabledByDefault = true
 
-    override fun listBaseStorageFiles(): Flow<List<BaseStorageFile>> =
-        walkDirectory(getExternalFolder() ?: directoriesManager.getInternalRomsDirectory())
+    // Nothing while the library comes from a network share: only one source is used at a time.
+    override fun listBaseStorageFiles(): Flow<List<BaseStorageFile>> {
+        if (SmbConfigStore(context).librarySource == SmbConfigStore.LibrarySource.SMB) return emptyFlow()
+        return walkDirectory(getExternalFolder() ?: directoriesManager.getInternalRomsDirectory())
+    }
 
     override fun getStorageFile(baseStorageFile: BaseStorageFile): StorageFile? {
         return DocumentFileParser.parseDocumentFile(context, baseStorageFile)

@@ -49,6 +49,7 @@ dependencies {
     implementation(deps.libs.material)
     implementation(deps.libs.kotlinxCoroutinesAndroid)
     implementation(deps.libs.flowPreferences)
+    api(deps.libs.smbj)
 
     kapt(deps.libs.androidx.room.compiler)
 }

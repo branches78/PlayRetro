@@ -9,6 +9,7 @@ import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.shared.library.EmptyLibraryLoading
 import com.swordfish.lemuroid.app.shared.library.LibraryLoadingProgress
 import com.swordfish.lemuroid.app.shared.library.LibraryScanProgressFormatter
+import com.swordfish.lemuroid.app.shared.settings.LibrarySourceActivity
 
 /**
  * Card of the TV "Home" and "Consoles" tabs for an empty library. While the first scan runs (the library was empty
@@ -18,8 +19,13 @@ class TVEmptyLibraryCard(private val cardView: View, private val contentView: Vi
 
     init {
         cardView.findViewById<View>(R.id.tv_empty_library_action)
-            .setOnClickListener { TVHelper.launchFolderPicker(cardView.context) }
+            // Asks first whether the games come from a folder of the device or a network share.
+            .setOnClickListener { LibrarySourceActivity.show(cardView.context) }
     }
+
+    /** Whether the card covers the tab (empty library or its first scan). */
+    val isShown: Boolean
+        get() = cardView.isVisible
 
     fun update(
         isLibraryEmpty: Boolean,

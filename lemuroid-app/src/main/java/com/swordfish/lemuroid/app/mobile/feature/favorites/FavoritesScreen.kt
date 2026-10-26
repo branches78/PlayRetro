@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidEmptyView
-import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameCard
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameGridCard
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 /** Every favorite game, opened from the "Show all" card of the home favorites row. */
@@ -46,9 +46,11 @@ fun FavoritesScreen(
     ) {
         items(games.itemCount, key = { games[it]?.id ?: it }) { index ->
             val game = games[index] ?: return@items
-            LemuroidGameCard(
+            // Games of every system: square cells, each card with the shape of its cover.
+            LemuroidGameGridCard(
                 modifier = Modifier.animateItem(),
                 game = game,
+                cellRatio = 1f,
                 onClick = { onGameClick(game) },
                 onLongClick = { onGameLongClick(game) },
             )

@@ -11,6 +11,7 @@ import com.swordfish.lemuroid.app.utils.android.displayErrorDialog
 import com.swordfish.lemuroid.lib.android.RetrogradeActivity
 import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
 import com.swordfish.lemuroid.lib.storage.DirectoriesManager
+import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
 import javax.inject.Inject
 
 class StorageFrameworkPickerLauncher : RetrogradeActivity() {
@@ -65,6 +66,8 @@ class StorageFrameworkPickerLauncher : RetrogradeActivity() {
                 }
             }
 
+            // A local folder replaces the network share as the source of the library.
+            SmbConfigStore(this).librarySource = SmbConfigStore.LibrarySource.LOCAL
             startLibraryIndexWork()
         }
         finish()

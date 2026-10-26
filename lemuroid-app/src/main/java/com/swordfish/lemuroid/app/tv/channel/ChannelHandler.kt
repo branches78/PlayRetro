@@ -9,30 +9,33 @@ import android.graphics.Canvas
 import android.graphics.drawable.VectorDrawable
 import android.media.tv.TvContract
 import android.net.Uri
+import androidx.core.content.ContextCompat
 import androidx.tvprovider.media.tv.Channel
 import androidx.tvprovider.media.tv.ChannelLogoUtils
 import androidx.tvprovider.media.tv.PreviewProgram
 import androidx.tvprovider.media.tv.TvContractCompat
+import coil.imageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.shared.covers.CoverUtils
 import com.swordfish.lemuroid.app.shared.deeplink.DeepLink
+import com.swordfish.lemuroid.app.tv.home.TVHomeViewModel
 import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
 import com.swordfish.lemuroid.lib.library.db.entity.Game
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.http.HEAD
-import retrofit2.http.Url
+import java.io.File
+import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.first
 
+/**
+ * Channel of the app on the home screen of the TV: the games of "Continue playing", in the same order, which open
+ * right away. Each one has a 16:9 poster made by the app with the whole cover centered on it, since the launcher
+ * crops the images to the shape of its cards.
+ */
 class ChannelHandler(
     private val appContext: Context,
     private val retrogradeDatabase: RetrogradeDatabase,
-    retrofit: Retrofit,
 ) {
-    private val thumbnailsApi = retrofit.create(ThumbnailsApi::class.java)
-
     private val appName = appContext.getString(R.string.lemuroid_name)
 
     private val channelsProjection =
@@ -94,12 +97,11 @@ class ChannelHandler(
     }
 
     suspend fun update() {
-        val recentGames = retrogradeDatabase.gameDao().asyncSelectFirstRecents(10)
+        val recentGames =
+            retrogradeDatabase.gameDao().selectFirstUnfavoriteRecents(TVHomeViewModel.CAROUSEL_MAX_ITEMS).first()
 
-        val channelEntries =
-            recentGames.asFlow()
-                .map { getChannelEntry(it) }
-                .toList()
+        val posters = recentGames.map { it to createPoster(it) }
+        deleteOldPosters(posters.map { it.second })
 
         val channelId = getOrCreateChannelId() ?: return
 
@@ -109,11 +111,11 @@ class ChannelHandler(
             .setAppLinkIntentUri(DeepLink.openLeanbackUri(appContext))
             .build()
 
-        appContext.contentResolver.delete(
-            TvContractCompat.buildPreviewProgramsUriForChannel(channelId),
-            null,
-            null,
-        )
+        deletePrograms()
+        // The channel kept from older versions may have lost its logo.
+        convertToBitmap(appContext, R.mipmap.lemuroid_tv_channel)?.let {
+            ChannelLogoUtils.storeChannelLogo(appContext, channelId, it)
+        }
 
         appContext.contentResolver.update(
             TvContractCompat.buildChannelUri(channelId),
@@ -123,8 +125,8 @@ class ChannelHandler(
         )
 
         val contentValues =
-            channelEntries.map { (game, thumbnail) ->
-                getGameProgram(channelId, game, thumbnail).toContentValues()
+            posters.map { (game, poster) ->
+                getGameProgram(channelId, game, poster).toContentValues()
             }
 
         if (contentValues.isNotEmpty()) {
@@ -135,43 +137,95 @@ class ChannelHandler(
         }
     }
 
-    private suspend fun getChannelEntry(game: Game): ChannelEntry {
-        val hasThumbnail =
-            game.coverFrontUrl
-                ?.let { thumbnailsApi.thumbnailExists(it).isSuccessful }
-                ?: false
-        return ChannelEntry(game, hasThumbnail)
+    /** 16:9 image with the whole cover centered on the dark background of the app; its file name. */
+    private suspend fun createPoster(game: Game): String {
+        val coverUrl = game.displayCoverUrl() ?: CoverUtils.getFallbackRemoteUrl(game)
+        // A new name when the cover changes, so the launcher doesn't keep showing the old one.
+        val name = "game_${game.id}_${Integer.toHexString(coverUrl.hashCode())}.png"
+        val file = File(ChannelPosterProvider.postersDirectory(appContext), name)
+        if (file.exists()) return name
+
+        val request =
+            ImageRequest.Builder(appContext)
+                .data(coverUrl)
+                .allowHardware(false)
+                .build()
+        val cover = (appContext.imageLoader.execute(request) as? SuccessResult)?.drawable
+            ?: CoverUtils.getFallbackDrawable(game)
+
+        val poster = Bitmap.createBitmap(POSTER_WIDTH, POSTER_HEIGHT, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(poster)
+        canvas.drawColor(ContextCompat.getColor(appContext, R.color.md_theme_dark_surfaceContainerLow))
+
+        val coverWidth = cover.intrinsicWidth.takeIf { it > 0 } ?: POSTER_HEIGHT
+        val coverHeight = cover.intrinsicHeight.takeIf { it > 0 } ?: POSTER_HEIGHT
+        val scale = minOf(POSTER_WIDTH.toFloat() / coverWidth, POSTER_HEIGHT.toFloat() / coverHeight)
+        val width = (coverWidth * scale).roundToInt()
+        val height = (coverHeight * scale).roundToInt()
+        val left = (POSTER_WIDTH - width) / 2
+        val top = (POSTER_HEIGHT - height) / 2
+        cover.setBounds(left, top, left + width, top + height)
+        cover.draw(canvas)
+
+        val partFile = File(file.parentFile, "$name.part")
+        partFile.outputStream().use { poster.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        partFile.renameTo(file)
+        poster.recycle()
+        return name
+    }
+
+    private fun deleteOldPosters(names: List<String>) {
+        ChannelPosterProvider.postersDirectory(appContext)
+            .listFiles()
+            ?.filter { it.name !in names }
+            ?.forEach { it.delete() }
     }
 
     @SuppressLint("RestrictedApi")
     private fun getGameProgram(
         channelId: Long,
         game: Game,
-        thumbnailExists: Boolean,
+        posterName: String,
     ): PreviewProgram {
         val intent = DeepLink.launchIntentForGame(appContext, game)
 
-        val preview =
-            PreviewProgram.Builder()
-                .setChannelId(channelId)
-                .setTitle(game.displayName())
-                .setDescription(game.developer)
-                .setIntent(intent)
-                .setStartTimeUtcMillis(game.lastPlayedAt ?: 0)
-                .setType(TvContractCompat.PreviewPrograms.TYPE_GAME)
-                .setPosterArtAspectRatio(TvContractCompat.PreviewProgramColumns.ASPECT_RATIO_1_1)
-
-        val coverUrl = game.displayCoverUrl()
-        if (coverUrl != null && (game.customCoverUri != null || thumbnailExists)) {
-            preview.setPosterArtUri(Uri.parse(coverUrl))
-        } else {
-            preview.setPosterArtUri(Uri.parse(CoverUtils.getFallbackRemoteUrl(game)))
-        }
-
-        return preview.build()
+        return PreviewProgram.Builder()
+            .setChannelId(channelId)
+            .setTitle(game.displayName())
+            .setDescription(game.developer)
+            .setIntent(intent)
+            .setStartTimeUtcMillis(game.lastPlayedAt ?: 0)
+            .setType(TvContractCompat.PreviewPrograms.TYPE_GAME)
+            .setPosterArtAspectRatio(TvContractCompat.PreviewProgramColumns.ASPECT_RATIO_16_9)
+            .setPosterArtUri(ChannelPosterProvider.uriFor(appContext, posterName))
+            .build()
     }
 
+    /**
+     * Every game of the channels of the app, also the ones of older versions. One by one: the TV provider doesn't
+     * accept a selection to delete them.
+     */
+    private fun deletePrograms() {
+        val ids =
+            appContext.contentResolver.query(
+                TvContractCompat.PreviewPrograms.CONTENT_URI,
+                arrayOf(TvContractCompat.PreviewPrograms._ID),
+                null,
+                null,
+                null,
+            )?.use { cursor ->
+                generateSequence { if (cursor.moveToNext()) cursor.getLong(0) else null }.toList()
+            }.orEmpty()
+        ids.forEach { appContext.contentResolver.delete(TvContractCompat.buildPreviewProgramUri(it), null, null) }
+    }
+
+    /**
+     * The channel of the app, whatever its name: the app was called GameStation before, and the launcher keeps showing
+     * the channel created then (a new one has to be accepted by the user). The one the launcher shows is kept (it is
+     * renamed in [update]); others left by older versions are deleted.
+     */
     private fun findChannel(): Long? {
+        // Only the channels of this app are returned.
         val channels =
             appContext.contentResolver.query(
                 TvContractCompat.Channels.CONTENT_URI,
@@ -179,27 +233,19 @@ class ChannelHandler(
                 null,
                 null,
                 null,
-            )
+            )?.use { cursor ->
+                generateSequence { if (cursor.moveToNext()) Channel.fromCursor(cursor) else null }.toList()
+            } ?: return null
 
-        channels?.use {
-            if (it.moveToFirst()) {
-                do {
-                    val channel = Channel.fromCursor(it)
-                    if (appName == channel.displayName) {
-                        return channel.id
-                    }
-                } while (it.moveToNext())
-            }
+        val kept = channels.sortedWith(compareBy({ !it.isBrowsable }, { it.id })).firstOrNull() ?: return null
+        channels.filter { it.id != kept.id }.forEach {
+            appContext.contentResolver.delete(TvContractCompat.buildChannelUri(it.id), null, null)
         }
-        return null
+        return kept.id
     }
 
-    private data class ChannelEntry(val game: Game, val hasThumbnail: Boolean)
-
-    interface ThumbnailsApi {
-        @HEAD
-        suspend fun thumbnailExists(
-            @Url url: String,
-        ): Response<Void>
+    companion object {
+        private const val POSTER_WIDTH = 640
+        private const val POSTER_HEIGHT = 360
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,8 +28,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -84,6 +85,7 @@ import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameImage
 import com.swordfish.lemuroid.app.shared.GameInteractor
+import com.swordfish.lemuroid.app.shared.covers.GameLogoOrTitle
 import com.swordfish.lemuroid.app.shared.details.GameAction
 import com.swordfish.lemuroid.app.shared.details.GameActionsHost
 import com.swordfish.lemuroid.app.shared.details.GameDescriptionProvider
@@ -94,13 +96,14 @@ import com.swordfish.lemuroid.app.shared.details.gameSystemName
 import com.swordfish.lemuroid.app.tv.home.TVBackdropView
 import com.swordfish.lemuroid.app.tv.home.TVHomeFragment
 import com.swordfish.lemuroid.app.tv.shared.TVGameContextMenu
+import com.swordfish.lemuroid.app.utils.android.TVNavigationSounds
 import com.swordfish.lemuroid.app.utils.games.GameUtils
 import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import dagger.android.support.AndroidSupportInjection
+import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Details of a game on TV, opened when a game is chosen (setting "Show game details"), like the details page of a
@@ -131,31 +134,32 @@ class TVGameDetailsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                AppTheme {
-                    val viewModel: GameDetailsViewModel =
-                        viewModel(
-                            factory =
-                                GameDetailsViewModel.Factory(
-                                    requireContext().applicationContext,
-                                    gameId,
-                                    retrogradeDb,
-                                    descriptionProvider,
-                                ),
-                        )
-                    val state by viewModel.state.collectAsState()
-                    val game = state.game
-                    Box(modifier = Modifier.fillMaxSize().background(colorResource(R.color.leanback_background))) {
-                        // Shown when everything read from the device is there, instead of growing piece by piece.
-                        if (game != null && state.isReady) {
-                            TVGameDetailsScreen(
-                                state = state,
-                                game = game,
-                                gameInteractor = gameInteractor,
-                                onOpenCoreOptions = {
-                                    TVGameContextMenu.show(context, it, gameInteractor, startWithCoreOptions = true)
-                                },
-                                onOpenGame = { open(this@TVGameDetailsFragment, it) },
+                TVNavigationSounds {
+                    AppTheme {
+                        val viewModel: GameDetailsViewModel =
+                            viewModel(
+                                factory =
+                                    GameDetailsViewModel.Factory(
+                                        gameId,
+                                        retrogradeDb,
+                                        descriptionProvider,
+                                    ),
                             )
+                        val state by viewModel.state.collectAsState()
+                        val game = state.game
+                        Box(modifier = Modifier.fillMaxSize().background(colorResource(R.color.leanback_background))) {
+                            // Shown when everything read from the device is there, instead of growing piece by piece.
+                            if (game != null && state.isReady) {
+                                TVGameDetailsScreen(
+                                    state = state,
+                                    game = game,
+                                    gameInteractor = gameInteractor,
+                                    onOpenCoreOptions = {
+                                        TVGameContextMenu.show(context, it, gameInteractor, startWithCoreOptions = true)
+                                    },
+                                    onOpenGame = { open(this@TVGameDetailsFragment, it) },
+                                )
+                            }
                         }
                     }
                 }
@@ -249,13 +253,22 @@ private fun TVGameDetailsScreen(
 
             GameActionsHost(game, gameInteractor, onOpenCoreOptions) { actions ->
                 val playFocusRequester = remember { FocusRequester() }
+                // Only Play/Resume has its name; the other buttons are round icons whose name shows below them while
+                // focused. The row still scrolls to the focused one if it doesn't fit (the padding is inside the
+                // scroll, so the zoom of the first and last ones is not cut).
                 Row(
-                    modifier = Modifier.padding(start = SIDE_PADDING.dp).graphicsLayer { alpha = detailsAlpha },
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier =
+                        Modifier
+                            .graphicsLayer { alpha = detailsAlpha }
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = SIDE_PADDING.dp),
+                    horizontalArrangement = Arrangement.spacedBy(BUTTON_SPACING.dp),
+                    verticalAlignment = Alignment.Top,
                 ) {
                     TVActionButton(actions.play, iconOnly = false, Modifier.focusRequester(playFocusRequester))
-                    actions.restart?.let { TVActionButton(it, iconOnly = false) }
-                    actions.coreOptions?.let { TVActionButton(it, iconOnly = false) }
+                    actions.restart?.let { TVActionButton(it, iconOnly = true) }
+                    actions.coreOptions?.let { TVActionButton(it, iconOnly = true) }
+                    actions.selectCore?.let { TVActionButton(it, iconOnly = true) }
                     TVActionButton(actions.favorite, iconOnly = true)
                     TVActionButton(actions.customName, iconOnly = true)
                     TVActionButton(actions.customCover, iconOnly = true)
@@ -305,33 +318,26 @@ private fun TVDetailsTexts(
     game: Game,
     onOpenDescription: () -> Unit,
 ) {
-    val primary = colorResource(R.color.md_theme_dark_primary)
-    val meta = listOfNotNull(gameSystemName(game), game.developer?.takeIf { it.isNotBlank() }).joinToString(" · ")
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = meta, color = primary, fontSize = 14.sp)
-        gameRegion(game)?.let { region ->
-            Text(
-                modifier =
-                    Modifier
-                        .padding(start = 12.dp)
-                        .border(1.dp, primary.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
-                        .padding(horizontal = 6.dp, vertical = 1.dp),
-                text = region,
-                color = primary,
-                fontSize = 12.sp,
-            )
-        }
+    // Same order as on mobile: title (the logo of the game when it has one), then system, developer and region.
+    GameLogoOrTitle(game, maxHeight = LOGO_MAX_HEIGHT.dp, maxWidth = LOGO_MAX_WIDTH.dp) {
+        Text(
+            text = gameCleanTitle(game),
+            color = colorResource(R.color.md_theme_dark_onSurface),
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Medium,
+            lineHeight = 44.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
+    val meta =
+        listOfNotNull(gameSystemName(game), game.developer?.takeIf { it.isNotBlank() }, gameRegion(game))
+            .joinToString(" · ")
     Text(
-        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
-        text = gameCleanTitle(game),
-        color = colorResource(R.color.md_theme_dark_onSurface),
-        fontSize = 40.sp,
-        fontWeight = FontWeight.Medium,
-        lineHeight = 44.sp,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
+        text = meta,
+        color = colorResource(R.color.md_theme_dark_primary),
+        fontSize = 14.sp,
     )
 
     TVDescription(state.description, onOpenDescription)
@@ -343,7 +349,6 @@ private fun TVDetailsTexts(
                     DateUtils.getRelativeTimeSpanString(it, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)
                         .toString()
             },
-            state.coreName?.let { stringResource(R.string.game_details_core) to it },
         )
     if (facts.isNotEmpty()) {
         Column(modifier = Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -358,16 +363,18 @@ private fun TVDetailsTexts(
 }
 
 /**
- * Description of the game, always four lines high so the buttons below don't move when it arrives from the network.
- * It can be focused (up from the buttons): OK opens it whole in a dialog.
+ * Description of the game, as tall as its text up to four lines, and nothing at all when the game has none: what
+ * follows moves up. Only when the text doesn't fit it can be focused (up from the buttons) and shows "Read more": OK
+ * opens it whole in a dialog.
  */
 @Composable
 private fun TVDescription(
     description: String?,
     onOpen: () -> Unit,
 ) {
+    if (description.isNullOrBlank()) return
     var focused by remember { mutableStateOf(false) }
-    val textAlpha by animateFloatAsState(if (description != null) 1f else 0f, label = "descriptionAlpha")
+    var overflows by remember(description) { mutableStateOf(false) }
     val shape = RoundedCornerShape(12.dp)
     val primary = colorResource(R.color.md_theme_dark_primary)
 
@@ -381,26 +388,27 @@ private fun TVDescription(
                 .background(if (focused) colorResource(R.color.md_theme_dark_surfaceContainerHigh) else Color.Transparent)
                 .border(2.dp, if (focused) Color.White else Color.Transparent, shape)
                 .onFocusChanged { focused = it.isFocused }
-                .then(if (description != null) Modifier.clickable(onClick = onOpen) else Modifier)
+                .then(if (overflows) Modifier.clickable(onClick = onOpen) else Modifier)
                 .padding(DESCRIPTION_PADDING.dp),
     ) {
         Text(
-            modifier = Modifier.graphicsLayer { alpha = textAlpha },
-            text = description.orEmpty(),
+            text = description,
             color = colorResource(R.color.md_theme_dark_onSurfaceVariant),
             fontSize = 16.sp,
             lineHeight = 24.sp,
-            minLines = DESCRIPTION_LINES,
             maxLines = DESCRIPTION_LINES,
             overflow = TextOverflow.Ellipsis,
+            onTextLayout = { overflows = it.hasVisualOverflow },
         )
-        Text(
-            modifier = Modifier.padding(top = 2.dp).graphicsLayer { alpha = if (focused) 1f else 0f },
-            text = stringResource(R.string.game_details_read_more),
-            color = primary,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-        )
+        if (overflows) {
+            Text(
+                modifier = Modifier.padding(top = 2.dp).graphicsLayer { alpha = if (focused) 1f else 0f },
+                text = stringResource(R.string.game_details_read_more),
+                color = primary,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
     }
 }
 
@@ -498,13 +506,30 @@ private fun TVActionButton(
                     .background(background)
                     .clickable(onClick = action.onClick)
                     .height(BUTTON_HEIGHT.dp)
-                    .then(if (iconOnly) Modifier.width(BUTTON_HEIGHT.dp) else Modifier.padding(horizontal = 20.dp)),
+                    .then(
+                        if (iconOnly) {
+                            Modifier.width(BUTTON_HEIGHT.dp)
+                        } else {
+                            Modifier.padding(horizontal = BUTTON_SIDE_PADDING.dp)
+                        },
+                    ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            Icon(imageVector = action.icon, contentDescription = action.label, tint = content)
+            Icon(
+                modifier = Modifier.size(BUTTON_ICON_SIZE.dp),
+                imageVector = action.icon,
+                contentDescription = action.label,
+                tint = content,
+            )
             if (!iconOnly) {
-                Text(modifier = Modifier.padding(start = 8.dp), text = action.label, color = content, fontSize = 16.sp)
+                Text(
+                    modifier = Modifier.padding(start = 6.dp),
+                    text = action.label,
+                    color = content,
+                    fontSize = BUTTON_TEXT_SIZE.sp,
+                    maxLines = 1,
+                )
             }
         }
         if (iconOnly) {
@@ -513,13 +538,14 @@ private fun TVActionButton(
                 modifier =
                     Modifier
                         .padding(top = 8.dp)
-                        .graphicsLayer { alpha = if (focused) 1f else 0f }
                         .layout { measurable, constraints ->
                             val placeable = measurable.measure(constraints.copy(minWidth = 0, maxWidth = Constraints.Infinity))
                             layout(0, placeable.height) { placeable.place(-placeable.width / 2, 0) }
-                        },
+                        }
+                        // After the layout: a layer as wide as the text. With zero width it was never drawn.
+                        .graphicsLayer { alpha = if (focused) 1f else 0f },
                 text = action.label,
-                color = colorResource(R.color.md_theme_dark_primary),
+                color = colorResource(R.color.md_theme_dark_onSurface),
                 fontSize = 12.sp,
                 maxLines = 1,
             )
@@ -589,7 +615,15 @@ private fun homeCardSpacing(): Dp {
 }
 
 private const val SIDE_PADDING = 56
+private const val LOGO_MAX_WIDTH = 480
+private const val LOGO_MAX_HEIGHT = 96
+// Play/Resume is a pill with its name, the other buttons are round icons of the same height. Only one button has
+// a name, so they have their original size again.
 private const val BUTTON_HEIGHT = 44
+private const val BUTTON_SIDE_PADDING = 20
+private const val BUTTON_ICON_SIZE = 24
+private const val BUTTON_TEXT_SIZE = 16
+private const val BUTTON_SPACING = 10
 private const val DETAILS_SCROLL = 250
 private const val DESCRIPTION_LINES = 4
 private const val ROW_TITLE_SIZE = 20

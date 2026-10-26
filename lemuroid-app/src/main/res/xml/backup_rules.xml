@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Backups up to Android 11. The network share settings are left out: the password is encrypted with a key that stays
+     on the device, so after a restore it couldn't be read and the share would fail; it is asked again instead. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="smb_config.xml" />
+</full-backup-content>

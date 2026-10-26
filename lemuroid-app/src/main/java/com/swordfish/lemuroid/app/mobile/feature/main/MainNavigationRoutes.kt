@@ -23,6 +23,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.swordfish.lemuroid.R
+import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 fun NavGraphBuilder.composable(
     route: MainRoute,
@@ -63,8 +64,28 @@ fun NavBackStackEntry.stablePadding(
     return kept[0]
 }
 
-fun NavController.navigateToGameDetails(gameId: Int) {
-    this.navigate(MainRoute.GAME_DETAILS.route.replace("{gameId}", gameId.toString()))
+/**
+ * Opens the details of a [game]. They keep the tab they are opened from selected in the bottom navigation (also when
+ * opened from other details), and the top bar shows the name of its system.
+ */
+fun NavController.navigateToGameDetails(game: Game) {
+    val current = currentBackStackEntry
+    val tab =
+        current?.arguments?.getString("tab")
+            ?: current?.destination?.route?.let { MainRoute.findByRoute(it).root.name }
+            ?: MainRoute.HOME.name
+    val route =
+        MainRoute.GAME_DETAILS.route
+            .replace("{gameId}", game.id.toString())
+            .replace("{systemId}", game.systemId)
+            .replace("{tab}", tab)
+    this.navigate(route)
+}
+
+/** Tab selected in the bottom navigation: the root of the [route], or the one the details of a game come from. */
+fun NavBackStackEntry?.mainTab(route: MainRoute): MainRoute {
+    val tab = this?.arguments?.getString("tab")
+    return tab?.let { runCatching { MainRoute.valueOf(it) }.getOrNull() } ?: route.root
 }
 
 enum class MainRoute(
@@ -135,25 +156,41 @@ enum class MainRoute(
         titleId = R.string.settings_title_save_sync,
         parent = SETTINGS,
     ),
+    // Network share (SMB) with the games library, opened from "Directory".
+    SETTINGS_SMB(
+        route = "settings/smb",
+        titleId = R.string.smb_title,
+        parent = SETTINGS,
+    ),
     ABOUT(
         route = "about",
         titleId = R.string.title_about,
     ),
-    // Not a tab: opened when a game is chosen. It has no top bar (its back button is over the screenshot) nor
-    // bottom navigation.
+    // Not a tab: opened when a game is chosen (see navigateToGameDetails). The top bar shows the name of the system
+    // of the game, and the bottom navigation the tab it was opened from.
     GAME_DETAILS(
-        route = "games/details/{gameId}",
+        route = "games/details/{gameId}?systemId={systemId}&tab={tab}",
         titleId = R.string.title_games,
-        arguments = listOf(navArgument("gameId") { type = NavType.IntType }),
-        showBottomNavigation = false,
+        arguments =
+            listOf(
+                navArgument("gameId") { type = NavType.IntType },
+                navArgument("systemId") {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument("tab") {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
     ),
     ;
 
     val root = root()
 
-    // Search has no tab of its own, so it goes back to the screen it was opened from.
+    // Search and the details of a game have no tab of their own, so they go back to the screen they were opened from.
     val hasBackButton: Boolean
-        get() = parent != null || this == SEARCH
+        get() = parent != null || this == SEARCH || this == GAME_DETAILS
 
     private fun root(): MainRoute {
         return parent?.root() ?: this

@@ -6,8 +6,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,16 +38,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import com.swordfish.lemuroid.R
-import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameCard
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameGridCard
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LibraryScanProgress
+import com.swordfish.lemuroid.app.shared.covers.CoverAspectRatio
 import com.swordfish.lemuroid.app.shared.home.HomeDynamicRows
 import com.swordfish.lemuroid.app.shared.library.EmptyLibraryLoading
 import com.swordfish.lemuroid.app.shared.library.LibraryLoadingProgress
@@ -53,6 +57,7 @@ import com.swordfish.lemuroid.app.shared.library.PendingOperationsMonitor
 import com.swordfish.lemuroid.app.utils.android.ComposableLifecycle
 import com.swordfish.lemuroid.common.displayDetailsSettingsScreen
 import com.swordfish.lemuroid.lib.library.db.entity.Game
+import kotlin.math.floor
 import kotlinx.coroutines.flow.combine
 
 @Composable
@@ -165,6 +170,7 @@ private fun HomeScreen(
                 actionId = R.string.home_empty_action,
                 onAction = onSetDirectoryClicked,
                 enabled = !state.indexInProgress,
+                outlined = true,
             )
         }
         AnimatedVisibility(state.showNoMicrophonePermissionCard) {
@@ -286,42 +292,46 @@ private fun HomeRowGames(
         }
     }
 
-    // Same width as a cell of the games grid of a system, so covers have the same size in both screens.
-    val cardWidth = homeCardWidth()
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        // Measured on the row itself, not on the screen width, which may differ from the room the row really has.
+        val cardWidth = homeCardWidth(maxWidth)
 
-    LazyRow(
-        state = listState,
-        modifier =
-            Modifier
-                .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(HOME_ROW_SPACING),
-        contentPadding = PaddingValues(HOME_ROW_PADDING),
-    ) {
-        items(games.size, key = { games[it].id }) { index ->
-            val game = games[index]
-            LemuroidGameCard(
-                modifier =
-                    Modifier
-                        .width(cardWidth)
-                        .animateItem(),
-                game = game,
-                // Same vertical shape for every card, like the NES grid: the row keeps its height while scrolling
-                // and covers of another shape are shown whole and centered.
-                fixedRatio = PORTRAIT_RATIO,
-                onClick = { onGameClicked(game) },
-                onLongClick = { onGameLongClick(game) },
-            )
-        }
-        if (onShowAll != null) {
-            item(key = SHOW_ALL_KEY) {
-                HomeShowAllCard(
+        LazyRow(
+            state = listState,
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(HOME_ROW_SPACING),
+            contentPadding = PaddingValues(HOME_ROW_PADDING),
+            // Cells of different heights (systems): the titles stay on one line.
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            items(games.size, key = { games[it].id }) { index ->
+                val game = games[index]
+                // Same size as in the grid of the games of a console: a cell as wide as a third of the row, with the
+                // usual shape of the covers of its system, and the cover inside it with its real shape.
+                LemuroidGameGridCard(
                     modifier =
                         Modifier
-                            .animateItem()
                             .width(cardWidth)
-                            .height(cardWidth / PORTRAIT_RATIO + TEXTS_HEIGHT),
-                    onClick = onShowAll,
+                            .animateItem(),
+                    game = game,
+                    cellRatio = CoverAspectRatio.forGameSystem(game),
+                    onClick = { onGameClicked(game) },
+                    onLongClick = { onGameLongClick(game) },
                 )
+            }
+            if (onShowAll != null) {
+                item(key = SHOW_ALL_KEY) {
+                    HomeShowAllCard(
+                        modifier =
+                            Modifier
+                                .animateItem()
+                                .width(cardWidth)
+                                .height(cardWidth + TEXTS_HEIGHT),
+                        onClick = onShowAll,
+                    )
+                }
             }
         }
     }
@@ -359,19 +369,22 @@ private fun HomeShowAllCard(
 
 private const val SHOW_ALL_KEY = "show_all"
 
+/**
+ * Three whole covers in the [rowWidth], like the games grid of a system, and the fourth one starting right at the edge
+ * of the screen: the end padding of the row only shows at its end, so while scrolling the gap after the third cover is
+ * the spacing between cards, and no part of the fourth one may show there. Rounded down to whole pixels.
+ */
 @Composable
-private fun homeCardWidth(): Dp {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    return (screenWidth - HOME_ROW_PADDING * 2 - HOME_ROW_SPACING * (GAMES_GRID_COLUMNS - 1)) / GAMES_GRID_COLUMNS
+private fun homeCardWidth(rowWidth: Dp): Dp {
+    val density = LocalDensity.current
+    val width = (rowWidth - HOME_ROW_PADDING - HOME_ROW_SPACING * GAMES_GRID_COLUMNS) / GAMES_GRID_COLUMNS
+    return with(density) { floor(width.toPx()).toDp() }
 }
 
 // Same layout as the games grid of a system (GamesScreen).
 private const val GAMES_GRID_COLUMNS = 3
 private val HOME_ROW_PADDING = 16.dp
 private val HOME_ROW_SPACING = 12.dp
-
-// Shape of a vertical box art: the shape of every home card, also the "Show all" one.
-private const val PORTRAIT_RATIO = 0.71f
 
 // Padding, two title lines and the system name below each cover.
 private val TEXTS_HEIGHT = 72.dp
@@ -382,11 +395,13 @@ private val HOME_ROW_EMPTY_HEIGHT = HOME_ROW_COVER_HEIGHT + TEXTS_HEIGHT
 
 @Composable
 private fun HomeLibraryLoading(progress: LibraryLoadingProgress) {
+    // The same card as "Choose a folder" while its first scan runs, with the same border.
     ElevatedCard(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp),
+                .padding(start = 16.dp, end = 16.dp)
+                .border(CARD_BORDER_WIDTH, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
     ) {
         Column(
             modifier =
@@ -414,13 +429,17 @@ private fun HomeNotification(
     messageId: Int,
     actionId: Int,
     enabled: Boolean = true,
+    // The thin border of the settings cards ("Choose a folder" of an empty library).
+    outlined: Boolean = false,
     onAction: () -> Unit = { },
 ) {
+    val borderColor = if (outlined) MaterialTheme.colorScheme.outlineVariant else Color.Transparent
     ElevatedCard(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp),
+                .padding(start = 16.dp, end = 16.dp)
+                .border(CARD_BORDER_WIDTH, borderColor, MaterialTheme.shapes.medium),
     ) {
         Column(
             modifier =
@@ -447,3 +466,5 @@ private fun HomeNotification(
         }
     }
 }
+
+private val CARD_BORDER_WIDTH = 1.dp

@@ -3,6 +3,8 @@
     <dimen name="tv_top_bar_height">80dp</dimen>
     <dimen name="tv_top_bar_top_padding">0dp</dimen>
     <dimen name="tv_top_bar_horizontal_padding">48dp</dimen>
+    <!-- Logo of the app on the right of the tabs bar. -->
+    <dimen name="tv_app_logo_height">24dp</dimen>
     <dimen name="tv_tab_horizontal_padding">20dp</dimen>
     <dimen name="tv_tab_vertical_padding">8dp</dimen>
     <dimen name="tv_tab_spacing">8dp</dimen>
@@ -21,37 +23,47 @@
     <dimen name="tv_grid_title_height">48dp</dimen>
     <dimen name="tv_grid_title_elevation">24dp</dimen>
     <dimen name="tv_games_grid_top_padding">72dp</dimen>
-    <!-- Width of the tabs content: the "Consoles" grid (5 cards of 128dp + 4 spacings of 8dp) and the "About" cards. -->
-    <dimen name="tv_content_width">672dp</dimen>
-    <!-- Home rows: 5 square cards fill the content width. -->
+    <!-- Side margins of the content of every tab, as in the Android TV guidelines (58dp on a 960dp wide screen):
+         the content is the screen width minus both margins (TVHomeFragment.contentWidth). -->
+    <dimen name="tv_content_side_margin">58dp</dimen>
+    <!-- Grids of square cards (games of a system, favorites, consoles): 5 per row fill the content width. -->
     <integer name="tv_home_cards_per_row">5</integer>
     <dimen name="tv_home_card_spacing">12dp</dimen>
+    <!-- Home rows: 16:9 cards (about 153 x 86dp on a 960dp wide screen), 5 of them fill the content width, with the
+         spacing of the immersive list guidelines. Covers of other shapes are shown whole inside them. -->
+    <integer name="tv_home_row_cards">5</integer>
+    <dimen name="tv_home_row_card_spacing">20dp</dimen>
     <!-- Room on both sides of the rows for the zoom of the focused card; nothing else is drawn there. -->
     <dimen name="tv_home_row_edge">12dp</dimen>
-    <!-- Immersive list on top of the home screen: screenshot of the focused game in the top right corner (16:9,
-         three quarters of the screen width), title, system and description on the left, and the row of cards at the
-         bottom of the screen. Offsets are from the top of the tabs content (below the 80dp tabs bar). -->
-    <dimen name="tv_backdrop_width">720dp</dimen>
-    <dimen name="tv_backdrop_height">405dp</dimen>
-    <dimen name="tv_immersive_info_width">420dp</dimen>
-    <dimen name="tv_immersive_info_top_margin">12dp</dimen>
-    <!-- Right below the texts (one line of title, system, three lines of description). Like the next one, it is the
-         position of the cards: the title of a row goes above it. -->
-    <dimen name="tv_immersive_row_top">172dp</dimen>
+    <!-- Immersive list on top of the home screen, with the measures of the Android TV guidelines: screenshot of the
+         focused game in the top right corner (16:9, 758 x 426dp), system, title and description on the left, 40dp
+         above the row of cards. Offsets are from the top of the tabs content (below the 80dp tabs bar). -->
+    <dimen name="tv_backdrop_width">758dp</dimen>
+    <dimen name="tv_backdrop_height">426dp</dimen>
+    <dimen name="tv_immersive_info_width">485dp</dimen>
+    <dimen name="tv_immersive_info_gap">40dp</dimen>
+    <!-- Position of the cards of the immersive list (305dp from the top of the screen): their square cells (about
+         153dp), names and focus zoom fit above the bottom of the screen. Its texts end tv_immersive_info_gap above it.
+         Like the next one, it is the position of the cards: the title of a row goes above it. -->
+    <dimen name="tv_immersive_row_top">225dp</dimen>
     <!-- Other home rows, while they have the focus and the immersive list is collapsed: room for their title above,
          with the previous row fully out of the screen (its bottom edge must not show under the tabs bar). -->
     <dimen name="tv_home_rows_top">46dp</dimen>
-    <dimen name="tv_immersive_title_size">30sp</dimen>
-    <dimen name="tv_immersive_meta_size">15sp</dimen>
+    <dimen name="tv_immersive_title_size">32sp</dimen>
+    <!-- Logo of the game in place of the title (scaled down keeping its shape). -->
+    <dimen name="tv_immersive_logo_max_width">360dp</dimen>
+    <dimen name="tv_immersive_logo_max_height">72dp</dimen>
+    <dimen name="tv_immersive_meta_size">12sp</dimen>
     <dimen name="tv_immersive_description_size">16sp</dimen>
     <!-- Tabs: the pill slides to the selected tab and the content slides in from that side. -->
     <integer name="tv_tab_animation_duration">280</integer>
     <!-- Opening and closing the details of a game. -->
     <integer name="tv_details_fade_duration">300</integer>
-    <!-- Alphabet bar on the right of the games of a console, outside the content width. -->
+    <!-- Alphabet bar on the right of the games of a console, outside the content width: inside the 58dp side
+         margin, 9dp from the screen edge and from the grid. -->
     <integer name="tv_alphabet_min_games">13</integer>
     <dimen name="tv_alphabet_width">40dp</dimen>
-    <dimen name="tv_alphabet_end_margin">56dp</dimen>
+    <dimen name="tv_alphabet_end_margin">9dp</dimen>
     <dimen name="tv_alphabet_top_margin">56dp</dimen>
     <dimen name="tv_alphabet_bottom_margin">16dp</dimen>
     <dimen name="tv_alphabet_vertical_padding">8dp</dimen>
@@ -74,9 +86,10 @@
     <color name="tv_alphabet_unavailable">#4C5249</color>
     <color name="tv_alphabet_letter_background">#EB3A4B39</color>
     <color name="tv_accent">@color/md_theme_dark_secondaryContainer</color>
-    <color name="tv_tab_selected_background">@color/md_theme_dark_secondaryContainer</color>
+    <!-- Selected tab while the bar has no focus: the almost grey tone of the logo green with white text. -->
+    <color name="tv_tab_selected_background">@color/playretro_soft_green</color>
     <color name="tv_tab_focused_text">@color/md_theme_dark_background</color>
-    <color name="tv_tab_selected_text">@android:color/white</color>
+    <color name="tv_tab_selected_text">@color/playretro_on_soft_green</color>
     <color name="tv_tab_default_text">@android:color/white</color>
 
     <style name="GameStationTVTab">

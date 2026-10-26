@@ -9,6 +9,8 @@ import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.feature.shortcuts.ShortcutsGenerator
 import com.swordfish.lemuroid.app.shared.game.GameLauncher
 import com.swordfish.lemuroid.app.shared.main.BusyActivity
+import com.swordfish.lemuroid.app.tv.channel.ChannelUpdateWork
+import com.swordfish.lemuroid.app.tv.shared.TVHelper
 import com.swordfish.lemuroid.common.displayToast
 import com.swordfish.lemuroid.lib.library.covers.CustomCoverManager
 import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
@@ -61,6 +63,8 @@ class GameInteractor(
     ) {
         GlobalScope.launch {
             retrogradeDb.gameDao().update(game.copy(isFavorite = isFavorite))
+            // Favorites leave "Continue playing", which the channel of the TV home screen shows.
+            if (TVHelper.isTV(activity.activity())) ChannelUpdateWork.enqueue(activity.activity().applicationContext)
         }
     }
 

@@ -64,7 +64,7 @@ class TVFavoritesFragment : VerticalGridSupportFragment() {
         val cardSize = TVHomeFragment.homeCardSize(resources)
         val pagingAdapter =
             PagingDataAdapter(
-                GamePresenter(cardSize, gameInteractor, fixedRatio = 1f),
+                GamePresenter(cardSize, gameInteractor, fitInCell = true),
                 Game.DIFF_CALLBACK,
             )
 

@@ -23,37 +23,18 @@ import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsMenuLin
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsSwitch
 import kotlin.reflect.KFunction1
 
+/**
+ * First screen of the in-game menu (mobile and TV): quit, restart, save, load, mute, fast forward, touch controls and
+ * tilt sensor (not on TV), then change disk and core options when the game has them.
+ */
 @Composable
 fun GameMenuHomeScreen(
     navController: NavController,
     gameMenuRequest: GameMenuActivity.GameMenuRequest,
+    isTV: Boolean,
     onResult: KFunction1<Intent.() -> Unit, Unit>,
 ) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        if (gameMenuRequest.coreConfig.statesSupported) {
-            LemuroidSettingsMenuLink(
-                title = { Text(text = stringResource(id = R.string.game_menu_save)) },
-                icon = {
-                    Icon(
-                        painterResource(R.drawable.ic_menu_save),
-                        contentDescription = stringResource(id = R.string.game_menu_save),
-                    )
-                },
-                onClick = { navController.navigateToRoute(GameMenuRoute.SAVE) },
-            )
-
-            LemuroidSettingsMenuLink(
-                title = { Text(text = stringResource(id = R.string.game_menu_load)) },
-                icon = {
-                    Icon(
-                        painterResource(R.drawable.ic_menu_load),
-                        contentDescription = stringResource(id = R.string.game_menu_load),
-                    )
-                },
-                onClick = { navController.navigateToRoute(GameMenuRoute.LOAD) },
-            )
-        }
-
         LemuroidSettingsMenuLink(
             title = { Text(text = stringResource(id = R.string.game_menu_quit)) },
             icon = {
@@ -79,6 +60,30 @@ fun GameMenuHomeScreen(
                 onResult { putExtra(GameMenuContract.RESULT_RESET, true) }
             },
         )
+
+        if (gameMenuRequest.coreConfig.statesSupported) {
+            LemuroidSettingsMenuLink(
+                title = { Text(text = stringResource(id = R.string.game_menu_save)) },
+                icon = {
+                    Icon(
+                        painterResource(R.drawable.ic_menu_save),
+                        contentDescription = stringResource(id = R.string.game_menu_save),
+                    )
+                },
+                onClick = { navController.navigateToRoute(GameMenuRoute.SAVE) },
+            )
+
+            LemuroidSettingsMenuLink(
+                title = { Text(text = stringResource(id = R.string.game_menu_load)) },
+                icon = {
+                    Icon(
+                        painterResource(R.drawable.ic_menu_load),
+                        contentDescription = stringResource(id = R.string.game_menu_load),
+                    )
+                },
+                onClick = { navController.navigateToRoute(GameMenuRoute.LOAD) },
+            )
+        }
 
         LemuroidSettingsSwitch(
             title = { Text(text = stringResource(id = R.string.game_menu_mute_audio)) },
@@ -110,51 +115,23 @@ fun GameMenuHomeScreen(
             )
         }
 
-        if (gameMenuRequest.numDisks > 1) {
-            LemuroidSettingsList(
-                title = { Text(text = stringResource(id = R.string.game_menu_change_disk_button)) },
-                items = (1..gameMenuRequest.numDisks).map { stringResource(R.string.game_menu_change_disk_disk, it) },
-                useSelectedValueAsSubtitle = false,
-                icon = {
-                    Icon(
-                        painterResource(R.drawable.ic_menu_disk),
-                        contentDescription = stringResource(id = R.string.game_menu_change_disk_button),
-                    )
-                },
-                state = rememberMemoryIntSettingState(gameMenuRequest.currentDisk),
-                onItemSelected = { index, _ ->
-                    onResult { putExtra(GameMenuContract.RESULT_CHANGE_DISK, index) }
-                },
-            )
-        }
-
-        LemuroidSettingsMenuLink(
-            title = { Text(text = stringResource(id = R.string.game_menu_edit_touch_controls)) },
-            icon = {
-                Icon(
-                    painterResource(R.drawable.ic_menu_controls),
-                    contentDescription = stringResource(id = R.string.game_menu_edit_touch_controls),
-                )
-            },
-            onClick = {
-                onResult { putExtra(GameMenuContract.RESULT_EDIT_TOUCH_CONTROLS, true) }
-            },
-        )
-
-        if (gameMenuRequest.advancedCoreOptions.isNotEmpty() || gameMenuRequest.coreOptions.isNotEmpty()) {
+        // Touch controls and the tilt sensor only exist on phones and tablets.
+        if (!isTV) {
             LemuroidSettingsMenuLink(
-                title = { Text(text = stringResource(id = R.string.game_menu_settings)) },
+                title = { Text(text = stringResource(id = R.string.game_menu_edit_touch_controls)) },
                 icon = {
                     Icon(
-                        painterResource(R.drawable.ic_menu_settings),
-                        contentDescription = stringResource(id = R.string.game_menu_settings),
+                        painterResource(R.drawable.ic_menu_controls),
+                        contentDescription = stringResource(id = R.string.game_menu_edit_touch_controls),
                     )
                 },
-                onClick = { navController.navigateToRoute(GameMenuRoute.OPTIONS) },
+                onClick = {
+                    onResult { putExtra(GameMenuContract.RESULT_EDIT_TOUCH_CONTROLS, true) }
+                },
             )
         }
 
-        if (gameMenuRequest.allTiltConfigurations.isNotEmpty()) {
+        if (!isTV && gameMenuRequest.allTiltConfigurations.isNotEmpty()) {
             val tiltConfigurationEntries =
                 gameMenuRequest.allTiltConfigurations
                     .map { TiltConfigurationMenuEntry.fromTiltConfiguration(it) }
@@ -182,6 +159,37 @@ fun GameMenuHomeScreen(
                         )
                     }
                 },
+            )
+        }
+
+        if (gameMenuRequest.numDisks > 1) {
+            LemuroidSettingsList(
+                title = { Text(text = stringResource(id = R.string.game_menu_change_disk_button)) },
+                items = (1..gameMenuRequest.numDisks).map { stringResource(R.string.game_menu_change_disk_disk, it) },
+                useSelectedValueAsSubtitle = false,
+                icon = {
+                    Icon(
+                        painterResource(R.drawable.ic_menu_disk),
+                        contentDescription = stringResource(id = R.string.game_menu_change_disk_button),
+                    )
+                },
+                state = rememberMemoryIntSettingState(gameMenuRequest.currentDisk),
+                onItemSelected = { index, _ ->
+                    onResult { putExtra(GameMenuContract.RESULT_CHANGE_DISK, index) }
+                },
+            )
+        }
+
+        if (gameMenuRequest.advancedCoreOptions.isNotEmpty() || gameMenuRequest.coreOptions.isNotEmpty()) {
+            LemuroidSettingsMenuLink(
+                title = { Text(text = stringResource(id = R.string.game_menu_settings)) },
+                icon = {
+                    Icon(
+                        painterResource(R.drawable.ic_menu_settings),
+                        contentDescription = stringResource(id = R.string.game_menu_settings),
+                    )
+                },
+                onClick = { navController.navigateToRoute(GameMenuRoute.OPTIONS) },
             )
         }
     }

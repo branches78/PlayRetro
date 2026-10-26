@@ -30,6 +30,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -42,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.swordfish.lemuroid.R
+import com.swordfish.lemuroid.app.shared.about.PlayRetroLogo
+import com.swordfish.lemuroid.app.shared.savesync.SaveSyncChanges
 import com.swordfish.lemuroid.app.shared.savesync.SaveSyncWork
 
 @Composable
@@ -89,8 +92,8 @@ fun LemuroidTopAppBar(
                     onUpdateQueryString = onUpdateQueryString,
                 )
             } else if (!route.hasBackButton) {
-                // Top-level tabs show the app name instead of the tab name.
-                Text(text = stringResource(R.string.lemuroid_name))
+                // Top-level tabs show the logo of the app instead of the tab name.
+                PlayRetroLogo(height = TOP_BAR_LOGO_HEIGHT)
             } else {
                 Text(text = stringResource(titleOverrideId ?: route.titleId))
             }
@@ -161,9 +164,11 @@ fun LemuroidTopBarActions(
             }
         }
         if (saveSyncEnabled) {
+            // Only when there is something to sync.
+            val hasChanges = SaveSyncChanges.hasChanges.collectAsState().value
             IconButton(
                 onClick = { SaveSyncWork.enqueueManualWork(context.applicationContext) },
-                enabled = !operationsInProgress,
+                enabled = !operationsInProgress && hasChanges,
             ) {
                 Icon(
                     Icons.Outlined.CloudSync,
@@ -246,3 +251,6 @@ private fun ViewModeToggle(
         }
     }
 }
+
+// Logo of the app in the top bar of the tabs (about the height of the title text).
+private val TOP_BAR_LOGO_HEIGHT = 22.dp

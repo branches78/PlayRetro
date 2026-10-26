@@ -77,6 +77,8 @@ android {
         }
         resources {
             excludes += setOf("META-INF/DEPENDENCIES", "META-INF/library_release.kotlin_module")
+            // Duplicated metadata of BouncyCastle, needed by the SMB client.
+            excludes += setOf("META-INF/versions/9/OSGI-INF/MANIFEST.MF", "META-INF/LICENSE.md", "META-INF/NOTICE.md")
         }
     }
 

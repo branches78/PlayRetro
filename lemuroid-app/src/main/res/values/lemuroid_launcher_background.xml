@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="lemuroid_launcher_background">@color/main_color</color>
+    <!-- Bright green of the app icon (black gamepad) and of the logo of the app. -->
+    <color name="playretro_brand_green">#00C64E</color>
+    <!-- Same hue, almost grey, for filled elements (selected tab, switches, bottom bar): the bright one is too
+         strong there. White content over it. -->
+    <color name="playretro_soft_green">#54635A</color>
+    <color name="playretro_on_soft_green">@android:color/white</color>
+    <color name="lemuroid_launcher_background">@color/playretro_brand_green</color>
 </resources>

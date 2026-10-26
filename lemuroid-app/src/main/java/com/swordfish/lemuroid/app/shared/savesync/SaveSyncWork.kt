@@ -1,5 +1,6 @@
 package com.swordfish.lemuroid.app.shared.savesync
 
+import android.app.ActivityManager
 import android.content.Context
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -15,6 +16,8 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.swordfish.lemuroid.app.mobile.feature.settings.SettingsManager
 import com.swordfish.lemuroid.app.mobile.shared.NotificationsManager
+import com.swordfish.lemuroid.app.tv.channel.ChannelUpdateWork
+import com.swordfish.lemuroid.app.tv.shared.TVHelper
 import com.swordfish.lemuroid.app.utils.android.createSyncForegroundInfo
 import com.swordfish.lemuroid.lib.injection.AndroidWorkerInjection
 import com.swordfish.lemuroid.lib.injection.WorkerKey
@@ -23,11 +26,14 @@ import com.swordfish.lemuroid.lib.savesync.SaveSyncManager
 import dagger.Binds
 import dagger.android.AndroidInjector
 import dagger.multibindings.IntoMap
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flow
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class SaveSyncWork(context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -44,20 +50,40 @@ class SaveSyncWork(context: Context, workerParams: WorkerParameters) :
             return Result.success()
         }
 
-        displayNotification()
-
         val coresToSync =
             settingsManager.syncStatesCores()
                 .mapNotNull { findByName(it) }
                 .toSet()
 
-        try {
-            saveSyncManager.sync(coresToSync)
-        } catch (e: Throwable) {
-            Timber.e(e, "Error in saves sync")
+        coroutineScope {
+            // With the app on screen the banner shows the sync: the notification is only for when it's not.
+            val notification =
+                launch {
+                    while (isAppInForeground()) delay(FOREGROUND_CHECK_MS)
+                    displayNotification()
+                }
+            var copied = false
+            try {
+                saveSyncManager.sync(coresToSync) {
+                    copied = true
+                    setProgressAsync(workDataOf(PROGRESS_COPYING to true))
+                }
+            } catch (e: Throwable) {
+                Timber.e(e, "Error in saves sync")
+            } finally {
+                notification.cancel()
+            }
+            // "Continue playing" may have changed: the channel of the TV home screen shows it too.
+            if (copied && TVHelper.isTV(applicationContext)) ChannelUpdateWork.enqueue(applicationContext)
         }
 
         return Result.success()
+    }
+
+    private fun isAppInForeground(): Boolean {
+        val info = ActivityManager.RunningAppProcessInfo()
+        ActivityManager.getMyMemoryState(info)
+        return info.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
     }
 
     private suspend fun shouldPerformSaveSync(): Boolean {
@@ -78,7 +104,7 @@ class SaveSyncWork(context: Context, workerParams: WorkerParameters) :
         return settingsManager.autoSaveSync() && isAutoSync || isManualSync
     }
 
-    private fun displayNotification() {
+    private suspend fun displayNotification() {
         val notificationsManager = NotificationsManager(applicationContext)
 
         val foregroundInfo =
@@ -86,13 +112,30 @@ class SaveSyncWork(context: Context, workerParams: WorkerParameters) :
                 NotificationsManager.SAVE_SYNC_NOTIFICATION_ID,
                 notificationsManager.saveSyncNotification(),
             )
-        setForegroundAsync(foregroundInfo)
+        // Android may not allow it from the background (Android 12+): the sync goes on without the notification.
+        runCatching { setForeground(foregroundInfo) }
+            .onFailure { Timber.w(it, "Unable to show the sync notification") }
     }
 
     companion object {
         val UNIQUE_WORK_ID: String = SaveSyncWork::class.java.simpleName
         val UNIQUE_PERIODIC_WORK_ID: String = SaveSyncWork::class.java.simpleName + "Periodic"
         private const val IS_AUTO = "IS_AUTO"
+
+        /** Progress set once the sync found something to copy (see [PendingOperationsMonitor.saveSyncRunning]). */
+        const val PROGRESS_COPYING = "PROGRESS_COPYING"
+        private const val FOREGROUND_CHECK_MS = 1000L
+
+        /** When the app opens, if automatic sync is on (e.g. to get the progress made on another device). */
+        fun enqueueStartupWork(applicationContext: Context) {
+            WorkManager.getInstance(applicationContext).enqueueUniqueWork(
+                UNIQUE_WORK_ID,
+                ExistingWorkPolicy.KEEP,
+                OneTimeWorkRequestBuilder<SaveSyncWork>()
+                    .setInputData(workDataOf(IS_AUTO to true))
+                    .build(),
+            )
+        }
 
         fun enqueueManualWork(applicationContext: Context) {
             val inputData: Data = workDataOf(IS_AUTO to false)

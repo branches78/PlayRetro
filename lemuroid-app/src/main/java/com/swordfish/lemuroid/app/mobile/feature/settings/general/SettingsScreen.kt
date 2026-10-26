@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -21,10 +21,13 @@ import androidx.navigation.NavController
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.feature.main.MainRoute
 import com.swordfish.lemuroid.app.mobile.feature.main.navigateToRoute
+import com.swordfish.lemuroid.app.mobile.feature.settings.smb.LibrarySourceDialog
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LibraryScanProgress
-import com.swordfish.lemuroid.app.shared.GameInteractor
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.rememberLibraryScanProgress
+import com.swordfish.lemuroid.app.shared.GameInteractor
 import com.swordfish.lemuroid.app.shared.library.LibraryIndexScheduler
+import com.swordfish.lemuroid.app.tv.shared.TVHelper
+import com.swordfish.lemuroid.app.utils.android.PlayRetroButton
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidCardSettingsGroup
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsList
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsMenuLink
@@ -34,8 +37,8 @@ import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsSwitch
 import com.swordfish.lemuroid.app.utils.android.settings.booleanPreferenceState
 import com.swordfish.lemuroid.app.utils.android.settings.indexPreferenceState
 import com.swordfish.lemuroid.app.utils.android.settings.intPreferenceState
-import com.swordfish.lemuroid.app.tv.shared.TVHelper
 import com.swordfish.lemuroid.app.utils.android.stringListResource
+import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
 
 @Composable
 fun SettingsScreen(
@@ -66,13 +69,30 @@ fun SettingsScreen(
             .collectAsState()
             .value
 
+    // "Directory" asks first whether the games come from a folder of the device or a network share.
+    var showSourceDialog by remember { mutableStateOf(false) }
+    val smbStore = remember { SmbConfigStore(context) }
+    if (showSourceDialog) {
+        LibrarySourceDialog(
+            currentSource = smbStore.librarySource,
+            smbLabel = smbStore.load()?.label?.takeIf { smbStore.librarySource == SmbConfigStore.LibrarySource.SMB },
+            onLocalFolder = {
+                showSourceDialog = false
+                if (isTV) TVHelper.launchFolderPicker(context) else viewModel.changeLocalStorageFolder()
+            },
+            onNetworkShare = {
+                showSourceDialog = false
+                navController.navigateToRoute(MainRoute.SETTINGS_SMB)
+            },
+            onDismiss = { showSourceDialog = false },
+        )
+    }
+
     LemuroidSettingsPage(modifier = modifier) {
         RomsSettings(
             state = state,
             cacheState = cacheState,
-            onChangeFolder = {
-                if (isTV) TVHelper.launchFolderPicker(context) else viewModel.changeLocalStorageFolder()
-            },
+            onChangeFolder = { showSourceDialog = true },
             indexingInProgress = indexingInProgress,
             scanInProgress = scanInProgress,
             navController = navController,
@@ -260,6 +280,26 @@ private fun DisplaySettings(isTV: Boolean) {
                     Text(text = if (selected != null) "$selected\n$description" else description)
                 },
             )
+
+            // Orientation of the screen when a game starts; "Auto" follows the device, as before.
+            val orientationState =
+                indexPreferenceState(
+                    R.string.pref_key_game_orientation,
+                    "auto",
+                    stringListResource(R.array.pref_key_game_orientation_values).toList(),
+                )
+            val orientationNames = stringListResource(R.array.pref_key_game_orientation_display_names)
+            LemuroidSettingsList(
+                state = orientationState,
+                title = { Text(text = stringResource(id = R.string.settings_title_game_orientation)) },
+                items = orientationNames,
+                useSelectedValueAsSubtitle = false,
+                subtitle = {
+                    val selected = orientationNames.getOrNull(orientationState.value)
+                    val description = stringResource(id = R.string.settings_description_game_orientation)
+                    Text(text = if (selected != null) "$selected\n$description" else description)
+                },
+            )
         }
     }
 }
@@ -277,19 +317,16 @@ private fun FactoryResetDialog(
         text = { Text(stringResource(id = R.string.reset_settings_warning_message_description)) },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(
+            PlayRetroButton(
+                text = stringResource(id = R.string.ok),
                 onClick = {
                     onResetAllSettings()
                     onDismiss()
                 },
-            ) {
-                Text(text = stringResource(id = R.string.ok))
-            }
+            )
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(id = R.string.cancel))
-            }
+            PlayRetroButton(text = stringResource(id = R.string.cancel), onClick = onDismiss)
         },
     )
 }
@@ -308,9 +345,12 @@ private fun RomsSettings(
     val currentDirectory = state.currentDirectory
     val emptyDirectory = stringResource(R.string.none)
 
+    // The network share when it is the source of the library, otherwise the local folder.
     val currentDirectoryName =
         remember(state.currentDirectory) {
-            runCatching {
+            val smbStore = SmbConfigStore(context)
+            val smbLabel = smbStore.load()?.label?.takeIf { smbStore.librarySource == SmbConfigStore.LibrarySource.SMB }
+            smbLabel ?: runCatching {
                 DocumentFile.fromTreeUri(context, Uri.parse(currentDirectory))?.name
             }.getOrNull() ?: emptyDirectory
         }

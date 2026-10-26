@@ -54,6 +54,16 @@
         <item name="android:backgroundDimAmount">0.75</item>
         <item name="android:fitsSystemWindows">true</item>
         <item name="android:windowIsTranslucent">true</item>
+        <!-- The in-game menu fades in and out over the game, also on TV. -->
+        <item name="android:windowAnimationStyle">@style/LemuroidMenuAnimation</item>
+    </style>
+
+    <style name="LemuroidMenuAnimation" parent="@android:style/Animation.Activity">
+        <!-- Only the menu fades: the game stays as it is behind it. -->
+        <item name="android:activityOpenEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@android:anim/fade_out</item>
     </style>
 
     <style name="LemuroidMaterialTheme.Game" parent="LemuroidMaterialTheme">

@@ -8,6 +8,7 @@ import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.shared.ImmersiveActivity
 import com.swordfish.lemuroid.app.shared.library.LibraryIndexScheduler
 import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
+import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
 
 class TVFolderPickerLauncher : ImmersiveActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +40,8 @@ class TVFolderPickerLauncher : ImmersiveActivity() {
                 }
             }
 
+            // A local folder replaces the network share as the source of the library.
+            SmbConfigStore(this).librarySource = SmbConfigStore.LibrarySource.LOCAL
             startLibraryIndexWork()
         }
         finish()

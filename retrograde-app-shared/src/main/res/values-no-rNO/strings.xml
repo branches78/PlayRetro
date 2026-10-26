@@ -122,4 +122,9 @@
     <string name="value_aspect_ratio_original">Original (4:3)</string>
     <string name="value_aspect_ratio_stretched">Strukket 16:9</string>
     <string name="value_aspect_ratio_widescreen">Bredformat</string>
+    <string name="smb_storage">Nettverksmappe (SMB)</string>
+    <string name="smb_sync_connected">Nettverksmappe: %1$s</string>
+    <string name="smb_sync_not_configured">Velg en nettverksmappe som kilde for spillene dine under Katalog</string>
+    <string name="smb_sync_last">Siste synkronisering: %1$s</string>
+    <string name="sync_metadata_unreadable">%1$s er skadet: lagrede spill synkroniseres, men ikke Fortsett å spille og favoritter. Slett den for å starte på nytt</string>
 </resources>

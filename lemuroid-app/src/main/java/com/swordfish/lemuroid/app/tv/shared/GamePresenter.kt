@@ -1,5 +1,6 @@
 package com.swordfish.lemuroid.app.tv.shared
 
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.leanback.widget.ImageCardView
@@ -8,19 +9,22 @@ import com.swordfish.lemuroid.app.shared.GameInteractor
 import com.swordfish.lemuroid.app.shared.covers.CoverAspectRatio
 import com.swordfish.lemuroid.app.shared.covers.CoverRatioCache
 import com.swordfish.lemuroid.app.shared.covers.CoverUtils
-import com.swordfish.lemuroid.app.utils.games.GameUtils
+import com.swordfish.lemuroid.app.utils.games.GameCardSubtitle
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import kotlin.math.roundToInt
 
 class GamePresenter(
     private val cardSize: Int,
     private val gameInteractor: GameInteractor,
-    // When set (home rows and grids) every card has this shape (width / height) and other covers are shown whole
-    // inside it; otherwise the card takes the shape of the cover (search).
-    private val fixedRatio: Float? = null,
+    // Grids: every game takes a square cell of [cardSize] to keep the columns aligned, and the card (with its
+    // border and focus frame) takes the real shape of the cover inside it. Otherwise (rows, search) every card has
+    // the height [cardSize] and the width of its cover.
+    private val fitInCell: Boolean = false,
     // The long press menu is kept only in "Continue playing" when choosing a game opens its details, which have
     // the same actions. Elsewhere a long press then opens the details too, like a normal press.
     private val alwaysShowMenu: Boolean = false,
+    // System in the home rows, favorites and search; developer inside a system.
+    private val subtitle: GameCardSubtitle = GameCardSubtitle.SYSTEM,
 ) : Presenter() {
     override fun onBindViewHolder(
         viewHolder: Presenter.ViewHolder?,
@@ -29,7 +33,9 @@ class GamePresenter(
         if (item == null || viewHolder !is ViewHolder) return
         val game = item as Game
         viewHolder.mCardView.titleText = game.displayName()
-        viewHolder.mCardView.contentText = GameUtils.getGameSubtitle(viewHolder.mCardView.context, game)
+        // A space when there is no developer, so every card keeps the same height.
+        viewHolder.mCardView.contentText =
+            subtitle.textFor(viewHolder.mCardView.context, game).ifEmpty { NO_SUBTITLE }
         // Same height for every card; the width follows the cover shape (like on mobile).
         updateCardShape(viewHolder, game)
         viewHolder.updateCardViewImage(game) { updateCardShape(viewHolder, game) }
@@ -49,13 +55,20 @@ class GamePresenter(
         viewHolder: ViewHolder,
         game: Game,
     ) {
-        val cardRatio = fixedRatio ?: CoverAspectRatio.forGame(game)
-        val cardWidth = (cardSize * cardRatio).roundToInt()
+        // Real shape of the cover once it has been loaded, the usual one of its system before.
+        val cardRatio = CoverAspectRatio.forGame(game)
+        val (cardWidth, cardHeight) =
+            when {
+                !fitInCell -> (cardSize * cardRatio).roundToInt() to cardSize
+                cardRatio >= 1f -> cardSize to (cardSize / cardRatio).roundToInt()
+                else -> (cardSize * cardRatio).roundToInt() to cardSize
+            }
         val imageView = viewHolder.mCardView.mainImageView
         val layoutParams = imageView?.layoutParams
-        if (layoutParams == null || layoutParams.width != cardWidth || layoutParams.height != cardSize) {
-            viewHolder.mCardView.setMainImageDimensions(cardWidth, cardSize)
+        if (layoutParams == null || layoutParams.width != cardWidth || layoutParams.height != cardHeight) {
+            viewHolder.mCardView.setMainImageDimensions(cardWidth, cardHeight)
         }
+        if (fitInCell) centerInCell(viewHolder.view, cardWidth, cardHeight)
 
         val coverRatio = CoverRatioCache.get(game.displayCoverUrl())
         imageView?.scaleType =
@@ -64,6 +77,23 @@ class GamePresenter(
             } else {
                 ImageView.ScaleType.CENTER_CROP
             }
+    }
+
+    /** Margins that keep the card in the middle of its square cell, so the columns of the grid stay aligned. */
+    private fun centerInCell(
+        view: View,
+        cardWidth: Int,
+        cardHeight: Int,
+    ) {
+        val horizontal = (cardSize - cardWidth) / 2
+        val vertical = (cardSize - cardHeight) / 2
+        val params =
+            (view.layoutParams as? ViewGroup.MarginLayoutParams)
+                ?: ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        if (params.leftMargin != horizontal || params.topMargin != vertical || view.layoutParams !== params) {
+            params.setMargins(horizontal, vertical, cardSize - cardWidth - horizontal, cardSize - cardHeight - vertical)
+            view.layoutParams = params
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup): Presenter.ViewHolder {
@@ -78,6 +108,10 @@ class GamePresenter(
         val viewHolder = viewHolder as ViewHolder
         viewHolder.mCardView.mainImage = null
         viewHolder.view.setOnLongClickListener(null)
+    }
+
+    companion object {
+        private const val NO_SUBTITLE = "\u00A0"
     }
 
     class ViewHolder(view: ImageCardView) : Presenter.ViewHolder(view) {

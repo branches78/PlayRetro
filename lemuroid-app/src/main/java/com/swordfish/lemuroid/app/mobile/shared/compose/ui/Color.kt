@@ -33,9 +33,9 @@ val md_theme_light_surfaceTint = Color(0xFF006E28)
 val md_theme_light_outlineVariant = Color(0xFFC2C9BD)
 val md_theme_light_scrim = Color(0xFF000000)
 
-// Soft green family instead of the bright one: light green for text and icons (primary),
-// dark green for filled elements (primaryContainer / secondaryContainer).
-val md_theme_dark_primary = Color(0xFFD4E8D0)
+// White for text, icons, switches and the TV search button (primary): only the logo of the app is green.
+// Dark green for filled elements (primaryContainer / secondaryContainer).
+val md_theme_dark_primary = Color(0xFFFFFFFF)
 val md_theme_dark_onPrimary = Color(0xFF1A1C19)
 val md_theme_dark_primaryContainer = Color(0xFF3A4B39)
 val md_theme_dark_onPrimaryContainer = Color(0xFFD4E8D0)

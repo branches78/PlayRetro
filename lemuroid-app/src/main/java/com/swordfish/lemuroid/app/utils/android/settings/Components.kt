@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -18,11 +19,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.alorma.compose.settings.storage.base.SettingValueState
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsSlider
 import com.alorma.compose.settings.ui.SettingsSwitch
+import com.swordfish.lemuroid.R
 import kotlin.math.roundToInt
 
 @Composable
@@ -52,7 +57,7 @@ fun LemuroidSettingsSwitch(
     onCheckedChange: (Boolean) -> Unit = {},
 ) {
     SettingsFocusItem(enabled) { onFocusItemClicked ->
-        DarkGreenFills {
+        BrandGreenFills {
             SettingsSwitch(
                 enabled = enabled,
                 state = state.value,
@@ -126,7 +131,10 @@ fun LemuroidCardSettingsGroup(
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp),
         ) {
-            OutlinedCard {
+            // The background of the "About" cards, so both tabs look the same.
+            OutlinedCard(
+                colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            ) {
                 if (title != null) {
                     SettingsGroupTitleSmall(title)
                 }
@@ -146,9 +154,10 @@ fun LemuroidSettingsSlider(
     title: @Composable () -> Unit,
     subtitle: @Composable () -> Unit = { },
 ) {
-    val defaultColors = ListItemDefaults.colors()
+    val defaultColors = ListItemDefaults.colors(containerColor = Color.Transparent)
     val disabledColors =
         ListItemDefaults.colors(
+            containerColor = Color.Transparent,
             headlineColor = defaultColors.disabledHeadlineColor,
             leadingIconColor = defaultColors.disabledLeadingIconColor,
             trailingIconColor = defaultColors.disabledTrailingIconColor,
@@ -170,15 +179,16 @@ fun LemuroidSettingsSlider(
     }
 }
 
-// Switch tracks use the dark green fill (with the light green on top) instead of the primary color.
+// Switch tracks use the almost grey tone of the logo green (with a white thumb) instead of the primary color, which
+// is white.
 @Composable
-private fun DarkGreenFills(content: @Composable () -> Unit) {
+private fun BrandGreenFills(content: @Composable () -> Unit) {
     val colorScheme = MaterialTheme.colorScheme
     MaterialTheme(
         colorScheme =
             colorScheme.copy(
-                primary = colorScheme.secondaryContainer,
-                onPrimary = colorScheme.onSecondaryContainer,
+                primary = colorResource(R.color.playretro_soft_green),
+                onPrimary = colorResource(R.color.playretro_on_soft_green),
             ),
         content = content,
     )
@@ -194,21 +204,24 @@ private fun SettingsGroupTitleSmall(title: @Composable () -> Unit) {
                 .padding(16.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
+        // As big as the options inside the card (16sp) and bolder, so it never looks smaller than them.
         val primary = MaterialTheme.colorScheme.primary
-        val titleStyle = MaterialTheme.typography.labelLarge.copy(color = primary)
+        val titleStyle = MaterialTheme.typography.titleMedium.copy(color = primary, fontWeight = FontWeight.Medium)
         ProvideTextStyle(value = titleStyle) { title() }
     }
 }
 
 @Composable
+// Transparent rows: the background is the one of the card.
 private fun lemuroidSettingsColor(enabled: Boolean): ListItemColors {
-    val defaultColors = ListItemDefaults.colors()
+    val defaultColors = ListItemDefaults.colors(containerColor = Color.Transparent)
 
     if (enabled) {
         return defaultColors
     }
 
     return ListItemDefaults.colors(
+        containerColor = Color.Transparent,
         headlineColor = defaultColors.disabledHeadlineColor,
         leadingIconColor = defaultColors.disabledLeadingIconColor,
         trailingIconColor = defaultColors.disabledTrailingIconColor,

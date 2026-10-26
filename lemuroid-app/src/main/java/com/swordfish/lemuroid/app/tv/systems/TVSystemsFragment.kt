@@ -90,10 +90,12 @@ class TVSystemsFragment : VerticalGridSupportFragment() {
             it.setPadding(it.paddingLeft, topPadding, it.paddingRight, it.paddingBottom)
         }
         (view.findViewById<View>(androidx.leanback.R.id.browse_grid) as? VerticalGridView)?.let {
+            // Same width and cards as the other grids: the content width of the tabs.
+            TVTabGrids.setUpHomeCardsGrid(it)
             TVTabGrids.allowFocusUpToTabs(this, it, GRID_COLUMNS)
         }
 
-        val cardSize = resources.getDimensionPixelSize(com.swordfish.lemuroid.lib.R.dimen.card_size)
+        val cardSize = TVHomeFragment.homeCardSize(resources)
         val cardPadding = resources.getDimensionPixelSize(com.swordfish.lemuroid.lib.R.dimen.systems_card_padding)
         val systemsAdapter = ArrayObjectAdapter(SystemPresenter(cardSize, cardPadding))
         adapter = systemsAdapter

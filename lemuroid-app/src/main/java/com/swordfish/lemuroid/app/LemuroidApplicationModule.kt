@@ -49,8 +49,8 @@ import com.swordfish.lemuroid.lib.core.CoresSelection
 import com.swordfish.lemuroid.lib.game.GameLoader
 import com.swordfish.lemuroid.lib.injection.PerActivity
 import com.swordfish.lemuroid.lib.injection.PerApp
-import com.swordfish.lemuroid.lib.library.covers.CustomCoverManager
 import com.swordfish.lemuroid.lib.library.LemuroidLibrary
+import com.swordfish.lemuroid.lib.library.covers.CustomCoverManager
 import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
 import com.swordfish.lemuroid.lib.library.db.dao.GameSearchDao
 import com.swordfish.lemuroid.lib.library.db.dao.Migrations
@@ -67,6 +67,7 @@ import com.swordfish.lemuroid.lib.storage.StorageProvider
 import com.swordfish.lemuroid.lib.storage.StorageProviderRegistry
 import com.swordfish.lemuroid.lib.storage.local.LocalStorageProvider
 import com.swordfish.lemuroid.lib.storage.local.StorageAccessFrameworkProvider
+import com.swordfish.lemuroid.lib.storage.smb.SmbStorageProvider
 import com.swordfish.lemuroid.metadata.libretrodb.LibretroDBMetadataProvider
 import com.swordfish.lemuroid.metadata.libretrodb.db.LibretroDBManager
 import dagger.Binds
@@ -75,14 +76,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoSet
-import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
-import retrofit2.Converter
-import retrofit2.Retrofit
 import java.io.InputStream
 import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
+import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
+import retrofit2.Converter
+import retrofit2.Retrofit
 
 @Module
 abstract class LemuroidApplicationModule {
@@ -157,6 +158,12 @@ abstract class LemuroidApplicationModule {
         @IntoSet
         @JvmStatic
         fun localSAFStorageProvider(context: Context): StorageProvider = StorageAccessFrameworkProvider(context)
+
+        @Provides
+        @PerApp
+        @IntoSet
+        @JvmStatic
+        fun smbStorageProvider(context: Context): StorageProvider = SmbStorageProvider(context)
 
         @Provides
         @PerApp
@@ -324,7 +331,8 @@ abstract class LemuroidApplicationModule {
         fun saveSyncManagerImpl(
             context: Context,
             directoriesManager: DirectoriesManager,
-        ) = SaveSyncManagerImpl(context, directoriesManager)
+            retrogradeDatabase: RetrogradeDatabase,
+        ) = SaveSyncManagerImpl(context, directoriesManager, retrogradeDatabase)
 
         @Provides
         @PerApp
@@ -352,8 +360,7 @@ abstract class LemuroidApplicationModule {
         fun channelHandler(
             context: Context,
             retrogradeDatabase: RetrogradeDatabase,
-            retrofit: Retrofit,
-        ) = ChannelHandler(context, retrogradeDatabase, retrofit)
+        ) = ChannelHandler(context, retrogradeDatabase)
 
         @Provides
         @PerApp

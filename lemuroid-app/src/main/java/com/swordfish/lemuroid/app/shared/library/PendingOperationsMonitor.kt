@@ -42,6 +42,25 @@ class PendingOperationsMonitor(private val appContext: Context) {
         return operationsInProgress(Operation.SAVES_SYNC_ONE_SHOT, Operation.SAVES_SYNC_PERIODIC)
     }
 
+    /**
+     * True while a sync of the saves is copying something: not while it only checks that nothing changed, so the
+     * banner shows up only for real changes.
+     */
+    fun saveSyncRunning(): Flow<Boolean> {
+        val flows =
+            listOf(Operation.SAVES_SYNC_ONE_SHOT, Operation.SAVES_SYNC_PERIODIC).map { operation ->
+                WorkManager.getInstance(appContext)
+                    .getWorkInfosForUniqueWorkFlow(operation.uniqueId)
+                    .map { infos ->
+                        infos.any {
+                            it.state == WorkInfo.State.RUNNING &&
+                                it.progress.getBoolean(SaveSyncWork.PROGRESS_COPYING, false)
+                        }
+                    }
+            }
+        return combine(flows) { running -> running.any { it } }.distinctUntilChanged()
+    }
+
     fun anyLibraryOperationInProgress(): Flow<Boolean> {
         return operationsInProgress(Operation.LIBRARY_INDEX, Operation.CORE_UPDATE)
     }

@@ -29,6 +29,8 @@
     <application
         android:name="com.swordfish.lemuroid.app.LemuroidApplication"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:banner="@mipmap/ic_banner"
         android:icon="@mipmap/lemuroid_launcher"
         android:isGame="true"
@@ -95,6 +97,11 @@
             android:name="com.swordfish.lemuroid.app.shared.settings.StorageFrameworkPickerLauncher"
             android:theme="@style/LemuroidMaterialTheme.Invisible" />
 
+        <!-- Source of the games of an empty library: device folder or network share (SMB). -->
+        <activity
+            android:name="com.swordfish.lemuroid.app.shared.settings.LibrarySourceActivity"
+            android:theme="@style/LemuroidMaterialTheme.Menu" />
+
         <!-- Leanback activities -->
         <activity
             android:name=".app.tv.main.MainTVActivity"
@@ -126,16 +133,17 @@
             android:theme="@style/LemuroidMaterialTheme.Game" />
 
         <activity
-            android:name=".app.tv.gamemenu.TVGameMenuActivity"
-            android:process=":game"
-            android:theme="@style/LemuroidLeanbackPreferencesTheme" />
-
-        <activity
             android:name=".app.shared.gamecrash.GameCrashActivity"
             android:theme="@style/LemuroidMaterialTheme.Game" />
 
         <receiver android:name=".app.shared.library.LibraryIndexBroadcastReceiver" />
         <receiver android:name=".app.shared.library.CoreUpdateBroadcastReceiver" />
+
+        <!-- Posters of the channel of the TV home screen, read by the launcher (ChannelPosterProvider). -->
+        <provider
+            android:name="com.swordfish.lemuroid.app.tv.channel.ChannelPosterProvider"
+            android:authorities="${applicationId}.channelposters"
+            android:exported="true" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

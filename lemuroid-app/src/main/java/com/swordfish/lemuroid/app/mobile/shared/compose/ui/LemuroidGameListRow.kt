@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.swordfish.lemuroid.app.utils.games.GameCardSubtitle
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -20,6 +21,7 @@ import com.swordfish.lemuroid.lib.library.db.entity.Game
 fun LemuroidGameListRow(
     modifier: Modifier = Modifier,
     game: Game,
+    subtitle: GameCardSubtitle = GameCardSubtitle.SYSTEM,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onFavoriteToggle: (Boolean) -> Unit,
@@ -56,6 +58,7 @@ fun LemuroidGameListRow(
                         .weight(1f)
                         .padding(start = 8.dp),
                 game = game,
+                subtitle = subtitle,
             )
             Box(
                 modifier =

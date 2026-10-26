@@ -38,6 +38,7 @@ import com.swordfish.lemuroid.app.mobile.feature.home.HomeScreen
 import com.swordfish.lemuroid.app.mobile.feature.home.HomeViewModel
 import com.swordfish.lemuroid.app.mobile.feature.search.SearchScreen
 import com.swordfish.lemuroid.app.mobile.feature.search.SearchViewModel
+import com.swordfish.lemuroid.app.mobile.feature.settings.SettingsManager
 import com.swordfish.lemuroid.app.mobile.feature.settings.bios.BiosScreen
 import com.swordfish.lemuroid.app.mobile.feature.settings.bios.BiosSettingsViewModel
 import com.swordfish.lemuroid.app.mobile.feature.settings.coreselection.CoreOptionsSettingsScreen
@@ -49,6 +50,8 @@ import com.swordfish.lemuroid.app.mobile.feature.settings.inputdevices.InputDevi
 import com.swordfish.lemuroid.app.mobile.feature.settings.inputdevices.InputDevicesSettingsViewModel
 import com.swordfish.lemuroid.app.mobile.feature.settings.savesync.SaveSyncSettingsScreen
 import com.swordfish.lemuroid.app.mobile.feature.settings.savesync.SaveSyncSettingsViewModel
+import com.swordfish.lemuroid.app.mobile.feature.settings.smb.SmbSettingsScreen
+import com.swordfish.lemuroid.app.mobile.feature.settings.smb.SmbSettingsViewModel
 import com.swordfish.lemuroid.app.mobile.feature.shortcuts.ShortcutsGenerator
 import com.swordfish.lemuroid.app.mobile.feature.systems.MetaSystemsScreen
 import com.swordfish.lemuroid.app.mobile.feature.systems.MetaSystemsViewModel
@@ -62,6 +65,9 @@ import com.swordfish.lemuroid.app.shared.game.GameLauncher
 import com.swordfish.lemuroid.app.shared.input.InputDeviceManager
 import com.swordfish.lemuroid.app.shared.main.BusyActivity
 import com.swordfish.lemuroid.app.shared.main.GameLaunchTaskHandler
+import com.swordfish.lemuroid.app.shared.savesync.SaveSyncBanner
+import com.swordfish.lemuroid.app.shared.savesync.SaveSyncChanges
+import com.swordfish.lemuroid.app.shared.savesync.SaveSyncWork
 import com.swordfish.lemuroid.app.shared.settings.SettingsInteractor
 import com.swordfish.lemuroid.common.coroutines.safeLaunch
 import com.swordfish.lemuroid.ext.feature.review.ReviewManager
@@ -78,9 +84,9 @@ import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
 import com.swordfish.lemuroid.lib.savesync.SaveSyncManager
 import com.swordfish.lemuroid.lib.storage.DirectoriesManager
 import dagger.Provides
+import javax.inject.Inject
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import javax.inject.Inject
 
 @OptIn(DelicateCoroutinesApi::class)
 class MainActivity : RetrogradeComponentActivity(), BusyActivity {
@@ -89,6 +95,9 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
 
     @Inject
     lateinit var saveSyncManager: SaveSyncManager
+
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     @Inject
     lateinit var retrogradeDb: RetrogradeDatabase
@@ -123,6 +132,8 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
             SystemBarStyle.dark(Color.TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) SaveSyncWork.enqueueStartupWork(applicationContext)
+        SaveSyncChanges.keepChecking(this, applicationContext, saveSyncManager, settingsManager)
 
         GlobalScope.safeLaunch {
             reviewManager.initialize(applicationContext)
@@ -149,7 +160,7 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
             val currentSystemTitleId =
                 navBackStackEntry.value?.arguments?.getString("metaSystemId")
                     ?.let { runCatching { MetaSystemID.valueOf(it).titleResId }.getOrNull() }
-                    // The core options of a system also show the system name.
+                    // The core options of a system and the details of a game also show the system name.
                     ?: navBackStackEntry.value?.arguments?.getString("systemId")
                         ?.let { runCatching { GameSystem.findById(it).titleResId }.getOrNull() }
 
@@ -175,7 +186,7 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
             // details"); without them it starts right away and the long press opens the menu, as before.
             val onGameClick = { game: Game ->
                 if (gameInteractor.showDetailsOnClick()) {
-                    navController.navigateToGameDetails(game.id)
+                    navController.navigateToGameDetails(game)
                 } else {
                     gameInteractor.onGamePlay(game)
                 }
@@ -183,7 +194,7 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
 
             val onGameLongClick = { game: Game ->
                 if (gameInteractor.showDetailsOnClick()) {
-                    navController.navigateToGameDetails(game.id)
+                    navController.navigateToGameDetails(game)
                 } else {
                     selectedGameState.value = game
                 }
@@ -200,7 +211,8 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
 
             Scaffold(
                 topBar = {
-                    // The details of a game have their own back button over the screenshot.
+                    // The details of a game are immersive: their screenshot goes up to the top of the screen and
+                    // they draw the back and search buttons over it.
                     if (currentRoute == MainRoute.GAME_DETAILS) return@Scaffold
                     MainTopBar(
                         currentRoute = currentRoute,
@@ -212,7 +224,11 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                         onToggleSystemsViewMode = { mainViewModel.toggleSystemsViewMode() },
                     )
                 },
-                bottomBar = { MainNavigationBar(currentRoute, navController) },
+                bottomBar = {
+                    MainNavigationBar(currentRoute, navBackStackEntry.value.mainTab(currentRoute), navController)
+                },
+                // Over the content, just above the bottom bar.
+                snackbarHost = { SaveSyncBanner() },
             ) { padding ->
                 NavHost(
                     modifier = Modifier.fillMaxSize(),
@@ -241,13 +257,12 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                     composable(MainRoute.GAME_DETAILS) { entry ->
                         val gameId = entry.arguments?.getInt("gameId") ?: return@composable
                         GameDetailsScreen(
-                            modifier = Modifier.padding(padding),
+                            modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
                             viewModel =
                                 viewModel(
                                     key = "game_details_$gameId",
                                     factory =
                                         GameDetailsViewModel.Factory(
-                                            applicationContext,
                                             gameId,
                                             retrogradeDb,
                                             descriptionProvider,
@@ -255,8 +270,9 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                                 ),
                             gameInteractor = gameInteractor,
                             onBack = { navController.popBackStack() },
+                            onSearch = { navController.navigate(MainRoute.SEARCH.route) { launchSingleTop = true } },
                             onOpenCoreOptions = { game -> navController.navigateToCoreOptions(game.systemId, game.id) },
-                            onOpenGame = { game -> navController.navigateToGameDetails(game.id) },
+                            onOpenGame = { game -> navController.navigateToGameDetails(game) },
                         )
                     }
                     composable(MainRoute.FAVORITES) { entry ->
@@ -399,6 +415,13 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                                     .padding(padding)
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
+                    composable(MainRoute.SETTINGS_SMB) {
+                        SmbSettingsScreen(
+                            modifier = Modifier.padding(padding),
+                            viewModel = viewModel(factory = SmbSettingsViewModel.Factory(applicationContext)),
+                            onClose = { navController.popBackStack() },
                         )
                     }
                     composable(MainRoute.SETTINGS_SAVE_SYNC) {

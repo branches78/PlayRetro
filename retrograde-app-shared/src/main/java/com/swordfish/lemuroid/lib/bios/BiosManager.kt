@@ -102,6 +102,15 @@ class BiosManager(private val directoriesManager: DirectoriesManager) {
     data class BiosInfo(val detected: List<Bios>, val notDetected: List<Bios>)
 
     companion object {
+        /** Extensions of the known BIOS files, so a scan can skip the files that can't be one. */
+        val BIOS_EXTENSIONS: Set<String> by lazy {
+            SUPPORTED_BIOS
+                .flatMap { listOfNotNull(it.libretroFileName, it.externalName) }
+                .map { it.substringAfterLast('.', "").lowercase() }
+                .filter { it.isNotEmpty() }
+                .toSet()
+        }
+
         private val SUPPORTED_BIOS =
             listOf(
                 Bios(

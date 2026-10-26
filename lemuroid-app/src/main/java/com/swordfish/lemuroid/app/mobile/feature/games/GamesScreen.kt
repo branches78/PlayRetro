@@ -18,8 +18,10 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidEmptyView
-import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameCard
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameGridCard
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameListRow
+import com.swordfish.lemuroid.app.shared.covers.CoverAspectRatio
+import com.swordfish.lemuroid.app.utils.games.GameCardSubtitle
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 private const val GRID_COLUMNS = 3
@@ -68,6 +70,8 @@ private fun GamesList(
             LemuroidGameListRow(
                 modifier = Modifier.animateItem(),
                 game = game,
+                // Inside a system: its developer instead of the system, the same for every game.
+                subtitle = GameCardSubtitle.DEVELOPER,
                 onClick = { onGameClick(game) },
                 onLongClick = { onGameLongClick(game) },
                 onFavoriteToggle = { isFavorite -> onGameFavoriteToggle(game, isFavorite) },
@@ -96,11 +100,12 @@ private fun GamesGrid(
         items(games.itemCount, key = { games[it]?.id ?: it }) { index ->
             val game = games[index] ?: return@items
 
-            LemuroidGameCard(
+            LemuroidGameGridCard(
                 modifier = Modifier.animateItem(),
                 game = game,
-                // Same size for every cell so the grid rows stay aligned.
-                matchCoverShape = false,
+                // Same cell for every game so the grid rows stay aligned: the usual shape of the covers of the system.
+                cellRatio = CoverAspectRatio.forGameSystem(game),
+                subtitle = GameCardSubtitle.DEVELOPER,
                 onClick = { onGameClick(game) },
                 onLongClick = { onGameLongClick(game) },
             )

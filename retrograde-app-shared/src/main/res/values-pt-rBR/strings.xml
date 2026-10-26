@@ -122,4 +122,9 @@
     <string name="value_aspect_ratio_original">Original (4:3)</string>
     <string name="value_aspect_ratio_stretched">16:9 esticado</string>
     <string name="value_aspect_ratio_widescreen">Tela widescreen</string>
+    <string name="smb_storage">Pasta de rede (SMB)</string>
+    <string name="smb_sync_connected">Pasta de rede: %1$s</string>
+    <string name="smb_sync_not_configured">Escolha uma pasta de rede como origem dos seus jogos em Diretório</string>
+    <string name="smb_sync_last">Última sincronização: %1$s</string>
+    <string name="sync_metadata_unreadable">%1$s está danificado: os saves são sincronizados, mas não Continuar jogando e Favoritos. Exclua-o para começar de novo</string>
 </resources>

@@ -122,4 +122,9 @@
     <string name="value_aspect_ratio_original">オリジナル (4:3)</string>
     <string name="value_aspect_ratio_stretched">16:9 に引き伸ばし</string>
     <string name="value_aspect_ratio_widescreen">ワイドスクリーン</string>
+    <string name="smb_storage">ネットワークフォルダ (SMB)</string>
+    <string name="smb_sync_connected">ネットワークフォルダ: %1$s</string>
+    <string name="smb_sync_not_configured">ディレクトリでネットワークフォルダをゲームの保存場所に選んでください</string>
+    <string name="smb_sync_last">最終同期: %1$s</string>
+    <string name="sync_metadata_unreadable">%1$s が破損しています。セーブは同期されますが、「続きから遊ぶ」とお気に入りは同期されません。削除するとやり直せます</string>
 </resources>

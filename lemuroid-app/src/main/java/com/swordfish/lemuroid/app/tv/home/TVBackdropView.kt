@@ -137,6 +137,11 @@ class TVBackdropView
             return LinearGradient(x0, y0, x1, y1, colors, positions, Shader.TileMode.CLAMP)
         }
 
+        // An ImageView without background says it has no overlapping drawing, so while it fades (when the tab
+        // changes) Android applies the transparency to the screenshot and to each fade on its own: the fades stop
+        // covering the edges of the screenshot. Drawn as one layer, the fades stay over it the whole time.
+        override fun hasOverlappingRendering(): Boolean = true
+
         override fun onDraw(canvas: Canvas) {
             val w = width.toFloat()
             val h = height.toFloat()

@@ -16,6 +16,7 @@ import androidx.core.view.isVisible
 import androidx.leanback.app.VerticalGridSupportFragment
 import androidx.leanback.paging.PagingDataAdapter
 import androidx.leanback.widget.FocusHighlight
+import androidx.leanback.widget.ObjectAdapter
 import androidx.leanback.widget.OnChildViewHolderSelectedListener
 import androidx.leanback.widget.OnItemViewClickedListener
 import androidx.leanback.widget.VerticalGridPresenter
@@ -29,6 +30,7 @@ import com.swordfish.lemuroid.app.tv.details.TVGameDetailsFragment
 import com.swordfish.lemuroid.app.tv.home.TVHomeFragment
 import com.swordfish.lemuroid.app.tv.shared.GamePresenter
 import com.swordfish.lemuroid.app.tv.shared.TVTabGrids
+import com.swordfish.lemuroid.app.utils.games.GameCardSubtitle
 import com.swordfish.lemuroid.common.coroutines.launchOnState
 import com.swordfish.lemuroid.lib.library.MetaSystemID
 import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
@@ -55,6 +57,12 @@ class TVGamesFragment : VerticalGridSupportFragment() {
 
     // Card the grid goes back to while the alphabet bar has the focus.
     private var markedCard: View? = null
+
+    /**
+     * Position of the game opened in its details. The view of this fragment is created again when coming back (the
+     * fragment keeps living), and the grid goes back to that game instead of the first one.
+     */
+    private var positionToRefocus: Int? = null
     private val hideBigLetter = Runnable { bigLetterView?.animate()?.alpha(0f) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,15 +89,16 @@ class TVGamesFragment : VerticalGridSupportFragment() {
         val factory = TVGamesViewModel.Factory(retrogradeDb)
         val gamesViewModel = ViewModelProvider(this, factory)[TVGamesViewModel::class.java]
 
-        // The same square cards of the home rows and the favorites, 5 per row for every system.
+        // Square cells as in the favorites, 5 per row for every system; each card takes the shape of its cover.
         val cardSize = TVHomeFragment.homeCardSize(resources)
         val pagingAdapter =
             PagingDataAdapter(
-                GamePresenter(cardSize, gameInteractor, fixedRatio = 1f),
+                GamePresenter(cardSize, gameInteractor, fitInCell = true, subtitle = GameCardSubtitle.DEVELOPER),
                 Game.DIFF_CALLBACK,
             )
 
         this.adapter = pagingAdapter
+        refocusGame(pagingAdapter, grid)
 
         launchOnState(Lifecycle.State.RESUMED) {
             gamesViewModel.games
@@ -106,7 +115,10 @@ class TVGamesFragment : VerticalGridSupportFragment() {
         onItemViewClickedListener =
             OnItemViewClickedListener { _, item, _, _ ->
                 when (item) {
-                    is Game -> TVGameDetailsFragment.openOrPlay(this, item, gameInteractor)
+                    is Game -> {
+                        if (gameInteractor.showDetailsOnClick()) positionToRefocus = grid.selectedPosition
+                        TVGameDetailsFragment.openOrPlay(this, item, gameInteractor)
+                    }
                 }
             }
     }
@@ -203,6 +215,38 @@ class TVGamesFragment : VerticalGridSupportFragment() {
         bar.setAvailableLetters(letterPositions.keys)
         bar.isVisible = letters.size >= resources.getInteger(R.integer.tv_alphabet_min_games)
         if (!bar.isVisible && bar.hasFocus()) grid.requestFocus()
+    }
+
+    /** Selects and focuses the game opened before, once the grid has it again. Done only once. */
+    private fun refocusGame(
+        adapter: ObjectAdapter,
+        grid: VerticalGridView,
+    ) {
+        val position = positionToRefocus ?: return
+        val observer =
+            object : ObjectAdapter.DataObserver() {
+                private var restored = false
+
+                override fun onChanged() = restore()
+
+                override fun onItemRangeInserted(
+                    positionStart: Int,
+                    itemCount: Int,
+                ) = restore()
+
+                private fun restore() {
+                    if (restored || adapter.size() <= position) return
+                    restored = true
+                    positionToRefocus = null
+                    grid.selectedPosition = position
+                    // Not while the adapter is notifying its observers.
+                    grid.post {
+                        adapter.unregisterObserver(this)
+                        grid.requestFocus()
+                    }
+                }
+            }
+        adapter.registerObserver(observer)
     }
 
     private fun focusAlphabetFromGrid(grid: VerticalGridView): Boolean {

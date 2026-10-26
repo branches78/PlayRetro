@@ -2,7 +2,6 @@ package com.swordfish.lemuroid.app.shared.about
 
 import android.content.Context
 import android.text.TextUtils
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -34,8 +32,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.lib.library.SystemID
 import de.charlex.compose.material3.HtmlText
@@ -50,7 +48,6 @@ fun AboutContent(
     focusableSections: Boolean = false,
 ) {
     val context = LocalContext.current
-    val appIcon = remember { context.packageManager.getApplicationIcon(context.packageName) }
     val version = remember { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }
     val helpHtml = remember { buildHelpHtml(context) }
 
@@ -58,28 +55,20 @@ fun AboutContent(
         modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(SECTION_SPACING.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        // Logo of the app and version, centered.
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Image(
-                modifier = Modifier.size(ICON_SIZE.dp),
-                painter = rememberDrawablePainter(drawable = appIcon),
-                contentDescription = null,
+            PlayRetroLogo(height = LOGO_HEIGHT.dp)
+            // Explicit color: on TV the content is not inside a Surface, so the default text color is black.
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = stringResource(R.string.about_version, version),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
-            Column(modifier = Modifier.padding(start = 16.dp)) {
-                // Explicit color: on TV the content is not inside a Surface, so the default text color is black.
-                Text(
-                    text = stringResource(R.string.lemuroid_name),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = stringResource(R.string.about_version, version),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
         }
 
         AboutSection(Icons.Outlined.Info, stringResource(R.string.about_what_is_title), focusableSections) {
@@ -103,8 +92,9 @@ private fun AboutSection(
 ) {
     var focused by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(CARD_CORNER_RADIUS.dp)
-    // Only focused on TV: white border, like the other focused elements there.
-    val borderColor = if (focused) Color.White else Color.Transparent
+    // The thin border of the settings cards; focused (only on TV), the white one of the other focused elements.
+    val borderColor = if (focused) Color.White else MaterialTheme.colorScheme.outlineVariant
+    val borderWidth = if (focused) FOCUS_BORDER_WIDTH else CARD_BORDER_WIDTH
 
     Surface(
         modifier =
@@ -112,7 +102,7 @@ private fun AboutSection(
                 .fillMaxWidth()
                 .onFocusChanged { focused = it.isFocused }
                 .then(if (focusable) Modifier.focusable() else Modifier)
-                .border(FOCUS_BORDER_WIDTH.dp, borderColor, shape),
+                .border(borderWidth.dp, borderColor, shape),
         shape = shape,
         color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
@@ -142,7 +132,8 @@ private fun buildHelpHtml(context: Context): String {
         "<br/><br/><b>&#8226;$coversQuestion</b><br/>$coversAnswer"
 }
 
-private const val ICON_SIZE = 64
+private const val LOGO_HEIGHT = 36
 private const val SECTION_SPACING = 14
 private const val CARD_CORNER_RADIUS = 14
 private const val FOCUS_BORDER_WIDTH = 3
+private const val CARD_BORDER_WIDTH = 1

@@ -19,6 +19,7 @@
     <string name="pref_key_shader_filter" translatable="false">shader_filter_0</string>
     <string name="pref_key_hd_mode" translatable="false">hd_mode</string>
     <string name="pref_key_viewport_alignment" translatable="false">viewport_alignment</string>
+    <string name="pref_key_game_orientation" translatable="false">game_orientation</string>
 
     <string-array translatable="false" name="pref_key_haptic_feedback_mode_values">
         <item>none</item>
@@ -58,5 +59,22 @@
         <item>@string/viewport_alignment_names_top</item>
         <item>@string/viewport_alignment_names_center</item>
         <item>@string/viewport_alignment_names_bottom</item>
+    </string-array>
+
+    <!-- Orientation of the screen while playing (mobile): "auto" follows the device. -->
+    <string-array translatable="false" name="pref_key_game_orientation_values">
+        <item>auto</item>
+        <item>landscape</item>
+        <item>reverse_landscape</item>
+        <item>portrait</item>
+        <item>reverse_portrait</item>
+    </string-array>
+
+    <string-array translatable="false" name="pref_key_game_orientation_display_names">
+        <item>@string/game_orientation_names_auto</item>
+        <item>@string/game_orientation_names_landscape</item>
+        <item>@string/game_orientation_names_reverse_landscape</item>
+        <item>@string/game_orientation_names_portrait</item>
+        <item>@string/game_orientation_names_reverse_portrait</item>
     </string-array>
 </resources>

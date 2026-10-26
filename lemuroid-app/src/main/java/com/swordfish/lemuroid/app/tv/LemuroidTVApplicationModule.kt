@@ -3,7 +3,6 @@ package com.swordfish.lemuroid.app.tv
 import com.swordfish.lemuroid.app.tv.folderpicker.TVFolderPickerActivity
 import com.swordfish.lemuroid.app.tv.folderpicker.TVFolderPickerLauncher
 import com.swordfish.lemuroid.app.tv.game.TVGameActivity
-import com.swordfish.lemuroid.app.tv.gamemenu.TVGameMenuActivity
 import com.swordfish.lemuroid.app.tv.main.MainTVActivity
 import com.swordfish.lemuroid.lib.injection.PerActivity
 import dagger.Module
@@ -18,10 +17,6 @@ abstract class LemuroidTVApplicationModule {
     @PerActivity
     @ContributesAndroidInjector
     abstract fun tvGameActivity(): TVGameActivity
-
-    @PerActivity
-    @ContributesAndroidInjector
-    abstract fun tvGameMenuActivity(): TVGameMenuActivity
 
     @PerActivity
     @ContributesAndroidInjector

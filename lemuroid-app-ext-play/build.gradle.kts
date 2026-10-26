@@ -36,4 +36,6 @@ dependencies {
     implementation(deps.libs.dagger.core)
 
     implementation(deps.libs.kotlinxCoroutinesAndroid)
+    // The sync of Google Drive reads and updates the games (favorites and "Continue playing").
+    implementation(deps.libs.androidx.room.runtime)
 }

@@ -158,6 +158,8 @@ object deps {
         const val okHttp3                  = "com.squareup.okhttp3:okhttp:${versions.okHttp}"
         const val retrofit                 = "com.squareup.retrofit2:retrofit:${versions.retrofit}"
         const val flowPreferences          = "com.fredporciuncula:flow-preferences:1.8.0"
+        // SMB2/SMB3 client for network shares (games library and save sync).
+        const val smbj                     = "com.hierynomus:smbj:0.13.0"
         const val timber                   = "com.jakewharton.timber:timber:5.0.1"
         const val material                 = "com.google.android.material:material:1.6.1"
         const val guava                    = "com.google.guava:guava:30.1.1-android"

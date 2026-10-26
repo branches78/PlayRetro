@@ -144,13 +144,18 @@ class LemuroidLibrary(
 
         val existingEntries = entries.filterIsInstance<ScanEntry.GameFile>()
         handleExistingEntries(existingEntries, startedAtMs, gameMetadata, provider)
+        onBatchProcessed(existingEntries.size)
 
+        // New files are read to identify them, which is slow over the network: the progress moves with each one
+        // instead of waiting for the whole batch (a library smaller than a batch went from 0% to 100% at the end).
+        val newFiles = entries.filterIsInstance<ScanEntry.File>()
         val newEntries =
-            entries.filterIsInstance<ScanEntry.File>()
-                .map { buildEntryFromMetadata(it.file, provider, gameMetadata, startedAtMs) }
+            newFiles.map {
+                buildEntryFromMetadata(it.file, provider, gameMetadata, startedAtMs).also { onBatchProcessed(1) }
+            }
 
         handleNewEntries(newEntries, startedAtMs, provider)
-        onBatchProcessed(batch.size)
+        onBatchProcessed(batch.size - existingEntries.size - newFiles.size)
     }
 
     private fun fetchEntriesFromDatabase(storageFile: GroupedStorageFiles): ScanEntry {

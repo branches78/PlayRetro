@@ -8,15 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
 import com.swordfish.lemuroid.app.shared.about.AboutContent
+import com.swordfish.lemuroid.app.utils.android.TVNavigationSounds
 
 /** Content of the "About" tab on TV: the same information as the mobile "About" tab. */
 class TVAboutFragment : Fragment() {
@@ -28,23 +30,23 @@ class TVAboutFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                AppTheme {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                        AboutContent(
-                            modifier =
-                                Modifier
-                                    .widthIn(max = CONTENT_MAX_WIDTH.dp)
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp, vertical = 8.dp),
-                            focusableSections = true,
-                        )
+                TVNavigationSounds {
+                    AppTheme {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                            AboutContent(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            horizontal = dimensionResource(R.dimen.tv_content_side_margin),
+                                            vertical = 8.dp,
+                                        ),
+                                focusableSections = true,
+                            )
+                        }
                     }
                 }
             }
         }
-    }
-
-    companion object {
-        private const val CONTENT_MAX_WIDTH = 720
     }
 }

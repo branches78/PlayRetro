@@ -27,12 +27,32 @@
         android:paddingTop="@dimen/tv_top_bar_top_padding"
         android:paddingEnd="@dimen/tv_top_bar_horizontal_padding">
 
-        <androidx.leanback.widget.SearchOrbView
-            android:id="@+id/tv_search_orb"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start|center_vertical"
-            android:clipChildren="false" />
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.leanback.widget.SearchOrbView
+                android:id="@+id/tv_search_orb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clipChildren="false" />
+
+            <!-- Syncs the saves now; only shown when the sync is configured. -->
+            <androidx.leanback.widget.SearchOrbView
+                android:id="@+id/tv_sync_orb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:clipChildren="false"
+                android:contentDescription="@string/settings_save_sync_refresh"
+                android:visibility="gone" />
+
+        </LinearLayout>
 
         <!-- The pill of the selected tab is a view of its own behind the tabs, so it can slide from one to another. -->
         <FrameLayout
@@ -76,14 +96,17 @@
 
         </FrameLayout>
 
-        <TextView
+        <!-- Logo of the app, white and tinted with the bright green of the app icon (android:tint: app:tint is
+             ignored by a plain ImageView). -->
+        <ImageView
             android:id="@+id/tv_app_name"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/tv_app_logo_height"
             android:layout_gravity="end|center_vertical"
-            android:text="@string/lemuroid_name"
-            android:textColor="@color/md_theme_dark_onSurface"
-            android:textSize="22sp" />
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/lemuroid_name"
+            android:src="@drawable/playretro_logo"
+            android:tint="@color/playretro_brand_green" />
 
     </FrameLayout>
 

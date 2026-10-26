@@ -122,4 +122,9 @@
     <string name="value_aspect_ratio_original">Оригінал (4:3)</string>
     <string name="value_aspect_ratio_stretched">Розтягнути до 16:9</string>
     <string name="value_aspect_ratio_widescreen">Широкоекранний</string>
+    <string name="smb_storage">Мережева папка (SMB)</string>
+    <string name="smb_sync_connected">Мережева папка: %1$s</string>
+    <string name="smb_sync_not_configured">Обери в розділі «Каталог» мережеву папку як джерело ігор</string>
+    <string name="smb_sync_last">Остання синхронізація: %1$s</string>
+    <string name="sync_metadata_unreadable">Файл %1$s пошкоджено: збереження синхронізуються, але «Продовжити гру» та обране — ні. Видали його, щоб почати знову</string>
 </resources>

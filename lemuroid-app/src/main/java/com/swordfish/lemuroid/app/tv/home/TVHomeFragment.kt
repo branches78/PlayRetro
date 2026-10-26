@@ -9,7 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.leanback.app.RowsSupportFragment
 import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.BaseGridView
@@ -29,10 +31,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import coil.dispose
+import coil.load
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.shared.GameInteractor
+import com.swordfish.lemuroid.app.shared.covers.GameScreenshots
 import com.swordfish.lemuroid.app.shared.details.GameDescriptionProvider
 import com.swordfish.lemuroid.app.shared.details.gameCleanTitle
+import com.swordfish.lemuroid.app.shared.details.gameRegion
 import com.swordfish.lemuroid.app.shared.home.HomeDynamicRows
 import com.swordfish.lemuroid.app.shared.systems.MetaSystemInfo
 import com.swordfish.lemuroid.app.tv.details.TVGameDetailsFragment
@@ -48,6 +54,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 /**
  * Content of the "Home" tab on TV. Discover always comes first as an immersive list: a screenshot, the title and a
@@ -86,21 +93,27 @@ class TVHomeFragment : RowsSupportFragment() {
         // by the screen sides, also while scrolling.
         val root = FrameLayout(requireContext())
         val rowEdge = resources.getDimensionPixelSize(R.dimen.tv_home_row_edge)
+        val contentWidth = contentWidth(resources)
 
-        // Texts of the immersive list, above the first row and aligned with its first card. The rows are drawn
-        // over them, as they go up when the focus moves to the other rows.
+        // Texts of the immersive list, aligned with the first card of the first row and ending the guidelines gap
+        // above it. The rows are drawn over them, as they go up when the focus moves to the other rows.
         val infoContainer = FrameLayout(requireContext())
         val infoView = inflater.inflate(R.layout.tv_home_immersive_info, infoContainer, false)
-        (infoView.layoutParams as FrameLayout.LayoutParams).marginStart = rowEdge
+        (infoView.layoutParams as FrameLayout.LayoutParams).apply {
+            marginStart = rowEdge
+            gravity = Gravity.START or Gravity.BOTTOM
+        }
         infoContainer.addView(infoView)
-        val infoLayoutParams =
-            FrameLayout.LayoutParams(rowsContentWidth() + 2 * rowEdge, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val infoHeight =
+            resources.getDimensionPixelSize(R.dimen.tv_immersive_row_top) -
+                resources.getDimensionPixelSize(R.dimen.tv_immersive_info_gap)
+        val infoLayoutParams = FrameLayout.LayoutParams(contentWidth + 2 * rowEdge, infoHeight)
         infoLayoutParams.gravity = Gravity.CENTER_HORIZONTAL
         root.addView(infoContainer, infoLayoutParams)
         immersiveInfo = ImmersiveInfo(infoView)
 
         val rowsLayoutParams =
-            FrameLayout.LayoutParams(rowsContentWidth() + 2 * rowEdge, ViewGroup.LayoutParams.MATCH_PARENT)
+            FrameLayout.LayoutParams(contentWidth + 2 * rowEdge, ViewGroup.LayoutParams.MATCH_PARENT)
         rowsLayoutParams.gravity = Gravity.CENTER_HORIZONTAL
         root.addView(rowsView, rowsLayoutParams)
 
@@ -135,8 +148,9 @@ class TVHomeFragment : RowsSupportFragment() {
 
     private fun tabsFragment(): TVMainTabsFragment? = parentFragment as? TVMainTabsFragment
 
-    /** Texts of the immersive list: title, system and developer, and description of the focused game. */
+    /** Texts of the immersive list: title, system, developer and region, and description of the focused game. */
     private class ImmersiveInfo(val root: View) {
+        val logo: ImageView = root.findViewById(R.id.tv_immersive_logo)
         val title: TextView = root.findViewById(R.id.tv_immersive_title)
         val meta: TextView = root.findViewById(R.id.tv_immersive_meta)
         val description: TextView = root.findViewById(R.id.tv_immersive_description)
@@ -165,6 +179,7 @@ class TVHomeFragment : RowsSupportFragment() {
 
         // Without the region and other tags of the file name: "Banjo-Tooie (USA)" -> "Banjo-Tooie".
         info.title.text = gameCleanTitle(game)
+        showImmersiveLogo(info, game)
         info.meta.text = immersiveMeta(game)
         info.description.text = descriptionProvider.getCachedDescription(game).orEmpty()
         info.root.animate().alpha(1f).setDuration(IMMERSIVE_FADE_MS).start()
@@ -178,9 +193,34 @@ class TVHomeFragment : RowsSupportFragment() {
             }
     }
 
+    // Same line as in the details of a game.
+    /** The title is shown until the logo of the game is loaded, and stays when the game has none. */
+    private fun showImmersiveLogo(
+        info: ImmersiveInfo,
+        game: Game,
+    ) {
+        info.logo.isVisible = false
+        info.title.isVisible = true
+        val logoUrl = GameScreenshots.logoUrl(game)
+        if (logoUrl == null) {
+            info.logo.dispose()
+            info.logo.setImageDrawable(null)
+            return
+        }
+        // A new load cancels the previous one of the view, so the result always belongs to this game.
+        info.logo.load(logoUrl) {
+            listener(
+                onSuccess = { _, _ ->
+                    info.logo.isVisible = true
+                    info.title.isVisible = false
+                },
+            )
+        }
+    }
+
     private fun immersiveMeta(game: Game): String {
         val system = runCatching { getString(GameSystem.findById(game.systemId).titleResId) }.getOrNull()
-        return listOfNotNull(system, game.developer?.takeIf { it.isNotBlank() }).joinToString(" · ")
+        return listOfNotNull(system, game.developer?.takeIf { it.isNotBlank() }, gameRegion(game)).joinToString(" · ")
     }
 
     private fun onItemSelected(
@@ -348,7 +388,10 @@ class TVHomeFragment : RowsSupportFragment() {
 
         // The selection is not reported again when the games of the row change: keep the texts in sync.
         val selectedRow = rowsAdapter.takeIf { selectedPosition in 0 until it.size() }?.get(selectedPosition)
-        if (selectedRow === discoverRow) {
+        if (emptyLibraryCard?.isShown == true) {
+            // Nothing behind the card of the first scan: the games found so far would show their screenshot and texts.
+            showImmersiveGame(null)
+        } else if (selectedRow === discoverRow) {
             val selectedGame = immersiveGame?.let { current -> viewState.discoveryGames.firstOrNull { it.id == current.id } }
             showImmersiveGame(selectedGame ?: viewState.discoveryGames.firstOrNull())
         } else if (!hasImmersiveRow) {
@@ -401,16 +444,11 @@ class TVHomeFragment : RowsSupportFragment() {
             .map { HomeRow(it.key, it.title, it.games) }
     }
 
-    private fun rowsContentWidth(): Int = rowsContentWidth(resources)
-
-    private fun homeCardSize(): Int = homeCardSize(resources)
-
-    private fun homeCardSpacing(): Int = homeCardSpacing(resources)
-
     private fun createAdapter(rows: List<HomeRow>) {
         val rowEdge = resources.getDimensionPixelSize(R.dimen.tv_home_row_edge)
-        val result = ArrayObjectAdapter(HomeListRowPresenter(rowEdge, homeCardSpacing()))
-        val cardSize = homeCardSize()
+        val result = ArrayObjectAdapter(HomeListRowPresenter(rowEdge, rowCardSpacing(resources)))
+        val cardWidth = rowCardWidth(resources)
+        val cardHeight = rowCardHeight(resources)
         val settingsCardPadding =
             resources.getDimensionPixelSize(
                 com.swordfish.lemuroid.lib.R.dimen.settings_card_padding,
@@ -420,10 +458,20 @@ class TVHomeFragment : RowsSupportFragment() {
             ClassPresenterSelector().apply {
                 addClassPresenter(
                     Game::class.java,
-                    GamePresenter(cardSize, gameInteractor, fixedRatio = 1f, alwaysShowMenu = alwaysShowMenu),
+                    // A square cell with the cover inside it, like in the grids of the consoles, small enough for 5
+                    // whole cells in the content width with the spacing of the rows.
+                    GamePresenter(
+                        cardWidth,
+                        gameInteractor,
+                        fitInCell = true,
+                        alwaysShowMenu = alwaysShowMenu,
+                    ),
                 )
-                addClassPresenter(TVSetting::class.java, SettingPresenter(cardSize, settingsCardPadding))
-                addClassPresenter(EmptyRowMessage::class.java, EmptyRowMessagePresenter(cardSize, rowsContentWidth()))
+                addClassPresenter(TVSetting::class.java, SettingPresenter(cardHeight, settingsCardPadding, cardWidth))
+                addClassPresenter(
+                    EmptyRowMessage::class.java,
+                    EmptyRowMessagePresenter(cardHeight, contentWidth(resources)),
+                )
             }
         val presenter = presenter(alwaysShowMenu = false)
 
@@ -459,6 +507,9 @@ class TVHomeFragment : RowsSupportFragment() {
         init {
             // Rows without a title (the immersive list) don't keep the empty space of the title.
             (headerPresenter as? RowHeaderPresenter)?.isNullItemVisibilityGone = true
+            // The shadow container of each card covers its whole cell, also the margins that center the cover in
+            // it, and showed a grey box above and below the cover. Like in the grids of the consoles, no shadow.
+            shadowEnabled = false
         }
 
         override fun initializeRowViewHolder(holder: RowPresenter.ViewHolder) {
@@ -474,22 +525,40 @@ class TVHomeFragment : RowsSupportFragment() {
     }
 
     companion object {
-        /** Same width as the content of the other tabs, rounded down to whole cards. */
+        /** Width of the content of every tab: the screen without the side margins of the TV guidelines. */
+        fun contentWidth(resources: Resources): Int {
+            val sideMargin = resources.getDimensionPixelSize(R.dimen.tv_content_side_margin)
+            return resources.displayMetrics.widthPixels - 2 * sideMargin
+        }
+
+        /** Width of the grids of square cards, rounded down to whole cards. */
         fun rowsContentWidth(resources: Resources): Int {
             val cardsPerRow = cardsPerRow(resources)
             return cardsPerRow * homeCardSize(resources) + (cardsPerRow - 1) * homeCardSpacing(resources)
         }
 
-        /** Size of the square game cards of the home rows (also used by the favorites grid). */
+        /** Size of the square game cards of the grids (games of a system, favorites, consoles, "More from"). */
         fun homeCardSize(resources: Resources): Int {
             val cardsPerRow = cardsPerRow(resources)
-            val contentWidth = resources.getDimensionPixelSize(R.dimen.tv_content_width)
-            return (contentWidth - (cardsPerRow - 1) * homeCardSpacing(resources)) / cardsPerRow
+            return (contentWidth(resources) - (cardsPerRow - 1) * homeCardSpacing(resources)) / cardsPerRow
         }
 
         fun homeCardSpacing(resources: Resources): Int = resources.getDimensionPixelSize(R.dimen.tv_home_card_spacing)
 
         fun cardsPerRow(resources: Resources): Int = resources.getInteger(R.integer.tv_home_cards_per_row)
+
+        /** Width of the 16:9 cards of the home rows: [R.integer.tv_home_row_cards] of them fill the content. */
+        private fun rowCardWidth(resources: Resources): Int {
+            val cards = resources.getInteger(R.integer.tv_home_row_cards)
+            return (contentWidth(resources) - (cards - 1) * rowCardSpacing(resources)) / cards
+        }
+
+        private fun rowCardHeight(resources: Resources): Int = (rowCardWidth(resources) / ROW_CARD_RATIO).roundToInt()
+
+        private fun rowCardSpacing(resources: Resources): Int =
+            resources.getDimensionPixelSize(R.dimen.tv_home_row_card_spacing)
+
+        private const val ROW_CARD_RATIO = 16f / 9f
 
         private const val KEY_RECENTS = "recents"
         private const val KEY_FAVORITES = "favorites"

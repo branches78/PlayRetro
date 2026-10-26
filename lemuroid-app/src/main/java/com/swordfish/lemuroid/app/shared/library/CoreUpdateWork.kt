@@ -6,6 +6,7 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.swordfish.lemuroid.app.mobile.shared.NotificationsManager
 import com.swordfish.lemuroid.app.utils.android.createSyncForegroundInfo
+import com.swordfish.lemuroid.app.utils.android.withNotificationInBackground
 import com.swordfish.lemuroid.lib.core.CoreUpdater
 import com.swordfish.lemuroid.lib.core.CoresSelection
 import com.swordfish.lemuroid.lib.injection.AndroidWorkerInjection
@@ -16,11 +17,11 @@ import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
 import dagger.Binds
 import dagger.android.AndroidInjector
 import dagger.multibindings.IntoMap
+import javax.inject.Inject
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import timber.log.Timber
-import javax.inject.Inject
 
 class CoreUpdateWork(context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -40,19 +41,20 @@ class CoreUpdateWork(context: Context, workerParams: WorkerParameters) :
 
         val notificationsManager = NotificationsManager(applicationContext)
 
-        val foregroundInfo =
+        val foregroundInfo = {
             createSyncForegroundInfo(
                 NotificationsManager.CORE_INSTALL_NOTIFICATION_ID,
                 notificationsManager.installingCoresNotification(),
             )
+        }
 
-        setForegroundAsync(foregroundInfo)
-
-        try {
-            val cores = libraryCores(retrogradeDatabase, coresSelection)
-            coreUpdater.downloadCores(applicationContext, cores)
-        } catch (e: Throwable) {
-            Timber.e(e, "Core update work failed with exception: ${e.message}")
+        withNotificationInBackground(foregroundInfo) {
+            try {
+                val cores = libraryCores(retrogradeDatabase, coresSelection)
+                coreUpdater.downloadCores(applicationContext, cores)
+            } catch (e: Throwable) {
+                Timber.e(e, "Core update work failed with exception: ${e.message}")
+            }
         }
 
         return Result.success()

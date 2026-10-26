@@ -122,4 +122,9 @@
     <string name="value_aspect_ratio_original">Původní (4:3)</string>
     <string name="value_aspect_ratio_stretched">Roztažený 16:9</string>
     <string name="value_aspect_ratio_widescreen">Širokoúhlý</string>
+    <string name="smb_storage">Síťová složka (SMB)</string>
+    <string name="smb_sync_connected">Síťová složka: %1$s</string>
+    <string name="smb_sync_not_configured">V Adresáři zvol síťovou složku jako zdroj svých her</string>
+    <string name="smb_sync_last">Poslední synchronizace: %1$s</string>
+    <string name="sync_metadata_unreadable">%1$s je poškozený: uložené pozice se synchronizují, ale Pokračovat ve hraní a oblíbené ne. Smaž ho a začni znovu</string>
 </resources>

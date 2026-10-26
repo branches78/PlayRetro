@@ -40,6 +40,10 @@ interface GameDao {
     @Query("SELECT * FROM games WHERE fileUri = :fileUri")
     fun selectByFileUri(fileUri: String): Game?
 
+    /** Games whose file is under [prefix] (e.g. the games of a network share, "smb://server/share/"). */
+    @Query("SELECT * FROM games WHERE fileUri LIKE :prefix || '%'")
+    suspend fun selectByFileUriPrefix(prefix: String): List<Game>
+
     @Query("SELECT * FROM games WHERE lastIndexedAt < :lastIndexedAt")
     fun selectByLastIndexedAtLessThan(lastIndexedAt: Long): List<Game>
 
@@ -55,9 +59,6 @@ interface GameDao {
 
     @Query("SELECT * FROM games WHERE isFavorite = 1 ORDER BY lastPlayedAt DESC LIMIT :limit")
     fun selectFirstFavoritesRecents(limit: Int): Flow<List<Game>>
-
-    @Query("SELECT * FROM games WHERE lastPlayedAt IS NOT NULL ORDER BY lastPlayedAt DESC LIMIT :limit")
-    suspend fun asyncSelectFirstRecents(limit: Int): List<Game>
 
     @Query("SELECT * FROM games WHERE isFavorite = 1 ORDER BY lastPlayedAt DESC LIMIT :limit")
     fun selectFirstFavorites(limit: Int): Flow<List<Game>>

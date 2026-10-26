@@ -32,6 +32,7 @@ import com.swordfish.lemuroid.app.mobile.feature.settings.coreselection.CoreOpti
 import com.swordfish.lemuroid.app.mobile.feature.settings.coreselection.CoresSelectionViewModel
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
 import com.swordfish.lemuroid.app.shared.GameInteractor
+import com.swordfish.lemuroid.app.utils.android.TVNavigationSounds
 import com.swordfish.lemuroid.lib.core.CoresSelection
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
@@ -60,10 +61,12 @@ object TVGameContextMenu {
         val content =
             ComposeView(context).apply {
                 setContent {
-                    AppTheme {
-                        CompositionLocalProvider(LocalViewModelStoreOwner provides viewModelStoreOwner) {
-                            TVGameContextMenuContent(context, game, gameInteractor, startWithCoreOptions) {
-                                dialog.dismiss()
+                    TVNavigationSounds {
+                        AppTheme {
+                            CompositionLocalProvider(LocalViewModelStoreOwner provides viewModelStoreOwner) {
+                                TVGameContextMenuContent(context, game, gameInteractor, startWithCoreOptions) {
+                                    dialog.dismiss()
+                                }
                             }
                         }
                     }

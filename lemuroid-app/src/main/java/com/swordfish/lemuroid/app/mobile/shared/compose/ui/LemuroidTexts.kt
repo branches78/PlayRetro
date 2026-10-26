@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.swordfish.lemuroid.app.utils.games.GameUtils
+import com.swordfish.lemuroid.app.utils.games.GameCardSubtitle
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 /**
- * Game name on up to two lines and its system below (the developer is left out to keep it short).
+ * Game name on up to two lines and, below, its system or its developer ([subtitle]).
  * Cards keep the space of two title lines, so all of them have the same height.
  */
 @Composable
@@ -22,17 +22,18 @@ fun LemuroidGameTexts(
     modifier: Modifier = Modifier,
     game: Game,
     reserveTitleLines: Boolean = false,
+    subtitle: GameCardSubtitle = GameCardSubtitle.SYSTEM,
 ) {
     val context = LocalContext.current
-    val subtitle =
-        remember(game.id) {
-            GameUtils.getSystemNameForGame(context, game)
+    val subtitleText =
+        remember(game.id, subtitle) {
+            subtitle.textFor(context, game)
         }
 
     LemuroidTexts(
         modifier = modifier,
         title = game.displayName(),
-        subtitle = subtitle,
+        subtitle = subtitleText,
         titleMaxLines = GAME_TITLE_MAX_LINES,
         titleMinLines = if (reserveTitleLines) GAME_TITLE_MAX_LINES else 1,
     )

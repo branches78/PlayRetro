@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Texts of the immersive list of the TV home screen: the game focused in its row. They always take the same height
-     (one line of title, three of description), as the row below them is placed right after them. -->
+<!-- Texts of the immersive list of the TV home screen: the game focused in its row, in the same order as the details
+     of a game (title, then system, developer and region, then two lines of description). They end right above the
+     row (TVHomeFragment places them at the bottom of their container). The logo of the game replaces the title once it
+     is loaded, when the game has one. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/tv_immersive_info_width"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/tv_immersive_info_top_margin"
     android:alpha="0"
     android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/tv_immersive_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:importantForAccessibility="no"
+        android:maxWidth="@dimen/tv_immersive_logo_max_width"
+        android:maxHeight="@dimen/tv_immersive_logo_max_height"
+        android:scaleType="fitStart"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_immersive_title"
@@ -22,7 +34,7 @@
         android:id="@+id/tv_immersive_meta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/md_theme_dark_primary"
@@ -32,10 +44,10 @@
         android:id="@+id/tv_immersive_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:ellipsize="end"
         android:lineSpacingMultiplier="1.2"
-        android:lines="3"
+        android:lines="2"
         android:textColor="@color/md_theme_dark_onSurfaceVariant"
         android:textSize="@dimen/tv_immersive_description_size" />
 

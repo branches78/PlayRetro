@@ -6,14 +6,19 @@ import androidx.leanback.widget.ImageCardView
 import androidx.leanback.widget.Presenter
 import com.swordfish.lemuroid.app.tv.shared.TVCardStyle
 
-class SettingPresenter(private val cardSize: Int, private val cardPadding: Int) : Presenter() {
+class SettingPresenter(
+    private val cardSize: Int,
+    private val cardPadding: Int,
+    // Width of the card, square by default (the home rows have 16:9 cards).
+    private val cardWidth: Int = cardSize,
+) : Presenter() {
     override fun onBindViewHolder(
         viewHolder: Presenter.ViewHolder?,
         item: Any,
     ) {
         val setting = item as TVSetting
         (viewHolder as ViewHolder).mCardView.titleText = viewHolder.view.context.resources.getString(setting.type.text)
-        viewHolder.mCardView.setMainImageDimensions(cardSize, cardSize)
+        viewHolder.mCardView.setMainImageDimensions(cardWidth, cardSize)
         viewHolder.mCardView.mainImageView.setImageResource(setting.type.icon)
 
         viewHolder.mCardView.mainImageView.setPadding(cardPadding, cardPadding, cardPadding, cardPadding)

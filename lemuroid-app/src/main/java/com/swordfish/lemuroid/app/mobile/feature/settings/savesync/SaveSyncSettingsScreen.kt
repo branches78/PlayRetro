@@ -9,13 +9,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.swordfish.lemuroid.R
+import com.swordfish.lemuroid.app.shared.savesync.SaveSyncChanges
 import com.swordfish.lemuroid.app.shared.savesync.SaveSyncWork
+import com.swordfish.lemuroid.app.shared.settings.LibrarySourceActivity
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidCardSettingsGroup
+import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsList
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsListMultiSelect
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsMenuLink
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsPage
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsSwitch
 import com.swordfish.lemuroid.app.utils.android.settings.booleanPreferenceState
+import com.swordfish.lemuroid.app.utils.android.settings.indexPreferenceState
 import com.swordfish.lemuroid.app.utils.android.settings.stringsSetPreferenceState
 
 @Composable
@@ -30,13 +34,36 @@ fun SaveSyncSettingsScreen(
             .collectAsState()
             .value
 
+    val hasChanges = SaveSyncChanges.hasChanges.collectAsState().value
+
     val isSyncInProgress =
         viewModel.saveSyncInProgress
             .collectAsState(true)
             .value
 
+    // The rows stay enabled during a sync, so the focus doesn't jump on TV: the actions are ignored instead.
     LemuroidSettingsPage(modifier = modifier.fillMaxSize()) {
         LemuroidCardSettingsGroup {
+            // Play variant: Google Drive or the network share of the library.
+            if (saveSyncState.hasProviderChoice) {
+                val providerNames =
+                    listOf(
+                        stringResource(R.string.save_sync_provider_drive),
+                        stringResource(com.swordfish.lemuroid.lib.R.string.smb_storage),
+                    )
+                LemuroidSettingsList(
+                    state =
+                        indexPreferenceState(
+                            com.swordfish.lemuroid.lib.R.string.pref_key_save_sync_provider,
+                            "drive",
+                            listOf("drive", "smb"),
+                        ),
+                    title = { Text(text = stringResource(id = R.string.save_sync_provider)) },
+                    items = providerNames,
+                    enabled = !isSyncInProgress,
+                    onItemSelected = { _, _ -> viewModel.refresh() },
+                )
+            }
             LemuroidSettingsMenuLink(
                 title = {
                     Text(
@@ -48,11 +75,19 @@ fun SaveSyncSettingsScreen(
                     )
                 },
                 subtitle = { Text(text = saveSyncState.configInfo) },
-                enabled = !isSyncInProgress,
-                onClick = { context.startActivity(Intent(context, saveSyncState.settingsActivity)) },
+                // The network share is configured with "Directory": the same chooser of the source of the games.
+                onClick = onClick@{
+                    if (isSyncInProgress) return@onClick
+                    val activity = saveSyncState.settingsActivity
+                    if (activity != null) {
+                        context.startActivity(Intent(context, activity))
+                    } else {
+                        LibrarySourceActivity.show(context)
+                    }
+                },
             )
             LemuroidSettingsSwitch(
-                state = booleanPreferenceState(R.string.pref_key_save_sync_enable, default = false),
+                state = booleanPreferenceState(R.string.pref_key_save_sync_enable, default = true),
                 title = { Text(text = stringResource(id = R.string.settings_save_sync_include_saves)) },
                 subtitle = {
                     Text(
@@ -63,7 +98,7 @@ fun SaveSyncSettingsScreen(
                             ),
                     )
                 },
-                enabled = saveSyncState.isConfigured && !isSyncInProgress,
+                enabled = saveSyncState.isConfigured,
             )
             LemuroidSettingsListMultiSelect(
                 state =
@@ -75,14 +110,14 @@ fun SaveSyncSettingsScreen(
                 subtitle = { Text(text = stringResource(id = R.string.settings_save_sync_include_states_description)) },
                 entryValues = saveSyncState.coreNames,
                 entries = saveSyncState.coreVisibleNames,
-                enabled = saveSyncState.isConfigured && !isSyncInProgress,
+                enabled = saveSyncState.isConfigured,
                 confirmButton = stringResource(id = R.string.ok),
             )
             LemuroidSettingsSwitch(
                 state = booleanPreferenceState(R.string.pref_key_save_sync_auto, default = false),
                 title = { Text(text = stringResource(id = R.string.settings_save_sync_enable_auto)) },
                 subtitle = { Text(text = stringResource(id = R.string.settings_save_sync_enable_auto_description)) },
-                enabled = saveSyncState.isConfigured && !isSyncInProgress,
+                enabled = saveSyncState.isConfigured,
             )
             LemuroidSettingsMenuLink(
                 title = { Text(text = stringResource(id = R.string.settings_save_sync_refresh)) },
@@ -95,8 +130,9 @@ fun SaveSyncSettingsScreen(
                             ),
                     )
                 },
-                enabled = saveSyncState.isConfigured && !isSyncInProgress,
-                onClick = { SaveSyncWork.enqueueManualWork(context) },
+                // Only when there is something to sync.
+                enabled = saveSyncState.isConfigured && hasChanges,
+                onClick = { if (!isSyncInProgress) SaveSyncWork.enqueueManualWork(context) },
             )
         }
     }

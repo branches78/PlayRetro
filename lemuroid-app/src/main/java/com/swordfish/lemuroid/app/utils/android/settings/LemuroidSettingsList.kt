@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.alorma.compose.settings.storage.base.SettingValueState
+import com.swordfish.lemuroid.app.utils.android.focusBorder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -99,6 +101,8 @@ fun LemuroidSettingsList(
                             Modifier
                                 .fillMaxWidth()
                                 .height(56.dp)
+                                // Where the focus of a remote is, like the buttons of the other dialogs.
+                                .focusBorder(RoundedCornerShape(8.dp))
                                 .selectable(
                                     role = Role.RadioButton,
                                     selected = isSelected,

@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.swordfish.lemuroid.app.shared.home.HomeDiscovery
 import com.swordfish.lemuroid.app.shared.home.HomeDynamicRows
 import com.swordfish.lemuroid.app.shared.library.PendingOperationsMonitor
-import com.swordfish.lemuroid.app.shared.settings.StorageFrameworkPickerLauncher
+import com.swordfish.lemuroid.app.shared.settings.LibrarySourceActivity
 import com.swordfish.lemuroid.common.coroutines.combine
 import com.swordfish.lemuroid.lib.core.CoresSelection
 import com.swordfish.lemuroid.lib.library.GameSystem
@@ -78,8 +78,9 @@ class HomeViewModel(
         return uiStates
     }
 
+    // Asks first whether the games come from a folder of the device or a network share.
     fun changeLocalStorageFolder(context: Context) {
-        StorageFrameworkPickerLauncher.pickFolder(context)
+        LibrarySourceActivity.show(context)
     }
 
     fun updatePermissions(context: Context) {

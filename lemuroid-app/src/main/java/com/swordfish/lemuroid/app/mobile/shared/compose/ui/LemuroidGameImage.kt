@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import com.swordfish.lemuroid.app.shared.covers.CoverAspectRatio
 import com.swordfish.lemuroid.app.shared.covers.CoverRatioCache
 import com.swordfish.lemuroid.app.shared.covers.CoverUtils
 import com.swordfish.lemuroid.lib.library.db.entity.Game
@@ -19,10 +18,8 @@ import com.swordfish.lemuroid.lib.library.db.entity.Game
 fun LemuroidGameImage(
     modifier: Modifier = Modifier,
     game: Game,
-    // When false the card keeps the shape of its system (grids) and other covers are shown whole inside it.
-    matchCoverShape: Boolean = true,
-    // When set, every card has this shape (e.g. home rows) and covers of another shape are shown whole and centered.
-    fixedRatio: Float? = null,
+    // Shape of the image (width / height): covers of another shape are shown whole and centered.
+    fixedRatio: Float,
 ) {
     val fallbackDrawable =
         remember(game) {
@@ -33,12 +30,7 @@ fun LemuroidGameImage(
 
     val coverUrl = game.displayCoverUrl()
     val coverRatio = CoverRatioCache.get(coverUrl)
-    val cardRatio =
-        when {
-            fixedRatio != null -> fixedRatio
-            matchCoverShape -> CoverAspectRatio.forGame(game)
-            else -> CoverAspectRatio.forGameSystem(game)
-        }
+    val cardRatio = fixedRatio
     val contentScale =
         if (CoverRatioCache.needsLetterbox(coverRatio, cardRatio)) ContentScale.Fit else ContentScale.Crop
 

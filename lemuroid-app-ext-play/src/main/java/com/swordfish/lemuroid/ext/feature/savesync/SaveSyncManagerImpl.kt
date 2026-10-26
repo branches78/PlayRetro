@@ -3,6 +3,7 @@ package com.swordfish.lemuroid.ext.feature.savesync
 import android.app.Activity
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.client.http.ByteArrayContent
 import com.google.api.client.http.FileContent
 import com.google.api.client.util.DateTime
 import com.google.api.services.drive.Drive
@@ -10,34 +11,71 @@ import com.swordfish.lemuroid.common.kotlin.SharedPreferencesDelegates
 import com.swordfish.lemuroid.common.kotlin.calculateMd5
 import com.swordfish.lemuroid.ext.R
 import com.swordfish.lemuroid.lib.library.CoreID
+import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
+import com.swordfish.lemuroid.lib.library.db.entity.Game
 import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
 import com.swordfish.lemuroid.lib.savesync.SaveSyncManager
+import com.swordfish.lemuroid.lib.savesync.SmbSaveSync
+import com.swordfish.lemuroid.lib.savesync.SyncMetadata
 import com.swordfish.lemuroid.lib.storage.DirectoriesManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import org.json.JSONException
+import org.json.JSONObject
+import timber.log.Timber
 
+/**
+ * Google Drive, or the network share of the library ([SmbSaveSync]) when chosen in the settings
+ * ([com.swordfish.lemuroid.lib.R.string.pref_key_save_sync_provider]).
+ *
+ * On Google Drive, saves and states go in folders of the private space of the app, and "Continue playing" and
+ * favorites in [SyncMetadata.FILE_NAME] next to them. Like on the network share, nothing is done when nothing changed.
+ */
 class SaveSyncManagerImpl(
     private val appContext: Context,
     private val directoriesManager: DirectoriesManager,
+    private val retrogradeDb: RetrogradeDatabase,
 ) : SaveSyncManager() {
+    private val smbSaveSync = SmbSaveSync(appContext, directoriesManager, retrogradeDb)
+
+    private val driveMetadata =
+        SyncMetadata(retrogradeDb, appContext.getSharedPreferences(DRIVE_RECORDS_PREFERENCES, Context.MODE_PRIVATE))
+
+    private fun useNetworkShare(): Boolean =
+        SharedPreferencesHelper.getSharedPreferences(appContext)
+            .getString(appContext.getString(com.swordfish.lemuroid.lib.R.string.pref_key_save_sync_provider), null) ==
+            PROVIDER_SMB
+
+    override fun hasProviderChoice(): Boolean = true
+
     private var lastSyncTimestamp: Long by SharedPreferencesDelegates.LongDelegate(
         SharedPreferencesHelper.getSharedPreferences(appContext),
         appContext.getString(com.swordfish.lemuroid.lib.R.string.pref_key_last_save_sync),
         0L,
     )
 
-    override fun getProvider(): String = "Google Drive"
+    override fun getProvider(): String = if (useNetworkShare()) smbSaveSync.getProvider() else "Google Drive"
 
-    override fun getSettingsActivity(): Class<out Activity>? = ActivateGoogleDriveActivity::class.java
+    override fun getSettingsActivity(): Class<out Activity>? =
+        if (useNetworkShare()) null else ActivateGoogleDriveActivity::class.java
 
     override fun isSupported(): Boolean = true
 
-    override fun isConfigured(): Boolean = GoogleSignIn.getLastSignedInAccount(appContext) != null
+    override fun isConfigured(): Boolean =
+        if (useNetworkShare()) smbSaveSync.isConfigured() else GoogleSignIn.getLastSignedInAccount(appContext) != null
 
     override fun getLastSyncInfo(): String {
+        if (useNetworkShare()) return smbSaveSync.getLastSyncInfo()
+        if (driveMetadata.isUnreadable()) {
+            return appContext.getString(
+                com.swordfish.lemuroid.lib.R.string.sync_metadata_unreadable,
+                SyncMetadata.FILE_NAME,
+            )
+        }
         val dateString =
             if (lastSyncTimestamp > 0) {
                 SimpleDateFormat.getDateTimeInstance().format(lastSyncTimestamp)
@@ -48,6 +86,7 @@ class SaveSyncManagerImpl(
     }
 
     override fun getConfigInfo(): String {
+        if (useNetworkShare()) return smbSaveSync.getConfigInfo()
         val email = GoogleSignIn.getLastSignedInAccount(appContext)?.email
         return if (email != null) {
             appContext.getString(R.string.gdrive_connected_summary, email)
@@ -56,46 +95,173 @@ class SaveSyncManagerImpl(
         }
     }
 
-    override suspend fun sync(cores: Set<CoreID>): Unit =
+    override suspend fun hasChanges(cores: Set<CoreID>): Boolean =
         withContext(Dispatchers.IO) {
-            synchronized(SYNC_LOCK) {
-                val saveSyncResult =
-                    runCatching {
-                        performSaveSyncForCores(cores)
-                    }
-
-                saveSyncResult.onFailure {
-                    Timber.e(it, "Error while performing save sync.")
+            if (useNetworkShare()) {
+                return@withContext SMB_LOCK.withLock {
+                    runCatching { smbSaveSync.hasChanges(cores) }
+                        .onFailure { Timber.e(it, "Error while checking the save sync.") }
+                        .getOrDefault(false)
                 }
+            }
+            val games = retrogradeDb.gameDao().selectByFileUriPrefix("")
+            SYNC_LOCK.withLock {
+                runCatching {
+                    val drive = DriveFactory(appContext).create() ?: return@runCatching false
+                    val remoteJson = findMetadataFile(drive)?.let { readMetadata(drive, it.id) } ?: JSONObject()
+                    val localFingerprint = driveFingerprint(games, cores)
+                    if (remoteJson !== DAMAGED) {
+                        !driveMetadata.isUpToDate(remoteJson, localFingerprint)
+                    } else {
+                        !driveMetadata.isLocalUpToDate(localFingerprint)
+                    }
+                }.onFailure { Timber.e(it, "Error while checking the save sync.") }
+                    .getOrDefault(false)
             }
         }
 
-    private fun performSaveSyncForCores(cores: Set<CoreID>) {
-        val drive = DriveFactory(appContext).create() ?: return
+    override suspend fun sync(
+        cores: Set<CoreID>,
+        onCopyStarted: () -> Unit,
+    ): Unit =
+        withContext(Dispatchers.IO) {
+            if (useNetworkShare()) {
+                SMB_LOCK.withLock {
+                    runCatching { smbSaveSync.sync(cores, onCopyStarted) }
+                        .onFailure { Timber.e(it, "Error while performing save sync.") }
+                }
+                return@withContext
+            }
+            SYNC_LOCK.withLock {
+                runCatching { performSaveSyncForCores(cores, onCopyStarted) }
+                    .onFailure { Timber.e(it, "Error while performing save sync.") }
+            }
+        }
 
-        syncLocalAndRemoteFolder(
-            drive,
-            getOrCreateAppDataFolder("saves"),
-            directoriesManager.getSavesDirectory(),
-            null,
-        )
+    private suspend fun performSaveSyncForCores(
+        cores: Set<CoreID>,
+        onCopyStarted: () -> Unit,
+    ) {
+        val drive = DriveFactory(appContext).create() ?: return
+        val games = retrogradeDb.gameDao().selectByFileUriPrefix("")
+
+        // Read first: if it is damaged it is not written (the data of the other devices is kept).
+        val metadataFile = findMetadataFile(drive)
+        val remoteJson = metadataFile?.let { readMetadata(drive, it.id) } ?: JSONObject()
+        val localFingerprint = driveFingerprint(games, cores)
+        val upToDate =
+            if (remoteJson !== DAMAGED) {
+                driveMetadata.isUpToDate(remoteJson, localFingerprint)
+            } else {
+                driveMetadata.isLocalUpToDate(localFingerprint)
+            }
+        if (upToDate) {
+            Timber.i("Save sync: nothing changed")
+            lastSyncTimestamp = System.currentTimeMillis()
+            return
+        }
+        onCopyStarted()
+
+        var changedRemote =
+            syncLocalAndRemoteFolder(
+                drive,
+                getOrCreateAppDataFolder("saves"),
+                directoriesManager.getSavesDirectory(),
+                null,
+            )
 
         if (cores.isNotEmpty()) {
-            syncLocalAndRemoteFolder(
-                drive,
-                getOrCreateAppDataFolder("states"),
-                directoriesManager.getStatesDirectory(),
-                cores.map { it.coreName }.toSet(),
-            )
-            syncLocalAndRemoteFolder(
-                drive,
-                getOrCreateAppDataFolder("state-previews"),
-                directoriesManager.getStatesPreviewDirectory(),
-                cores.map { it.coreName }.toSet(),
-            )
+            changedRemote =
+                syncLocalAndRemoteFolder(
+                    drive,
+                    getOrCreateAppDataFolder("states"),
+                    directoriesManager.getStatesDirectory(),
+                    cores.map { it.coreName }.toSet(),
+                ) || changedRemote
+            changedRemote =
+                syncLocalAndRemoteFolder(
+                    drive,
+                    getOrCreateAppDataFolder("state-previews"),
+                    directoriesManager.getStatesPreviewDirectory(),
+                    cores.map { it.coreName }.toSet(),
+                ) || changedRemote
+        }
+
+        if (remoteJson === DAMAGED) {
+            // The saves and states are synced anyway; "Continue playing" and favorites wait for a readable file.
+            driveMetadata.setReadable(false, driveFingerprint(retrogradeDb.gameDao().selectByFileUriPrefix(""), cores))
+        } else {
+            changedRemote = driveMetadata.merge(remoteJson, games) || changedRemote
+            driveMetadata.prepareWrite(remoteJson, changedRemote)
+            if (changedRemote) writeMetadata(drive, metadataFile?.id, remoteJson)
+            // After the downloads, the changes to the library and the write, so they don't count as changes.
+            driveMetadata.commit(remoteJson, driveFingerprint(retrogradeDb.gameDao().selectByFileUriPrefix(""), cores))
         }
 
         lastSyncTimestamp = System.currentTimeMillis()
+    }
+
+    /** Played games and favorites, and names, sizes and dates of the saves and of the states of the [cores]. */
+    private fun driveFingerprint(
+        games: List<Game>,
+        cores: Set<CoreID>,
+    ): String {
+        val coreNames = cores.map { it.coreName }.toSet()
+        val builder = StringBuilder(coreNames.sorted().joinToString(","))
+        builder.append(SyncMetadata.gamesFingerprint(games))
+        val folders =
+            listOf(directoriesManager.getSavesDirectory() to null) +
+                listOf(directoriesManager.getStatesDirectory(), directoriesManager.getStatesPreviewDirectory())
+                    .map { it to coreNames }
+        folders.forEach { (folder, prefixes) ->
+            buildLocalFileMap(folder)
+                .filterKeys { key -> prefixes == null || prefixes.any { key.startsWith(it) } }
+                .toSortedMap()
+                .forEach { (path, file) ->
+                    builder.append('|').append(path).append(':').append(file.lastModified()).append('/')
+                        .append(file.length())
+                }
+        }
+        return builder.toString().hashCode().toString() + ":" + builder.length
+    }
+
+    private fun findMetadataFile(drive: Drive): com.google.api.services.drive.model.File? =
+        drive.files().list()
+            .setSpaces("appDataFolder")
+            .setQ("name = '${SyncMetadata.FILE_NAME}' and 'appDataFolder' in parents and trashed = false")
+            .setFields("files(id)")
+            .execute()
+            .files
+            .firstOrNull()
+
+    /** The content of the file, or [DAMAGED] when it can't be parsed. Network errors are thrown. */
+    private fun readMetadata(
+        drive: Drive,
+        fileId: String,
+    ): JSONObject {
+        val text = drive.files().get(fileId).executeMediaAsInputStream().use { it.readBytes().decodeToString() }
+        return try {
+            JSONObject(text)
+        } catch (e: JSONException) {
+            Timber.e(e, "Damaged ${SyncMetadata.FILE_NAME}")
+            DAMAGED
+        }
+    }
+
+    private fun writeMetadata(
+        drive: Drive,
+        fileId: String?,
+        json: JSONObject,
+    ) {
+        val content = ByteArrayContent("application/json", json.toString().encodeToByteArray())
+        if (fileId != null) {
+            drive.files().update(fileId, com.google.api.services.drive.model.File(), content).execute()
+        } else {
+            val metadata = com.google.api.services.drive.model.File()
+            metadata.parents = listOf("appDataFolder")
+            metadata.name = SyncMetadata.FILE_NAME
+            drive.files().create(metadata, content).setFields("id").execute()
+        }
     }
 
     override fun computeSavesSpace() = getSizeHumanReadable(directoriesManager.getSavesDirectory())
@@ -115,14 +281,17 @@ class SaveSyncManagerImpl(
         remoteFolderId: String,
         localFolder: File,
         prefixes: Set<String>?,
-    ) {
+    ): Boolean {
         val remoteFiles = getRemoteFiles(drive, remoteFolderId)
         val remoteFilesMap = buildRemoteFileMap(remoteFiles)
         val localFilesMap = buildLocalFileMap(localFolder)
 
+        var uploaded = false
         getFilteredKeys(remoteFilesMap.keys + localFilesMap.keys, prefixes).forEach {
-            handleFileSync(drive, remoteFolderId, localFolder, remoteFilesMap[it], localFilesMap[it])
+            uploaded =
+                handleFileSync(drive, remoteFolderId, localFolder, remoteFilesMap[it], localFilesMap[it]) || uploaded
         }
+        return uploaded
     }
 
     private fun getFilteredKeys(
@@ -139,24 +308,31 @@ class SaveSyncManagerImpl(
         localParentFolder: File,
         remoteFile: com.google.api.services.drive.model.File?,
         localFile: File?,
-    ) {
+    ): Boolean {
         Timber.i("Handling file pair: $localFile $remoteFile")
 
-        runCatching {
+        // True when something was uploaded: the other devices then have something to download.
+        return runCatching {
             if (remoteFile != null && localFile == null) {
                 onRemoteOnly(localParentFolder, remoteFile, drive)
+                false
             } else if (remoteFile == null && localFile != null) {
                 onLocalOnly(remoteParentFolderId, localFile, localParentFolder, drive)
-            } else if (remoteFile != null && localFile != null) {
-                if (areFileDifferent(remoteFile, localFile)) {
-                    if (remoteFile.modifiedTime.value < localFile.lastModified()) {
-                        onLocalUpdated(localFile, drive, remoteFile)
-                    } else if (remoteFile.modifiedTime.value > localFile.lastModified()) {
+                true
+            } else if (remoteFile != null && localFile != null && areFileDifferent(remoteFile, localFile)) {
+                if (remoteFile.modifiedTime.value < localFile.lastModified()) {
+                    onLocalUpdated(localFile, drive, remoteFile)
+                    true
+                } else {
+                    if (remoteFile.modifiedTime.value > localFile.lastModified()) {
                         onRemoteUpdated(drive, remoteFile, localFile)
                     }
+                    false
                 }
+            } else {
+                false
             }
-        }
+        }.getOrDefault(false)
     }
 
     private fun areFileDifferent(
@@ -327,7 +503,13 @@ class SaveSyncManagerImpl(
     }
 
     companion object {
+        const val PROVIDER_SMB = "smb"
         const val GDRIVE_PROPERTY_LOCAL_PATH = "localPath"
-        private val SYNC_LOCK = Object()
+        private const val DRIVE_RECORDS_PREFERENCES = "gdrive_save_sync"
+
+        // Marker of a damaged file (compared by identity).
+        private val DAMAGED = JSONObject()
+        private val SYNC_LOCK = Mutex()
+        private val SMB_LOCK = Mutex()
     }
 }

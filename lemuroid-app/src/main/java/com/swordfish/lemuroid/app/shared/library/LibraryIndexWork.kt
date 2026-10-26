@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.swordfish.lemuroid.app.mobile.shared.NotificationsManager
 import com.swordfish.lemuroid.app.utils.android.createSyncForegroundInfo
+import com.swordfish.lemuroid.app.utils.android.withNotificationInBackground
 import com.swordfish.lemuroid.lib.core.CoreUpdater
 import com.swordfish.lemuroid.lib.core.CoresSelection
 import com.swordfish.lemuroid.lib.injection.AndroidWorkerInjection
@@ -17,10 +18,10 @@ import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
 import dagger.Binds
 import dagger.android.AndroidInjector
 import dagger.multibindings.IntoMap
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
 
 class LibraryIndexWork(context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -41,29 +42,30 @@ class LibraryIndexWork(context: Context, workerParams: WorkerParameters) :
 
         val notificationsManager = NotificationsManager(applicationContext)
 
-        val foregroundInfo =
+        val foregroundInfo = {
             createSyncForegroundInfo(
                 NotificationsManager.LIBRARY_INDEXING_NOTIFICATION_ID,
                 notificationsManager.libraryIndexingNotification(),
             )
-
-        setForegroundAsync(foregroundInfo)
-
-        val result =
-            withContext(Dispatchers.IO) {
-                kotlin.runCatching {
-                    lemuroidLibrary.indexLibrary { setProgress(filesProgress(it)) }
-                }
-            }
-
-        result.exceptionOrNull()?.let {
-            Timber.e("Library indexing work terminated with an exception:", it)
         }
 
-        // The cores of the systems found are prepared by this same work, so the loading progress only reaches
-        // 100% (and the games are shown) when they are ready too.
-        if (!isStopped) {
-            withContext(Dispatchers.IO) { downloadLibraryCores() }
+        withNotificationInBackground(foregroundInfo) {
+            val result =
+                withContext(Dispatchers.IO) {
+                    kotlin.runCatching {
+                        lemuroidLibrary.indexLibrary { setProgress(filesProgress(it)) }
+                    }
+                }
+
+            result.exceptionOrNull()?.let {
+                Timber.e("Library indexing work terminated with an exception:", it)
+            }
+
+            // The cores of the systems found are prepared by this same work, so the loading progress only reaches
+            // 100% (and the games are shown) when they are ready too.
+            if (!isStopped) {
+                withContext(Dispatchers.IO) { downloadLibraryCores() }
+            }
         }
 
         return Result.success()

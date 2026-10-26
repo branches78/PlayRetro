@@ -12,12 +12,19 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.leanback.widget.BrowseFrameLayout
 import androidx.leanback.widget.SearchOrbView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.swordfish.lemuroid.R
+import com.swordfish.lemuroid.app.shared.library.PendingOperationsMonitor
+import com.swordfish.lemuroid.app.shared.savesync.SaveSyncChanges
+import com.swordfish.lemuroid.app.shared.savesync.SaveSyncWork
 import com.swordfish.lemuroid.app.tv.about.TVAboutFragment
 import com.swordfish.lemuroid.app.tv.favorites.TVFavoritesFragment
 import com.swordfish.lemuroid.app.tv.games.TVGamesFragment
@@ -26,6 +33,9 @@ import com.swordfish.lemuroid.app.tv.home.TVHomeFragment
 import com.swordfish.lemuroid.app.tv.settings.TVSettingsTabFragment
 import com.swordfish.lemuroid.app.tv.systems.TVSystemsFragment
 import com.swordfish.lemuroid.lib.library.db.entity.Game
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * TV start screen: search button on the left, centered tabs (home, systems, settings)
@@ -70,9 +80,17 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
         }
 
         view.findViewById<SearchOrbView>(R.id.tv_search_orb).apply {
-            orbColor = ContextCompat.getColor(requireContext(), R.color.tv_accent)
+            // White like the rest of the interface (only the logo is green), with a dark icon.
+            orbColors =
+                SearchOrbView.Colors(
+                    ContextCompat.getColor(requireContext(), R.color.md_theme_dark_primary),
+                    ContextCompat.getColor(requireContext(), R.color.tv_tab_focused_background),
+                    ContextCompat.getColor(requireContext(), R.color.md_theme_dark_background),
+                )
             setOnOrbClickedListener { findNavController().navigate(R.id.navigation_search) }
         }
+
+        setupSyncOrb(view.findViewById(R.id.tv_sync_orb))
 
         view.findViewById<BrowseFrameLayout>(R.id.tv_tabs_root).onFocusSearchListener =
             BrowseFrameLayout.OnFocusSearchListener { focused, direction ->
@@ -110,6 +128,54 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
             } else {
                 focusTabIfNothingFocused(searchOrb)
             }
+        }
+    }
+
+    /** Same look as the search orb, with a cloud. A click while a sync is running is ignored and keeps the focus. */
+    private fun setupSyncOrb(syncOrb: SearchOrbView) {
+        syncOrb.orbColors =
+            SearchOrbView.Colors(
+                ContextCompat.getColor(requireContext(), R.color.md_theme_dark_primary),
+                ContextCompat.getColor(requireContext(), R.color.tv_tab_focused_background),
+                ContextCompat.getColor(requireContext(), R.color.md_theme_dark_background),
+            )
+        syncOrb.orbIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_tv_sync_orb)
+
+        var syncInProgress = false
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                PendingOperationsMonitor(requireContext().applicationContext)
+                    .anySaveOperationInProgress()
+                    .collect { syncInProgress = it }
+            }
+        }
+        syncOrb.setOnOrbClickedListener {
+            if (!syncInProgress) SaveSyncWork.enqueueManualWork(requireContext().applicationContext)
+        }
+
+        // Only usable when there is something to sync: otherwise it is dimmed and the focus skips it.
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SaveSyncChanges.hasChanges.collect { hasChanges ->
+                    if (!hasChanges && syncOrb.hasFocus()) tabs.getOrNull(selectedTab)?.requestFocus()
+                    syncOrb.isFocusable = hasChanges
+                    syncOrb.isEnabled = hasChanges
+                    syncOrb.alpha = if (hasChanges) 1f else DISABLED_ORB_ALPHA
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // The sync may have been configured or turned off in the settings meanwhile.
+        val syncOrb = view?.findViewById<View>(R.id.tv_sync_orb) ?: return
+        val saveSyncManager = (activity as? MainTVActivity)?.saveSyncManager ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            val available =
+                withContext(Dispatchers.IO) { saveSyncManager.isSupported() && saveSyncManager.isConfigured() }
+            if (!available && syncOrb.hasFocus()) tabs.getOrNull(selectedTab)?.requestFocus()
+            syncOrb.isVisible = available
         }
     }
 
@@ -370,6 +436,7 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
     companion object {
         private const val KEY_SELECTED_TAB = "selected_tab"
         private const val CONTENT_FOCUS_WAIT_MS = 600L
+        private const val DISABLED_ORB_ALPHA = 0.4f
         private const val BACK_STACK_INNER_SCREEN = "inner_screen"
         private const val TAB_HOME = 0
         private const val TAB_SYSTEMS = 1

@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Tune
@@ -67,6 +68,8 @@ import androidx.compose.ui.unit.dp
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameTexts
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidSmallGameImage
+import com.swordfish.lemuroid.app.shared.details.canConfigureCore
+import com.swordfish.lemuroid.app.shared.details.canSelectCore
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import timber.log.Timber
 
@@ -268,11 +271,25 @@ fun GameContextMenuContent(
             )
         }
 
-        // Core options are only known once the core has run, so they are offered after the first play.
-        if (hasBeenPlayed) {
+        // Core options are only known once the core has run, so they are offered after the first play, and only
+        // when there is something to configure.
+        val coreConfigurable = remember(selectedGame.id, hasBeenPlayed) { canConfigureCore(context, selectedGame) }
+        if (coreConfigurable) {
             ContextActionEntry(
                 label = stringResource(id = R.string.game_context_menu_core_options),
                 icon = Icons.Default.Tune,
+                onClick = {
+                    onOpenCoreOptions(selectedGame)
+                    onDismiss()
+                },
+            )
+        }
+
+        // Before that, the core can be chosen for this game when its system has more than one.
+        if (canSelectCore(selectedGame)) {
+            ContextActionEntry(
+                label = stringResource(id = R.string.game_context_menu_select_core),
+                icon = Icons.Default.Memory,
                 onClick = {
                     onOpenCoreOptions(selectedGame)
                     onDismiss()

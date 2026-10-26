@@ -1,12 +1,14 @@
 package com.swordfish.lemuroid.lib.storage.local
 
 import android.content.Context
+import android.net.Uri
 import com.swordfish.lemuroid.common.kotlin.calculateCrc32
 import com.swordfish.lemuroid.common.kotlin.toStringCRC32
 import com.swordfish.lemuroid.lib.storage.BaseStorageFile
 import com.swordfish.lemuroid.lib.storage.StorageFile
 import com.swordfish.lemuroid.lib.storage.scanner.SerialScanner
 import timber.log.Timber
+import java.io.InputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
@@ -15,24 +17,26 @@ object DocumentFileParser {
     private const val SINGLE_ARCHIVE_THRESHOLD = 0.9
     private const val MAX_SIZE_CRC32 = 1_000_000_000
 
+    /** [openInputStream] reads the file: by default from a content URI, other providers read their own URIs. */
     fun parseDocumentFile(
         context: Context,
         baseStorageFile: BaseStorageFile,
+        openInputStream: (Uri) -> InputStream? = { context.contentResolver.openInputStream(it) },
     ): StorageFile {
         return if (baseStorageFile.extension == "zip") {
             Timber.d("Detected zip file. ${baseStorageFile.name}")
-            parseZipFile(context, baseStorageFile)
+            parseZipFile(baseStorageFile, openInputStream)
         } else {
             Timber.d("Detected standard file. ${baseStorageFile.name}")
-            parseStandardFile(context, baseStorageFile)
+            parseStandardFile(baseStorageFile, openInputStream)
         }
     }
 
     private fun parseZipFile(
-        context: Context,
         baseStorageFile: BaseStorageFile,
+        openInputStream: (Uri) -> InputStream?,
     ): StorageFile {
-        val inputStream = context.contentResolver.openInputStream(baseStorageFile.uri)
+        val inputStream = openInputStream(baseStorageFile.uri)
         return ZipInputStream(inputStream).use {
             val gameEntry = findGameEntry(it, baseStorageFile.size)
             if (gameEntry != null) {
@@ -40,7 +44,7 @@ object DocumentFileParser {
                 parseCompressedGame(baseStorageFile, gameEntry, it)
             } else {
                 Timber.d("Handing zip file as standard: ${baseStorageFile.name}")
-                parseStandardFile(context, baseStorageFile)
+                parseStandardFile(baseStorageFile, openInputStream)
             }
         }
     }
@@ -66,16 +70,16 @@ object DocumentFileParser {
     }
 
     private fun parseStandardFile(
-        context: Context,
         baseStorageFile: BaseStorageFile,
+        openInputStream: (Uri) -> InputStream?,
     ): StorageFile {
         val diskInfo =
-            context.contentResolver.openInputStream(baseStorageFile.uri)
-                ?.let { inputStream -> SerialScanner.extractInfo(baseStorageFile.name, inputStream) }
+            openInputStream(baseStorageFile.uri)
+                ?.use { inputStream -> SerialScanner.extractInfo(baseStorageFile.name, inputStream) }
 
         val crc32 =
             if (baseStorageFile.size < MAX_SIZE_CRC32 && diskInfo?.serial == null) {
-                context.contentResolver.openInputStream(baseStorageFile.uri)?.calculateCrc32()
+                openInputStream(baseStorageFile.uri)?.use { it.calculateCrc32() }
             } else {
                 null
             }
