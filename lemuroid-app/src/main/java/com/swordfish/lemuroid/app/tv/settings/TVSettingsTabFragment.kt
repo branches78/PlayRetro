@@ -24,6 +24,7 @@ import com.fredporciuncula.flow.preferences.FlowSharedPreferences
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.feature.main.MainRoute
 import com.swordfish.lemuroid.app.mobile.feature.main.composable
+import com.swordfish.lemuroid.app.mobile.feature.main.navigateToRoute
 import com.swordfish.lemuroid.app.mobile.feature.settings.bios.BiosScreen
 import com.swordfish.lemuroid.app.mobile.feature.settings.bios.BiosSettingsViewModel
 import com.swordfish.lemuroid.app.mobile.feature.settings.coreselection.CoreOptionsSettingsScreen
@@ -169,6 +170,15 @@ class TVSettingsTabFragment : Fragment() {
                                         )
                                     }
                                 }
+                                composable(MainRoute.SETTINGS_SMB_SYNC) {
+                                    SettingsFocusDestination {
+                                        SmbSettingsScreen(
+                                            viewModel = viewModel(factory = SmbSettingsViewModel.syncFolderFactory(appContext)),
+                                            isTV = true,
+                                            onClose = { navController.popBackStack() },
+                                        )
+                                    }
+                                }
                                 composable(MainRoute.SETTINGS_SAVE_SYNC) {
                                     SettingsFocusDestination {
                                         SaveSyncSettingsScreen(
@@ -176,6 +186,9 @@ class TVSettingsTabFragment : Fragment() {
                                                 viewModel(
                                                     factory = SaveSyncSettingsViewModel.Factory(application, saveSyncManager),
                                                 ),
+                                            onConfigureNetworkFolder = {
+                                                navController.navigateToRoute(MainRoute.SETTINGS_SMB_SYNC)
+                                            },
                                         )
                                     }
                                 }

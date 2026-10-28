@@ -153,6 +153,18 @@ fun LemuroidTopBarActions(
             MainRoute.SYSTEM_GAMES -> ViewModeToggle(gamesGridMode, onToggleGamesViewMode)
             else -> { }
         }
+        // Left of the search button, and only when there is something to sync and nothing running.
+        val hasChanges = SaveSyncChanges.hasChanges.collectAsState().value
+        if (saveSyncEnabled && hasChanges && !operationsInProgress) {
+            IconButton(
+                onClick = { SaveSyncWork.enqueueManualWork(context.applicationContext) },
+            ) {
+                Icon(
+                    Icons.Outlined.CloudSync,
+                    stringResource(R.string.save_sync),
+                )
+            }
+        }
         if (route != MainRoute.SEARCH) {
             IconButton(
                 onClick = { onSearchPressed() },
@@ -160,19 +172,6 @@ fun LemuroidTopBarActions(
                 Icon(
                     Icons.Filled.Search,
                     stringResource(R.string.title_search),
-                )
-            }
-        }
-        if (saveSyncEnabled) {
-            // Only when there is something to sync.
-            val hasChanges = SaveSyncChanges.hasChanges.collectAsState().value
-            IconButton(
-                onClick = { SaveSyncWork.enqueueManualWork(context.applicationContext) },
-                enabled = !operationsInProgress && hasChanges,
-            ) {
-                Icon(
-                    Icons.Outlined.CloudSync,
-                    stringResource(R.string.save_sync),
                 )
             }
         }

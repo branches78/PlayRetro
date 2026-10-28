@@ -459,11 +459,13 @@ class TVHomeFragment : RowsSupportFragment() {
                 addClassPresenter(
                     Game::class.java,
                     // A square cell with the cover inside it, like in the grids of the consoles, small enough for 5
-                    // whole cells in the content width with the spacing of the rows.
+                    // whole cells in the content width with the spacing of the rows. The covers start at the top of
+                    // the row, aligned whatever their height.
                     GamePresenter(
                         cardWidth,
                         gameInteractor,
                         fitInCell = true,
+                        topInCell = true,
                         alwaysShowMenu = alwaysShowMenu,
                     ),
                 )

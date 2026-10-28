@@ -295,6 +295,13 @@ private fun HomeRowGames(
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         // Measured on the row itself, not on the screen width, which may differ from the room the row really has.
         val cardWidth = homeCardWidth(maxWidth)
+        // One cell shape for the whole row (not one per visible card): otherwise the height of the row follows the
+        // cards on screen and the cards move up and down. The shape of its system when all the games are of
+        // one, square with several, like the TV home (the tallest shape left big gaps around the wide covers).
+        val cellRatio =
+            remember(games) {
+                games.map { CoverAspectRatio.forGameSystem(it) }.distinct().singleOrNull() ?: 1f
+            }
 
         LazyRow(
             state = listState,
@@ -303,20 +310,21 @@ private fun HomeRowGames(
                     .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(HOME_ROW_SPACING),
             contentPadding = PaddingValues(HOME_ROW_PADDING),
-            // Cells of different heights (systems): the titles stay on one line.
-            verticalAlignment = Alignment.Bottom,
+            // Cards of different sizes: all of them start at the top of the row, like the cards of the TV home.
+            verticalAlignment = Alignment.Top,
         ) {
             items(games.size, key = { games[it].id }) { index ->
                 val game = games[index]
-                // Same size as in the grid of the games of a console: a cell as wide as a third of the row, with the
-                // usual shape of the covers of its system, and the cover inside it with its real shape.
+                // A cell as wide as a third of the row, like the grid of the games of a console, with the cover inside
+                // it with its real shape.
                 LemuroidGameGridCard(
                     modifier =
                         Modifier
                             .width(cardWidth)
                             .animateItem(),
                     game = game,
-                    cellRatio = CoverAspectRatio.forGameSystem(game),
+                    cellRatio = cellRatio,
+                    alignment = Alignment.TopCenter,
                     onClick = { onGameClicked(game) },
                     onLongClick = { onGameLongClick(game) },
                 )

@@ -20,6 +20,9 @@ class GamePresenter(
     // border and focus frame) takes the real shape of the cover inside it. Otherwise (rows, search) every card has
     // the height [cardSize] and the width of its cover.
     private val fitInCell: Boolean = false,
+    // With [fitInCell]: the card at the top of its cell instead of in the middle (home rows), so all the covers of a
+    // row start at the same height.
+    private val topInCell: Boolean = false,
     // The long press menu is kept only in "Continue playing" when choosing a game opens its details, which have
     // the same actions. Elsewhere a long press then opens the details too, like a normal press.
     private val alwaysShowMenu: Boolean = false,
@@ -79,19 +82,31 @@ class GamePresenter(
             }
     }
 
-    /** Margins that keep the card in the middle of its square cell, so the columns of the grid stay aligned. */
+    /**
+     * Margins that keep the card in the middle of its square cell (at the top with [topInCell]), so the columns of the
+     * grid stay aligned.
+     */
     private fun centerInCell(
         view: View,
         cardWidth: Int,
         cardHeight: Int,
     ) {
         val horizontal = (cardSize - cardWidth) / 2
-        val vertical = (cardSize - cardHeight) / 2
+        val vertical = if (topInCell) 0 else (cardSize - cardHeight) / 2
         val params =
             (view.layoutParams as? ViewGroup.MarginLayoutParams)
                 ?: ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        if (params.leftMargin != horizontal || params.topMargin != vertical || view.layoutParams !== params) {
-            params.setMargins(horizontal, vertical, cardSize - cardWidth - horizontal, cardSize - cardHeight - vertical)
+        val right = cardSize - cardWidth - horizontal
+        val bottom = cardSize - cardHeight - vertical
+        // All four: at the top of the cell the top margin is always 0, and a recycled card must still get the bottom
+        // margin of its new cover, or the height of the row changes while scrolling.
+        if (params.leftMargin != horizontal ||
+            params.topMargin != vertical ||
+            params.rightMargin != right ||
+            params.bottomMargin != bottom ||
+            view.layoutParams !== params
+        ) {
+            params.setMargins(horizontal, vertical, right, bottom)
             view.layoutParams = params
         }
     }

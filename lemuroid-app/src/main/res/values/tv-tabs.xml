@@ -41,11 +41,14 @@
     <dimen name="tv_backdrop_width">758dp</dimen>
     <dimen name="tv_backdrop_height">426dp</dimen>
     <dimen name="tv_immersive_info_width">485dp</dimen>
-    <dimen name="tv_immersive_info_gap">40dp</dimen>
-    <!-- Position of the cards of the immersive list (305dp from the top of the screen): their square cells (about
-         153dp), names and focus zoom fit above the bottom of the screen. Its texts end tv_immersive_info_gap above it.
+    <!-- Space between the description of the immersive list and its cards. -->
+    <dimen name="tv_immersive_info_gap">30dp</dimen>
+    <!-- Position of the cards of the immersive list (295dp from the top of the screen): their square cells (about
+         153dp), names and focus zoom fit above the bottom of the screen, also with tall covers, and the title of
+         "Continue playing" stays just below the screen (higher, its letters peek out cut). Its texts end
+         tv_immersive_info_gap above it, at 185dp (the height of their container is this minus that gap).
          Like the next one, it is the position of the cards: the title of a row goes above it. -->
-    <dimen name="tv_immersive_row_top">225dp</dimen>
+    <dimen name="tv_immersive_row_top">215dp</dimen>
     <!-- Other home rows, while they have the focus and the immersive list is collapsed: room for their title above,
          with the previous row fully out of the screen (its bottom edge must not show under the tabs bar). -->
     <dimen name="tv_home_rows_top">46dp</dimen>

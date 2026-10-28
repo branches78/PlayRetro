@@ -80,13 +80,7 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
         }
 
         view.findViewById<SearchOrbView>(R.id.tv_search_orb).apply {
-            // White like the rest of the interface (only the logo is green), with a dark icon.
-            orbColors =
-                SearchOrbView.Colors(
-                    ContextCompat.getColor(requireContext(), R.color.md_theme_dark_primary),
-                    ContextCompat.getColor(requireContext(), R.color.tv_tab_focused_background),
-                    ContextCompat.getColor(requireContext(), R.color.md_theme_dark_background),
-                )
+            setupOrbColors(this)
             setOnOrbClickedListener { findNavController().navigate(R.id.navigation_search) }
         }
 
@@ -131,51 +125,82 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
         }
     }
 
-    /** Same look as the search orb, with a cloud. A click while a sync is running is ignored and keeps the focus. */
+    // Whether the sync is configured, has something to do, and is running (see updateSyncOrb).
+    private var syncAvailable = false
+    private var syncHasChanges = false
+    private var syncInProgress = false
+
+    /**
+     * Same look as the search orb, with a cloud. Only shown when the sync is configured and has something to do, and
+     * not while it runs (the banner shows it then).
+     */
     private fun setupSyncOrb(syncOrb: SearchOrbView) {
-        syncOrb.orbColors =
-            SearchOrbView.Colors(
-                ContextCompat.getColor(requireContext(), R.color.md_theme_dark_primary),
-                ContextCompat.getColor(requireContext(), R.color.tv_tab_focused_background),
-                ContextCompat.getColor(requireContext(), R.color.md_theme_dark_background),
-            )
+        setupOrbColors(syncOrb)
         syncOrb.orbIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_tv_sync_orb)
 
-        var syncInProgress = false
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 PendingOperationsMonitor(requireContext().applicationContext)
                     .anySaveOperationInProgress()
-                    .collect { syncInProgress = it }
+                    .collect {
+                        syncInProgress = it
+                        updateSyncOrb()
+                    }
             }
         }
         syncOrb.setOnOrbClickedListener {
             if (!syncInProgress) SaveSyncWork.enqueueManualWork(requireContext().applicationContext)
         }
 
-        // Only usable when there is something to sync: otherwise it is dimmed and the focus skips it.
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                SaveSyncChanges.hasChanges.collect { hasChanges ->
-                    if (!hasChanges && syncOrb.hasFocus()) tabs.getOrNull(selectedTab)?.requestFocus()
-                    syncOrb.isFocusable = hasChanges
-                    syncOrb.isEnabled = hasChanges
-                    syncOrb.alpha = if (hasChanges) 1f else DISABLED_ORB_ALPHA
+                SaveSyncChanges.hasChanges.collect {
+                    syncHasChanges = it
+                    updateSyncOrb()
                 }
             }
         }
     }
 
+    /**
+     * The bright green of the logo with a dark icon, and white with a dark icon when focused, like the tabs.
+     * Both colors of a state are the same, so the orb doesn't pulse between them while it has the focus.
+     */
+    private fun setupOrbColors(orb: SearchOrbView) {
+        val context = requireContext()
+        val green = ContextCompat.getColor(context, R.color.playretro_brand_green)
+        val greenIcon = ContextCompat.getColor(context, R.color.md_theme_dark_background)
+        val focused = ContextCompat.getColor(context, R.color.tv_tab_focused_background)
+        val focusedIcon = ContextCompat.getColor(context, R.color.tv_tab_focused_text)
+        val setColors = { hasFocus: Boolean ->
+            orb.orbColors =
+                if (hasFocus) {
+                    SearchOrbView.Colors(focused, focused, focusedIcon)
+                } else {
+                    SearchOrbView.Colors(green, green, greenIcon)
+                }
+        }
+        setColors(orb.hasFocus())
+        orb.setOnFocusChangeListener { _, hasFocus -> setColors(hasFocus) }
+    }
+
+    /** Shows or hides the sync orb; when it hides with the focus, the focus goes to the selected tab. */
+    private fun updateSyncOrb() {
+        val syncOrb = view?.findViewById<View>(R.id.tv_sync_orb) ?: return
+        val visible = syncAvailable && syncHasChanges && !syncInProgress
+        if (!visible && syncOrb.hasFocus()) tabs.getOrNull(selectedTab)?.requestFocus()
+        syncOrb.isVisible = visible
+    }
+
     override fun onResume() {
         super.onResume()
         // The sync may have been configured or turned off in the settings meanwhile.
-        val syncOrb = view?.findViewById<View>(R.id.tv_sync_orb) ?: return
+        if (view == null) return
         val saveSyncManager = (activity as? MainTVActivity)?.saveSyncManager ?: return
         viewLifecycleOwner.lifecycleScope.launch {
-            val available =
+            syncAvailable =
                 withContext(Dispatchers.IO) { saveSyncManager.isSupported() && saveSyncManager.isConfigured() }
-            if (!available && syncOrb.hasFocus()) tabs.getOrNull(selectedTab)?.requestFocus()
-            syncOrb.isVisible = available
+            updateSyncOrb()
         }
     }
 
@@ -436,7 +461,6 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
     companion object {
         private const val KEY_SELECTED_TAB = "selected_tab"
         private const val CONTENT_FOCUS_WAIT_MS = 600L
-        private const val DISABLED_ORB_ALPHA = 0.4f
         private const val BACK_STACK_INNER_SCREEN = "inner_screen"
         private const val TAB_HOME = 0
         private const val TAB_SYSTEMS = 1

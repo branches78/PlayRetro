@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -120,6 +121,9 @@ class TVGameDetailsFragment : Fragment() {
     @Inject
     lateinit var descriptionProvider: GameDescriptionProvider
 
+    /** Game of "More from" opened from this screen: back from it, the focus goes to its card instead of Play. */
+    private var openedGameId: Int? = null
+
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
@@ -131,6 +135,9 @@ class TVGameDetailsFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         val gameId = requireArguments().getInt(ARG_GAME_ID)
+        // The view is made again when coming back from another game: only then it has one to focus.
+        val refocusGameId = openedGameId
+        openedGameId = null
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -157,7 +164,11 @@ class TVGameDetailsFragment : Fragment() {
                                     onOpenCoreOptions = {
                                         TVGameContextMenu.show(context, it, gameInteractor, startWithCoreOptions = true)
                                     },
-                                    onOpenGame = { open(this@TVGameDetailsFragment, it) },
+                                    onOpenGame = {
+                                        openedGameId = it.id
+                                        open(this@TVGameDetailsFragment, it)
+                                    },
+                                    refocusGameId = refocusGameId,
                                 )
                             }
                         }
@@ -211,8 +222,12 @@ private fun TVGameDetailsScreen(
     gameInteractor: GameInteractor,
     onOpenCoreOptions: (Game) -> Unit,
     onOpenGame: (Game) -> Unit,
+    refocusGameId: Int?,
 ) {
     var moreRowFocused by remember { mutableStateOf(false) }
+    // Back from a game of "More from": its card is focused instead of Play, with the row scrolled to it.
+    val refocusIndex = state.moreGames.indexOfFirst { it.id == refocusGameId }
+    val refocusRequester = remember { FocusRequester() }
     var showFullDescription by remember { mutableStateOf(false) }
     // With the focus on the other games the details move up and fade, like a streaming app.
     val detailsOffset by animateDpAsState(if (moreRowFocused) (-DETAILS_SCROLL).dp else 0.dp, label = "detailsOffset")
@@ -276,8 +291,9 @@ private fun TVGameDetailsScreen(
                 }
                 // Play is focused when the screen opens, so playing is just one more press of OK.
                 LaunchedEffect(game.id) {
+                    val requester = if (refocusIndex >= 0) refocusRequester else playFocusRequester
                     repeat(FOCUS_ATTEMPTS) {
-                        if (runCatching { playFocusRequester.requestFocus() }.isSuccess) return@LaunchedEffect
+                        if (runCatching { requester.requestFocus() }.isSuccess) return@LaunchedEffect
                         delay(FOCUS_ATTEMPT_DELAY_MS)
                     }
                 }
@@ -294,12 +310,16 @@ private fun TVGameDetailsScreen(
                 // The side and vertical padding leave room for the zoom of the focused card, which would be cut by
                 // the edges of the row otherwise; the first card stays aligned with the texts above.
                 LazyRow(
+                    state = rememberLazyListState(initialFirstVisibleItemIndex = refocusIndex.coerceAtLeast(0)),
                     modifier = Modifier.onFocusChanged { moreRowFocused = it.hasFocus },
                     horizontalArrangement = Arrangement.spacedBy(homeCardSpacing()),
                     contentPadding = PaddingValues(horizontal = SIDE_PADDING.dp, vertical = MORE_ROW_ZOOM_ROOM.dp),
                 ) {
                     items(state.moreGames, key = { it.id }) { other ->
-                        TVMoreGameCard(other) { onOpenGame(other) }
+                        TVMoreGameCard(
+                            game = other,
+                            modifier = if (other.id == refocusGameId) Modifier.focusRequester(refocusRequester) else Modifier,
+                        ) { onOpenGame(other) }
                     }
                 }
             }
@@ -560,6 +580,7 @@ private fun TVActionButton(
 @Composable
 private fun TVMoreGameCard(
     game: Game,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     var focused by remember { mutableStateOf(false) }
@@ -570,7 +591,7 @@ private fun TVMoreGameCard(
 
     Column(
         modifier =
-            Modifier
+            modifier
                 .width(cardSize)
                 .scale(scale)
                 .onFocusChanged { focused = it.isFocused }

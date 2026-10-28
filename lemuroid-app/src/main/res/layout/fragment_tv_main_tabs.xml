@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:clipChildren="false" />
 
-            <!-- Syncs the saves now; only shown when the sync is configured. -->
+            <!-- Syncs the saves now; only shown when the sync is configured and has something to do. -->
             <androidx.leanback.widget.SearchOrbView
                 android:id="@+id/tv_sync_orb"
                 android:layout_width="wrap_content"

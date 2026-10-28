@@ -4,21 +4,25 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import com.swordfish.lemuroid.app.shared.covers.CoverAspectRatio
 import com.swordfish.lemuroid.app.utils.games.GameCardSubtitle
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 /**
- * Game of a grid: every cell has the shape [cellRatio] so the rows stay aligned, and inside it the card (with its
- * corners and shadow) takes the real shape of the cover, at the bottom of the cell, right above the texts. No empty
- * bands around the cover.
+ * Game of a grid or a home row, like the cards of the TV: every cell has room for a cover of the shape [cellRatio]
+ * and the texts, so the rows stay aligned, and inside it one card (with its corners and shadow) with the cover in its
+ * real shape and the name and [subtitle] below, as wide as the cover and placed in the cell by [alignment] (centered
+ * in the grids, at the top in the home rows). No empty bands around the cover; on narrow covers the name is cut.
  */
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
@@ -27,30 +31,26 @@ fun LemuroidGameGridCard(
     game: Game,
     cellRatio: Float,
     subtitle: GameCardSubtitle = GameCardSubtitle.SYSTEM,
+    alignment: Alignment = Alignment.Center,
     onClick: () -> Unit = { },
     onLongClick: () -> Unit = { },
 ) {
-    Column(
-        modifier =
-            modifier.combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
-            ),
-    ) {
-        BoxWithConstraints(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(cellRatio),
-            contentAlignment = Alignment.BottomCenter,
-        ) {
-            // Real shape of the cover once loaded, the usual one of its system before.
-            val coverRatio = CoverAspectRatio.forGame(game)
-            val coverWidth = if (coverRatio >= cellRatio) maxWidth else maxHeight * coverRatio
-            ElevatedCard(modifier = Modifier.width(coverWidth)) {
+    BoxWithConstraints(modifier = modifier, contentAlignment = alignment) {
+        val coverAreaHeight = maxWidth / cellRatio
+        // Real shape of the cover once loaded, the usual one of its system before.
+        val coverRatio = CoverAspectRatio.forGame(game)
+        val coverWidth = if (coverRatio >= cellRatio) maxWidth else coverAreaHeight * coverRatio
+
+        // Size of the cell: the room of the cover and of the texts, the same whatever the shape of the cover.
+        Column(modifier = Modifier.fillMaxWidth().alpha(0f).clearAndSetSemantics { }) {
+            Spacer(modifier = Modifier.fillMaxWidth().height(coverAreaHeight))
+            LemuroidGameTexts(game = game, singleLineTitle = true, subtitle = subtitle)
+        }
+        ElevatedCard(modifier = Modifier.width(coverWidth)) {
+            Column(modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)) {
                 LemuroidGameImage(game = game, fixedRatio = coverRatio)
+                LemuroidGameTexts(game = game, singleLineTitle = true, subtitle = subtitle)
             }
         }
-        LemuroidGameTexts(game = game, reserveTitleLines = true, subtitle = subtitle)
     }
 }

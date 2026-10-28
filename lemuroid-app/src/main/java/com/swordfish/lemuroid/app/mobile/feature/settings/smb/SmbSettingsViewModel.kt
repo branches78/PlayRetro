@@ -33,6 +33,12 @@ class SmbSettingsViewModel(
         }
     }
 
+    companion object {
+        /** From the sync settings: with the library in a folder of the device, only the folder of the sync is set. */
+        fun syncFolderFactory(appContext: Context): Factory =
+            Factory(appContext, SmbConfigStore(appContext).librarySource != SmbConfigStore.LibrarySource.SMB)
+    }
+
     sealed interface TestResult {
         data object Testing : TestResult
 

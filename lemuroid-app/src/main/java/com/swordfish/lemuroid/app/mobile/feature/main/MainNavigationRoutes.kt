@@ -162,6 +162,12 @@ enum class MainRoute(
         titleId = R.string.smb_title,
         parent = SETTINGS,
     ),
+    // The same form, opened from the save sync settings (see SmbSettingsViewModel.syncFolderFactory).
+    SETTINGS_SMB_SYNC(
+        route = "settings/smb/sync",
+        titleId = R.string.smb_title,
+        parent = SETTINGS,
+    ),
     ABOUT(
         route = "about",
         titleId = R.string.title_about,

@@ -424,6 +424,13 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                             onClose = { navController.popBackStack() },
                         )
                     }
+                    composable(MainRoute.SETTINGS_SMB_SYNC) {
+                        SmbSettingsScreen(
+                            modifier = Modifier.padding(padding),
+                            viewModel = viewModel(factory = SmbSettingsViewModel.syncFolderFactory(applicationContext)),
+                            onClose = { navController.popBackStack() },
+                        )
+                    }
                     composable(MainRoute.SETTINGS_SAVE_SYNC) {
                         SaveSyncSettingsScreen(
                             modifier = Modifier.padding(padding),
@@ -435,6 +442,7 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                                             saveSyncManager,
                                         ),
                                 ),
+                            onConfigureNetworkFolder = { navController.navigateToRoute(MainRoute.SETTINGS_SMB_SYNC) },
                         )
                     }
                 }

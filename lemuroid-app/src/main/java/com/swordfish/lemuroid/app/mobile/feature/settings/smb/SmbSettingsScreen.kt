@@ -1,5 +1,6 @@
 package com.swordfish.lemuroid.app.mobile.feature.settings.smb
 
+import android.view.View
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.utils.android.PlayRetroButton
 import com.swordfish.lemuroid.app.utils.android.focusBorder
+import com.swordfish.lemuroid.app.utils.android.settings.SettingsFocusItem
 
 /**
  * Network share (SMB) with the games library: name, server, path from the share name and, optionally, user and
@@ -171,6 +174,7 @@ fun SmbSettingsScreen(
 /**
  * Text field of the form. The keyboard's action key is "next" and moves to the following field. On TV the field is
  * only edited after pressing OK on it, so moving through the form with the remote doesn't open the keyboard each time.
+ * On TV it is a settings item (see SettingsFocusDestination), so the first field gets the focus when the form opens.
  */
 @Composable
 private fun SmbTextField(
@@ -185,53 +189,66 @@ private fun SmbTextField(
 ) {
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
+    val view = LocalView.current
     var editing by remember { mutableStateOf(!isTV) }
 
     LaunchedEffect(editing) {
         if (isTV && editing) keyboard?.show()
     }
 
-    OutlinedTextField(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .onFocusChanged { if (isTV && !it.isFocused) editing = false }
-                .onPreviewKeyEvent { event ->
-                    val isOk = event.key == Key.DirectionCenter || event.key == Key.Enter || event.key == Key.NumPadEnter
-                    if (isTV && !editing && isOk) {
-                        if (event.type == KeyEventType.KeyUp) editing = true
-                        true
-                    } else {
-                        false
-                    }
-                },
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        supportingText = supportingText?.let { { Text(it) } },
-        readOnly = !editing,
-        visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Next),
-        keyboardActions =
-            KeyboardActions(
-                onNext = {
-                    if (isTV) {
-                        editing = false
-                        keyboard?.hide()
-                    }
-                    focusManager.moveFocus(FocusDirection.Down)
-                },
-            ),
-        singleLine = true,
-    )
+    SettingsFocusItem(enabled = true) {
+        OutlinedTextField(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { if (isTV && !it.isFocused) editing = false }
+                    .onPreviewKeyEvent { event ->
+                        val isOk = event.key == Key.DirectionCenter || event.key == Key.Enter || event.key == Key.NumPadEnter
+                        when {
+                            isTV && !editing && isOk -> {
+                                if (event.type == KeyEventType.KeyUp) editing = true
+                                true
+                            }
+                            // The text field moves the focus itself with the D-pad, but never out of the form: ↑ on the
+                            // first field goes on to the views around it, the selected tab of the TV top bar.
+                            isTV && !editing && event.key == Key.DirectionUp -> {
+                                if (event.type == KeyEventType.KeyDown && !focusManager.moveFocus(FocusDirection.Up)) {
+                                    view.focusSearch(View.FOCUS_UP)?.requestFocus()
+                                }
+                                true
+                            }
+                            else -> false
+                        }
+                    },
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            supportingText = supportingText?.let { { Text(it) } },
+            readOnly = !editing,
+            visualTransformation = visualTransformation,
+            trailingIcon = trailingIcon,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Next),
+            keyboardActions =
+                KeyboardActions(
+                    onNext = {
+                        if (isTV) {
+                            editing = false
+                            keyboard?.hide()
+                        }
+                        focusManager.moveFocus(FocusDirection.Down)
+                    },
+                ),
+            singleLine = true,
+        )
+    }
 }
 
 @Composable
 private fun TestResultText(result: SmbSettingsViewModel.TestResult?) {
+    // Empty before a test: its line is kept anyway, so the buttons below don't move when the result shows up.
     val text =
         when (result) {
-            null -> return
+            null -> ""
             SmbSettingsViewModel.TestResult.Testing -> stringResource(R.string.smb_testing)
             is SmbSettingsViewModel.TestResult.Success -> stringResource(R.string.smb_test_success, result.entries)
             is SmbSettingsViewModel.TestResult.Failure -> stringResource(R.string.smb_test_error, result.message)
@@ -248,5 +265,6 @@ private fun TestResultText(result: SmbSettingsViewModel.TestResult?) {
         color = color,
         style = MaterialTheme.typography.bodyMedium,
         textAlign = TextAlign.Center,
+        minLines = 1,
     )
 }

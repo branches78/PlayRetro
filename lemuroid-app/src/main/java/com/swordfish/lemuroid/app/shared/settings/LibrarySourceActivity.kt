@@ -32,21 +32,16 @@ import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
  * "Choose a folder" of an empty library (mobile home and TV "Home" and "Consoles" tabs): asks whether the games
  * come from a folder of the device or a network share, like "Directory" in the settings, and shows the network share
  * form when chosen. A folder of the device opens the usual folder picker.
- *
- * From the sync settings ([showSyncFolder]) the network share form is shown at once: with the library in a folder of
- * the device, saving it only sets where the saves are synced, and the source of the games doesn't change.
  */
 class LibrarySourceActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val isTV = TVHelper.isTV(this)
         val store = SmbConfigStore(this)
-        val formOnly = intent.getBooleanExtra(EXTRA_FORM_ONLY, false)
-        val syncOnly = formOnly && store.librarySource != SmbConfigStore.LibrarySource.SMB
 
         setContent {
             AppTheme {
-                var showSmbForm by rememberSaveable { mutableStateOf(formOnly) }
+                var showSmbForm by rememberSaveable { mutableStateOf(false) }
 
                 if (!showSmbForm) {
                     LibrarySourceDialog(
@@ -67,7 +62,7 @@ class LibrarySourceActivity : ComponentActivity() {
                         Box(modifier = Modifier.padding(horizontal = sideMargin)) {
                             SettingsFocusDestination {
                                 SmbSettingsScreen(
-                                    viewModel = viewModel(factory = SmbSettingsViewModel.Factory(applicationContext, syncOnly)),
+                                    viewModel = viewModel(factory = SmbSettingsViewModel.Factory(applicationContext)),
                                     isTV = isTV,
                                     onClose = { finish() },
                                 )
@@ -80,15 +75,8 @@ class LibrarySourceActivity : ComponentActivity() {
     }
 
     companion object {
-        private const val EXTRA_FORM_ONLY = "form_only"
-
         fun show(context: Context) {
             context.startActivity(Intent(context, LibrarySourceActivity::class.java))
-        }
-
-        /** The network share form, for the sync of the saves (see the class documentation). */
-        fun showSyncFolder(context: Context) {
-            context.startActivity(Intent(context, LibrarySourceActivity::class.java).putExtra(EXTRA_FORM_ONLY, true))
         }
     }
 }

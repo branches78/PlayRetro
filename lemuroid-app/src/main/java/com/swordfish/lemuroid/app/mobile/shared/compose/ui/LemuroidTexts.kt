@@ -14,14 +14,15 @@ import com.swordfish.lemuroid.app.utils.games.GameCardSubtitle
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 /**
- * Game name on up to two lines and, below, its system or its developer ([subtitle]).
- * Cards keep the space of two title lines, so all of them have the same height.
+ * Game name on up to two lines (one with [singleLineTitle], as in the cards) and, below, its system or its developer
+ * ([subtitle]). With [reserveTitleLines] they keep the space of two title lines, so all of them have the same height.
  */
 @Composable
 fun LemuroidGameTexts(
     modifier: Modifier = Modifier,
     game: Game,
     reserveTitleLines: Boolean = false,
+    singleLineTitle: Boolean = false,
     subtitle: GameCardSubtitle = GameCardSubtitle.SYSTEM,
 ) {
     val context = LocalContext.current
@@ -34,8 +35,8 @@ fun LemuroidGameTexts(
         modifier = modifier,
         title = game.displayName(),
         subtitle = subtitleText,
-        titleMaxLines = GAME_TITLE_MAX_LINES,
-        titleMinLines = if (reserveTitleLines) GAME_TITLE_MAX_LINES else 1,
+        titleMaxLines = if (singleLineTitle) 1 else GAME_TITLE_MAX_LINES,
+        titleMinLines = if (reserveTitleLines && !singleLineTitle) GAME_TITLE_MAX_LINES else 1,
     )
 }
 

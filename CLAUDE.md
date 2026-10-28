@@ -54,7 +54,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   y sus datos (partidas, ajustes, biblioteca) no pasan a la nueva.
 - Variante que se compila: **freeDynamicDebug** (sin librerías de Google; los cores se descargan al usarlos).
   La sincronización con Google Drive solo existe en la variante `play` y requiere credenciales propias en Google Cloud.
-- Tema fijo en teléfono y TV (sin Material You): blanco para textos de acento, iconos, interruptores y la lupa de TV
+- Tema fijo en teléfono y TV (sin Material You): blanco para textos de acento, iconos e interruptores; la lupa y la nube de TV usan el verde del logo (`playretro_brand_green`, icono oscuro; blancas con foco)
   (`primary`; solo el logo es verde) y verde oscuro #3A4B39 para rellenos (`primaryContainer`, `secondaryContainer`).
   Un tono casi gris del verde del logo (`playretro_soft_green`, #54635A, con contenido blanco) va en los interruptores
   (`BrandGreenFills` en `Components.kt`), en la pestaña seleccionada de TV cuando la barra no tiene el foco
@@ -84,7 +84,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   capturas (p. ej. de N64) traen franjas negras a los lados: se recortan al cargarlas
   (`shared/covers/TrimBlackBordersTransformation.kt`).
   Los textos (título de 1 línea a 32 sp; debajo, sistema, desarrollador y región en pequeño; descripción de 2 líneas; 485 dp de
-  ancho, `tv_home_immersive_info.xml`) acaban 40 dp por encima de las tarjetas (`tv_immersive_info_gap`), y las tarjetas
+  ancho, `tv_home_immersive_info.xml`) acaban 30 dp por encima de las tarjetas (`tv_immersive_info_gap`), y las tarjetas
   de la fila inmersiva van a 267 dp del borde superior del contenido (347 dp de la pantalla, la fila siguiente asoma
   86 dp); las demás filas, al enfocarse, a 46 dp, para que se vea
   su título sin que asome el borde inferior de la fila anterior bajo la barra
@@ -120,7 +120,10 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   un tercio de la fila, `homeCardWidth`; TV: el alto de una tarjeta 16:9 de las 5 del ancho del contenido, unos 86 dp,
   `tv_home_row_cards`, `tv_home_row_card_spacing`). En las rejillas cada juego ocupa una celda fija para que las
   columnas sigan alineadas y la tarjeta toma la forma de la carátula dentro: móvil `LemuroidGameGridCard` (celda con
-  la forma del sistema en una consola y cuadrada en Favoritos, carátula abajo, textos debajo); TV
+  la forma del sistema en una consola y cuadrada en Favoritos; como en la TV, una tarjeta con la carátula y debajo nombre
+  (1 línea) y subtítulo, del ancho de la carátula y centrada en la celda; en las filas de Inicio todas las celdas de una fila tienen la misma forma,
+  la de su consola si todos los juegos son de una y cuadrada si hay varias, para que la fila no cambie de alto al desplazarla,
+  y las tarjetas van arriba de la celda (`alignment = Alignment.TopCenter`) para que todas las carátulas empiecen a la misma altura); TV
   `GamePresenter(fitInCell = true)` (celda cuadrada, 5 por fila, `tv_home_cards_per_row`, tarjeta centrada con
   márgenes). Canal de la pantalla principal de la TV (`tv/channel/ChannelHandler.kt`): los juegos de "Continuar
   jugando" (misma consulta y orden), con un póster 16:9 hecho por la app con la carátula entera centrada
@@ -128,8 +131,11 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   marcar favoritos y tras una sincronización con cambios. El canal se busca por ser de la app, no por nombre: se
   conserva el que muestra el inicio (el creado cuando la app se llamaba GameStation), se renombra y se borran los
   sobrantes. En las filas de Inicio de la TV las carátulas van en celdas cuadradas de 5 por fila, sin la sombra de
-  Leanback (`shadowEnabled = false`, pintaba la celda entera); la fila inmersiva está en `tv_immersive_row_top`
-  (225 dp) para que quepan las tarjetas con su nombre. Alternativas de nombre y caché de
+  Leanback (`shadowEnabled = false`, pintaba la celda entera) y pegadas arriba de la celda (`topInCell = true`), no
+  centradas como en las rejillas; la fila inmersiva está en `tv_immersive_row_top`
+  (215 dp; los textos siguen terminando a 185 dp, solo se acortó el espacio entre la descripción y la fila; más arriba asoman cortadas las letras del título de "Seguir jugando") para que quepan las tarjetas con su nombre y el zoom aun con carátulas altas.
+  `GamePresenter.centerInCell` compara los cuatro márgenes (con `topInCell` el superior siempre es 0 y una
+  tarjeta reciclada conservaba el inferior viejo: la fila cambiaba de alto al desplazarla). Alternativas de nombre y caché de
   resultados en `ThumbnailFallbackInterceptor.kt`. Reconocimiento de juegos (CRC, TOSEC → No-Intro, búsqueda por título)
   en `lemuroid-metadata-libretro-db/.../LibretroDBMetadataProvider.kt`.
 - **Texto bajo las tarjetas de juegos** (`utils/games/GameCardSubtitle.kt`, móvil y TV): la consola en Inicio, Favoritos
@@ -204,8 +210,8 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   **Sincronización por SMB** (`lib/savesync/SmbSaveSync.kt`): en la variante sin Google es la única
   (`lemuroid-app-ext-free/.../SaveSyncManagerImpl.kt`); en la de Play se elige Google Drive o la carpeta de red
   (`pref_key_save_sync_provider`, "Sincronizar con" en Ajustes → Sincronización). Con la biblioteca en SMB o en el dispositivo: "Configurar"
-  abre directamente el formulario SMB (`LibrarySourceActivity.showSyncFolder`); con biblioteca local, guardarlo no cambia
-  el origen de los juegos (`SmbSettingsViewModel(syncOnly)`). Con biblioteca local, las partidas de cada juego van a su
+  abre el formulario SMB dentro de Ajustes (ruta `MainRoute.SETTINGS_SMB_SYNC`, móvil y TV, con título y barra superior);
+  con biblioteca local, guardarlo no cambia el origen de los juegos (`SmbSettingsViewModel.syncFolderFactory`). Con biblioteca local, las partidas de cada juego van a su
   carpeta en la red, que los dispositivos con la biblioteca en SMB escriben en `playretro-sync.json` (campo `folder`); si
   el juego no está en la red, a `<raíz>\<sistema>` (se crea al subir). Partidas
   (`.srm`) y estados (con el núcleo en el nombre: `Juego.cue.pcsx_rearmed.state`, `.slotN`, `.metadata` y la `.jpg` de
@@ -216,7 +222,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   borrar lo de otros dispositivos). Solo se trabaja si hay cambios: huella local (archivos, favoritos, fechas, núcleos)
   y `revision` del JSON, que sube cada vez que un dispositivo sube algo; si ninguna cambió, termina enseguida. Se
   sincroniza al abrir la app (si la automática está activa, `SaveSyncWork.enqueueStartupWork`), al salir de un juego,
-  con la nube del móvil, la nube junto a la lupa en la TV (`tv_sync_orb`, solo si está configurada) y con
+  con la nube del móvil (a la izquierda de la lupa), la nube junto a la lupa en la TV (`tv_sync_orb`) y con
   "Sincronización manual". Mientras corre se ve abajo "Sincronizando partidas, por favor espere"
   (`shared/savesync/SaveSyncBanner.kt`, `PendingOperationsMonitor.saveSyncRunning`; solo cuando hay algo que copiar: `sync(cores, onCopyStarted)` marca el progreso `PROGRESS_COPYING` del trabajo) y no se pueden
   abrir juegos; la notificación de Android solo sale si la app pasa a segundo plano. En la pantalla de sincronización
@@ -229,9 +235,11 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   Favoritos, Continuar jugando, número de versión y huella van en `lib/savesync/SyncMetadata.kt`, compartido con
   Google Drive (variante `play`): ahí `playretro-sync.json` va en la carpeta privada de la app en Drive, con las
   mismas reglas y la misma comprobación rápida (registros en las preferencias `gdrive_save_sync`; sin probar, faltan
-  credenciales de Google Cloud). Los botones de sincronizar (nube del móvil, nube de la TV, "Sincronización manual")
-  solo se activan si hay cambios: `SaveSyncManager.hasChanges`, comprobado por `shared/savesync/SaveSyncChanges.kt`
-  al abrir o volver a la pantalla principal, cada minuto y al terminar una sincronización.
+  credenciales de Google Cloud). Las nubes del móvil y de la TV solo se
+  muestran si hay cambios y no hay una sincronización en curso; "Sincronización manual" solo se activa si hay cambios:
+  `SaveSyncManager.hasChanges`, comprobado por `shared/savesync/SaveSyncChanges.kt` al abrir o volver a la pantalla
+  principal, cada minuto y al terminar una sincronización. Mientras una sincronización corre o espera (p. ej. la
+  automática al abrir la app) cuenta como "sin cambios".
   Cuando hay cambios, cada carpeta de juegos del NAS se lista una sola vez (`RemoteFolders`) y solo se consulta
   aparte un archivo después de copiarlo; antes se preguntaba por cada archivo posible de cada juego.
   Todos los dispositivos deben usar la misma carpeta raíz de la biblioteca: `playretro-sync.json` va en esa raíz y
@@ -277,7 +285,8 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   demás sube; solo si no cabe se enfoca con ↑ desde los botones, muestra "Leer más" y con OK se abre completa en un
   diálogo (↑ ↓ la desplazan). Botones de 44 dp de alto. "Más de…" usa tarjetas como las de Inicio (tamaño, fondo, título y
   subtítulo) con margen para el zoom; la ficha se mide con su alto completo (`wrapContentHeight(unbounded = true)`)
-  para que esa fila no se recorte. Al volver, el foco regresa a la carátula abierta en Inicio
+  para que esa fila no se recorte. Al volver de un juego abierto desde "Más de…", el foco va a su tarjeta y no a Jugar
+  (`TVGameDetailsFragment.openedGameId`). Al volver, el foco regresa a la carátula abierta en Inicio
   (`TVHomeFragment.gameToRefocus`; `TVMainTabsFragment` devuelve el foco al contenido si lo tenía en `onPause`).
   En la TV el borde de foco es blanco (tarjetas `tv_card_focus_foreground.xml`, ficha y Acerca de).
   Tamaños: títulos de fila 20 sp en TV y `titleMedium` en móvil, siempre mayores que los nombres de los juegos.
