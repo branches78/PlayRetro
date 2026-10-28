@@ -121,20 +121,19 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   `tv_home_row_cards`, `tv_home_row_card_spacing`). En las rejillas cada juego ocupa una celda fija para que las
   columnas sigan alineadas y la tarjeta toma la forma de la carátula dentro: móvil `LemuroidGameGridCard` (celda con
   la forma del sistema en una consola y cuadrada en Favoritos; como en la TV, una tarjeta con la carátula y debajo nombre
-  (1 línea) y subtítulo, del ancho de la carátula y centrada en la celda; en las filas de Inicio todas las celdas de una fila tienen la misma forma,
-  la de su consola si todos los juegos son de una y cuadrada si hay varias, para que la fila no cambie de alto al desplazarla,
-  y las tarjetas van arriba de la celda (`alignment = Alignment.TopCenter`) para que todas las carátulas empiecen a la misma altura); TV
-  `GamePresenter(fitInCell = true)` (celda cuadrada, 5 por fila, `tv_home_cards_per_row`, tarjeta centrada con
-  márgenes). Canal de la pantalla principal de la TV (`tv/channel/ChannelHandler.kt`): los juegos de "Continuar
+  (1 línea) y subtítulo, del ancho de la carátula y arriba de la celda, centrada a lo ancho, para que todas las carátulas
+  de una fila empiecen a la misma altura; en las filas de Inicio todas las celdas de una fila tienen la misma forma,
+  la de su consola si todos los juegos son de una y cuadrada si hay varias, para que la fila no cambie de alto al desplazarla); TV
+  `GamePresenter(fitInCell = true)` (celda cuadrada, 5 por fila, `tv_home_cards_per_row`, tarjeta arriba de la celda
+  y centrada a lo ancho con márgenes, `placeInCell`, en las rejillas y en las filas de Inicio). Canal de la pantalla principal de la TV (`tv/channel/ChannelHandler.kt`): los juegos de "Continuar
   jugando" (misma consulta y orden), con un póster 16:9 hecho por la app con la carátula entera centrada
   (`ChannelPosterProvider`, archivos en `channel-posters`); se actualiza al abrir la app, al cerrar un juego, al
   marcar favoritos y tras una sincronización con cambios. El canal se busca por ser de la app, no por nombre: se
   conserva el que muestra el inicio (el creado cuando la app se llamaba GameStation), se renombra y se borran los
   sobrantes. En las filas de Inicio de la TV las carátulas van en celdas cuadradas de 5 por fila, sin la sombra de
-  Leanback (`shadowEnabled = false`, pintaba la celda entera) y pegadas arriba de la celda (`topInCell = true`), no
-  centradas como en las rejillas; la fila inmersiva está en `tv_immersive_row_top`
+  Leanback (`shadowEnabled = false`, pintaba la celda entera); la fila inmersiva está en `tv_immersive_row_top`
   (215 dp; los textos siguen terminando a 185 dp, solo se acortó el espacio entre la descripción y la fila; más arriba asoman cortadas las letras del título de "Seguir jugando") para que quepan las tarjetas con su nombre y el zoom aun con carátulas altas.
-  `GamePresenter.centerInCell` compara los cuatro márgenes (con `topInCell` el superior siempre es 0 y una
+  `GamePresenter.placeInCell` compara los cuatro márgenes (el superior siempre es 0 y una
   tarjeta reciclada conservaba el inferior viejo: la fila cambiaba de alto al desplazarla). Alternativas de nombre y caché de
   resultados en `ThumbnailFallbackInterceptor.kt`. Reconocimiento de juegos (CRC, TOSEC → No-Intro, búsqueda por título)
   en `lemuroid-metadata-libretro-db/.../LibretroDBMetadataProvider.kt`.
@@ -273,8 +272,8 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   (`LibraryScanProgress.kt`). Ya no hay línea de progreso en el móvil ni círculo de carga en la TV.
 - **Ficha del juego:** al elegir un juego se abre su ficha en lugar de jugarlo (ajuste "Mostrar ficha del juego",
   `pref_key_show_game_details`, activado por defecto, en Ajustes → ROMs; `GameInteractor.showDetailsOnClick`).
-  Continuar jugando siempre juega directamente y es la única fila que conserva el menú de pulsación larga; en el resto,
-  con la ficha activada, la pulsación larga también abre la ficha. Datos compartidos en `shared/details/`
+  Continuar jugando siempre juega directamente. La pulsación larga abre siempre el menú de opciones, en todas partes
+  (móvil y TV), también con la ficha activada. Datos compartidos en `shared/details/`
   (`GameDetailsViewModel`: juego observado con `GameDao.observeById`, descripción de Wikipedia y "Más de
   [consola]"; `GameActionsHost`: las mismas acciones del menú, con el diálogo de nombre y el selector de carátula).
   TV: `tv/details/TVGameDetailsFragment.kt` (destino `navigation_game_details` del grafo de TV, se abre y cierra con

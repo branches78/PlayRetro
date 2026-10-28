@@ -66,7 +66,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onGameClick: (Game) -> Unit,
     onGameLongClick: (Game) -> Unit,
-    // "Continue playing" starts the game right away and keeps the long press menu, also with the game details.
+    // "Continue playing" starts the game right away, also with the game details.
     onRecentGameClick: (Game) -> Unit,
     onRecentGameLongClick: (Game) -> Unit,
     onShowAllFavorites: () -> Unit,
@@ -324,7 +324,6 @@ private fun HomeRowGames(
                             .animateItem(),
                     game = game,
                     cellRatio = cellRatio,
-                    alignment = Alignment.TopCenter,
                     onClick = { onGameClicked(game) },
                     onLongClick = { onGameLongClick(game) },
                 )

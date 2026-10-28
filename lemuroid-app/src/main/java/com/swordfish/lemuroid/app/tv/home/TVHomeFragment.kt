@@ -454,20 +454,14 @@ class TVHomeFragment : RowsSupportFragment() {
                 com.swordfish.lemuroid.lib.R.dimen.settings_card_padding,
             )
 
-        fun presenter(alwaysShowMenu: Boolean) =
+        val presenter =
             ClassPresenterSelector().apply {
                 addClassPresenter(
                     Game::class.java,
                     // A square cell with the cover inside it, like in the grids of the consoles, small enough for 5
                     // whole cells in the content width with the spacing of the rows. The covers start at the top of
                     // the row, aligned whatever their height.
-                    GamePresenter(
-                        cardWidth,
-                        gameInteractor,
-                        fitInCell = true,
-                        topInCell = true,
-                        alwaysShowMenu = alwaysShowMenu,
-                    ),
+                    GamePresenter(cardWidth, gameInteractor, fitInCell = true),
                 )
                 addClassPresenter(TVSetting::class.java, SettingPresenter(cardHeight, settingsCardPadding, cardWidth))
                 addClassPresenter(
@@ -475,7 +469,6 @@ class TVHomeFragment : RowsSupportFragment() {
                     EmptyRowMessagePresenter(cardHeight, contentWidth(resources)),
                 )
             }
-        val presenter = presenter(alwaysShowMenu = false)
 
         discoverRow = null
         recentsRow = null
@@ -483,9 +476,9 @@ class TVHomeFragment : RowsSupportFragment() {
             val listRow =
                 when (row.key) {
                     KEY_DISCOVER -> ListRow(ArrayObjectAdapter(presenter)).also { discoverRow = it }
-                    // "Continue playing" keeps the long press menu: its games start right away (see onViewCreated).
+                    // "Continue playing": its games start right away (see onViewCreated).
                     KEY_RECENTS ->
-                        ListRow(HeaderItem(index.toLong(), row.title), ArrayObjectAdapter(presenter(alwaysShowMenu = true)))
+                        ListRow(HeaderItem(index.toLong(), row.title), ArrayObjectAdapter(presenter))
                             .also { recentsRow = it }
                     else -> ListRow(HeaderItem(index.toLong(), row.title), ArrayObjectAdapter(presenter))
                 }

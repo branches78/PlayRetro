@@ -173,7 +173,7 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                     mutableStateOf<Game?>(null)
                 }
 
-            // "Continue playing" always starts the game and keeps the long press menu.
+            // "Continue playing" always starts the game.
             val onRecentGameClick = { game: Game ->
                 gameInteractor.onGamePlay(game)
             }
@@ -182,8 +182,8 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                 selectedGameState.value = game
             }
 
-            // Elsewhere a game opens its details, which have all the actions of the menu (setting "Show game
-            // details"); without them it starts right away and the long press opens the menu, as before.
+            // Elsewhere a game opens its details (setting "Show game details") or, without them, starts right away.
+            // The long press always opens the menu.
             val onGameClick = { game: Game ->
                 if (gameInteractor.showDetailsOnClick()) {
                     navController.navigateToGameDetails(game)
@@ -193,11 +193,7 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
             }
 
             val onGameLongClick = { game: Game ->
-                if (gameInteractor.showDetailsOnClick()) {
-                    navController.navigateToGameDetails(game)
-                } else {
-                    selectedGameState.value = game
-                }
+                selectedGameState.value = game
             }
 
             val onGameFavoriteToggle = { game: Game, isFavorite: Boolean ->

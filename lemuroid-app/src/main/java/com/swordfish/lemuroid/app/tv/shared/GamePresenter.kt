@@ -17,15 +17,10 @@ class GamePresenter(
     private val cardSize: Int,
     private val gameInteractor: GameInteractor,
     // Grids: every game takes a square cell of [cardSize] to keep the columns aligned, and the card (with its
-    // border and focus frame) takes the real shape of the cover inside it. Otherwise (rows, search) every card has
-    // the height [cardSize] and the width of its cover.
+    // border and focus frame) takes the real shape of the cover inside it, at the top of the cell so all the covers of
+    // a row start at the same height. Otherwise (search) every card has the height [cardSize] and the width of its
+    // cover.
     private val fitInCell: Boolean = false,
-    // With [fitInCell]: the card at the top of its cell instead of in the middle (home rows), so all the covers of a
-    // row start at the same height.
-    private val topInCell: Boolean = false,
-    // The long press menu is kept only in "Continue playing" when choosing a game opens its details, which have
-    // the same actions. Elsewhere a long press then opens the details too, like a normal press.
-    private val alwaysShowMenu: Boolean = false,
     // System in the home rows, favorites and search; developer inside a system.
     private val subtitle: GameCardSubtitle = GameCardSubtitle.SYSTEM,
 ) : Presenter() {
@@ -42,15 +37,10 @@ class GamePresenter(
         // Same height for every card; the width follows the cover shape (like on mobile).
         updateCardShape(viewHolder, game)
         viewHolder.updateCardViewImage(game) { updateCardShape(viewHolder, game) }
-        // A long press opens the same actions menu as on mobile. When it is not handled, releasing the button
-        // counts as a normal press.
+        // A long press opens the same actions menu as on mobile, everywhere.
         viewHolder.view.setOnLongClickListener {
-            if (alwaysShowMenu || !gameInteractor.showDetailsOnClick()) {
-                TVGameContextMenu.show(it.context, game, gameInteractor)
-                true
-            } else {
-                false
-            }
+            TVGameContextMenu.show(it.context, game, gameInteractor)
+            true
         }
     }
 
@@ -71,7 +61,7 @@ class GamePresenter(
         if (layoutParams == null || layoutParams.width != cardWidth || layoutParams.height != cardHeight) {
             viewHolder.mCardView.setMainImageDimensions(cardWidth, cardHeight)
         }
-        if (fitInCell) centerInCell(viewHolder.view, cardWidth, cardHeight)
+        if (fitInCell) placeInCell(viewHolder.view, cardWidth, cardHeight)
 
         val coverRatio = CoverRatioCache.get(game.displayCoverUrl())
         imageView?.scaleType =
@@ -83,22 +73,22 @@ class GamePresenter(
     }
 
     /**
-     * Margins that keep the card in the middle of its square cell (at the top with [topInCell]), so the columns of the
-     * grid stay aligned.
+     * Margins that keep the card centered at the top of its square cell, so the columns of the grid stay aligned and
+     * the covers of a row start at the same height.
      */
-    private fun centerInCell(
+    private fun placeInCell(
         view: View,
         cardWidth: Int,
         cardHeight: Int,
     ) {
         val horizontal = (cardSize - cardWidth) / 2
-        val vertical = if (topInCell) 0 else (cardSize - cardHeight) / 2
+        val vertical = 0
         val params =
             (view.layoutParams as? ViewGroup.MarginLayoutParams)
                 ?: ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         val right = cardSize - cardWidth - horizontal
         val bottom = cardSize - cardHeight - vertical
-        // All four: at the top of the cell the top margin is always 0, and a recycled card must still get the bottom
+        // All four: the top margin is always 0, and a recycled card must still get the bottom
         // margin of its new cover, or the height of the row changes while scrolling.
         if (params.leftMargin != horizontal ||
             params.topMargin != vertical ||

@@ -21,8 +21,8 @@ import com.swordfish.lemuroid.lib.library.db.entity.Game
 /**
  * Game of a grid or a home row, like the cards of the TV: every cell has room for a cover of the shape [cellRatio]
  * and the texts, so the rows stay aligned, and inside it one card (with its corners and shadow) with the cover in its
- * real shape and the name and [subtitle] below, as wide as the cover and placed in the cell by [alignment] (centered
- * in the grids, at the top in the home rows). No empty bands around the cover; on narrow covers the name is cut.
+ * real shape and the name and [subtitle] below, as wide as the cover and at the top of the cell, so all the covers of
+ * a row start at the same height. No empty bands around the cover; on narrow covers the name is cut.
  */
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
@@ -31,11 +31,10 @@ fun LemuroidGameGridCard(
     game: Game,
     cellRatio: Float,
     subtitle: GameCardSubtitle = GameCardSubtitle.SYSTEM,
-    alignment: Alignment = Alignment.Center,
     onClick: () -> Unit = { },
     onLongClick: () -> Unit = { },
 ) {
-    BoxWithConstraints(modifier = modifier, contentAlignment = alignment) {
+    BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.TopCenter) {
         val coverAreaHeight = maxWidth / cellRatio
         // Real shape of the cover once loaded, the usual one of its system before.
         val coverRatio = CoverAspectRatio.forGame(game)
