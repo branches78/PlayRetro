@@ -193,6 +193,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Прилагођени назив</string>
     <string name="game_context_menu_core_options">Подеси језгро</string>
     <string name="game_context_menu_select_core">Изабери језгро</string>
+    <string name="game_context_menu_open_details">Иди на опис игре</string>
     <string name="game_context_menu_no_image_picker">На овом уређају нема апликације за избор слика.</string>
     <string name="title_about">О апликацији</string>
     <string name="about_version">Верзија %1$s</string>

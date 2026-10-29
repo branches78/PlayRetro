@@ -194,6 +194,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Nome personalizzato</string>
     <string name="game_context_menu_core_options">Configura core</string>
     <string name="game_context_menu_select_core">Seleziona core</string>
+    <string name="game_context_menu_open_details">Vai alla descrizione del gioco</string>
     <string name="game_context_menu_no_image_picker">Su questo dispositivo non c\'è nessuna app per scegliere immagini.</string>
     <string name="title_about">Informazioni</string>
     <string name="about_version">Versione %1$s</string>

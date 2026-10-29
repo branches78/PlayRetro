@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +47,11 @@ fun LemuroidGameGridCard(
             Spacer(modifier = Modifier.fillMaxWidth().height(coverAreaHeight))
             LemuroidGameTexts(game = game, singleLineTitle = true, subtitle = subtitle)
         }
-        ElevatedCard(modifier = Modifier.width(coverWidth)) {
+        // Name and subtitle on the light tone behind the images of the consoles.
+        ElevatedCard(
+            modifier = Modifier.width(coverWidth),
+            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        ) {
             Column(modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)) {
                 LemuroidGameImage(game = game, fixedRatio = coverRatio)
                 LemuroidGameTexts(game = game, singleLineTitle = true, subtitle = subtitle)

@@ -25,6 +25,7 @@
     <string name="game_context_menu_start">Speel</string>
     <string name="game_context_menu_resume">Hervat</string>
     <string name="game_context_menu_select_core">Kies kern</string>
+    <string name="game_context_menu_open_details">Gaan na speletjiebesonderhede</string>
     <string name="game_context_menu_add_custom_name">Hernoem</string>
     <string name="game_context_menu_add_custom_artwork">Verander omslag</string>
     <string name="game_context_menu_remove_custom_name">Verwyder naam</string>

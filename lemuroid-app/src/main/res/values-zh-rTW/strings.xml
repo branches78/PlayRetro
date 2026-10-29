@@ -178,6 +178,7 @@
     <string name="game_context_menu_custom_name_dialog_title">自訂名稱</string>
     <string name="game_context_menu_core_options">設定核心</string>
     <string name="game_context_menu_select_core">選擇核心</string>
+    <string name="game_context_menu_open_details">前往遊戲介紹</string>
     <string name="game_context_menu_no_image_picker">此裝置上沒有可用於選擇圖片的應用程式。</string>
     <string name="title_about">關於</string>
     <string name="about_version">版本 %1$s</string>

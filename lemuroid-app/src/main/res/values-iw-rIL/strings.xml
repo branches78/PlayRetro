@@ -142,6 +142,7 @@
     <string name="game_context_menu_custom_name_dialog_title">שם מותאם אישית</string>
     <string name="game_context_menu_core_options">הגדרת ליבה</string>
     <string name="game_context_menu_select_core">בחירת ליבה</string>
+    <string name="game_context_menu_open_details">מעבר לתיאור המשחק</string>
     <string name="game_context_menu_no_image_picker">אין במכשיר זה אפליקציה לבחירת תמונות.</string>
     <string name="title_about">אודות</string>
     <string name="about_version">גרסה %1$s</string>

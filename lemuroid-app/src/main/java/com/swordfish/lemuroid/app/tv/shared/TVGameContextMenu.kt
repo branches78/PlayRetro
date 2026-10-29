@@ -43,12 +43,16 @@ import kotlinx.coroutines.delay
  * "Configure core" shows the core options inside the same dialog; back returns to the menu.
  */
 object TVGameContextMenu {
-    /** With [startWithCoreOptions] (button of the details screen) the dialog only shows the core options. */
+    /**
+     * With [startWithCoreOptions] (button of the details screen) the dialog only shows the core options. With
+     * [onOpenDetails] the menu ends with "Go to game details".
+     */
     fun show(
         context: Context,
         game: Game,
         gameInteractor: GameInteractor,
         startWithCoreOptions: Boolean = false,
+        onOpenDetails: ((Game) -> Unit)? = null,
     ) {
         val dialog = LongPressSafeDialog(context)
         // The core options screen uses a ViewModel: the dialog keeps its own store, cleared when it closes.
@@ -64,7 +68,13 @@ object TVGameContextMenu {
                     TVNavigationSounds {
                         AppTheme {
                             CompositionLocalProvider(LocalViewModelStoreOwner provides viewModelStoreOwner) {
-                                TVGameContextMenuContent(context, game, gameInteractor, startWithCoreOptions) {
+                                TVGameContextMenuContent(
+                                    context,
+                                    game,
+                                    gameInteractor,
+                                    startWithCoreOptions,
+                                    onOpenDetails,
+                                ) {
                                     dialog.dismiss()
                                 }
                             }
@@ -84,6 +94,7 @@ object TVGameContextMenu {
         game: Game,
         gameInteractor: GameInteractor,
         startWithCoreOptions: Boolean,
+        onOpenDetails: ((Game) -> Unit)?,
         dismiss: () -> Unit,
     ) {
         var coreOptionsGame by remember { mutableStateOf(game.takeIf { startWithCoreOptions }) }
@@ -121,6 +132,7 @@ object TVGameContextMenu {
                     },
                     onClearCustomCoverUri = { gameInteractor.onClearCustomCoverUri(it) },
                     onOpenCoreOptions = { coreOptionsGame = it },
+                    onOpenDetails = onOpenDetails,
                     requestInitialFocus = true,
                 )
             }

@@ -131,7 +131,14 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   marcar favoritos y tras una sincronización con cambios. El canal se busca por ser de la app, no por nombre: se
   conserva el que muestra el inicio (el creado cuando la app se llamaba GameStation), se renombra y se borran los
   sobrantes. En las filas de Inicio de la TV las carátulas van en celdas cuadradas de 5 por fila, sin la sombra de
-  Leanback (`shadowEnabled = false`, pintaba la celda entera); la fila inmersiva está en `tv_immersive_row_top`
+  Leanback (`shadowEnabled = false`, pintaba la celda entera) ni sus esquinas (`enableChildRoundedCorners(false)`,
+  reemplazaban el contorno redondeado de 12 dp de `TVCardStyle`); las filas sin foco no usan la capa oscura de Leanback
+  (un rectángulo que tapaba las esquinas redondeadas) sino un filtro de color en la tarjeta misma
+  (`HomeListRowPresenter.applySelectLevelToChild`). Las rejillas de juegos (consola y Favoritos) usan
+  `TVTabGrids.gamesGridPresenter` (zoom 1.1 como las filas, sin sombra ni esquinas de Leanback) y `setUpGamesGrid`
+  (`tv_games_grid_row_spacing`, 20 dp entre filas para que el zoom de una carátula alta no tape la fila de abajo; se alinean desde arriba de la
+  tarjeta, `itemAlignmentOffset` = media celda, porque sin el contenedor de la sombra cada tarjeta mide lo que su carátula
+  y alineando por su centro las filas subían y bajaban al ir a izquierda o derecha); la fila inmersiva está en `tv_immersive_row_top`
   (215 dp; los textos siguen terminando a 185 dp, solo se acortó el espacio entre la descripción y la fila; más arriba asoman cortadas las letras del título de "Seguir jugando") para que quepan las tarjetas con su nombre y el zoom aun con carátulas altas.
   `GamePresenter.placeInCell` compara los cuatro márgenes (el superior siempre es 0 y una
   tarjeta reciclada conservaba el inferior viejo: la fila cambiaba de alto al desplazarla). Alternativas de nombre y caché de
@@ -273,34 +280,41 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
 - **Ficha del juego:** al elegir un juego se abre su ficha en lugar de jugarlo (ajuste "Mostrar ficha del juego",
   `pref_key_show_game_details`, activado por defecto, en Ajustes → ROMs; `GameInteractor.showDetailsOnClick`).
   Continuar jugando siempre juega directamente. La pulsación larga abre siempre el menú de opciones, en todas partes
-  (móvil y TV), también con la ficha activada. Datos compartidos en `shared/details/`
+  (móvil y TV), también con la ficha activada; su última opción es "Ir a descripción del juego"
+  (`GameContextMenuContent(onOpenDetails)`; en TV la pasa cada pantalla a `GamePresenter(onOpenDetails)`). Datos compartidos en `shared/details/`
   (`GameDetailsViewModel`: juego observado con `GameDao.observeById`, descripción de Wikipedia y "Más de
   [consola]"; `GameActionsHost`: las mismas acciones del menú, con el diálogo de nombre y el selector de carátula).
   TV: `tv/details/TVGameDetailsFragment.kt` (destino `navigation_game_details` del grafo de TV, se abre y cierra con
   fundido `res/anim/tv_details_fade_*`), captura con `TVBackdropView`, Jugar/Reanudar en píldora con nombre y el resto
-  como iconos redondos cuyo nombre sale debajo al enfocarlos (la fila se desplaza hasta el enfocado si no cabe), Jugar/Continuar enfocado al abrir, "Configurar núcleo" abre el diálogo de opciones
+  como iconos redondos cuyo nombre sale debajo al enfocarlos (la fila se desplaza hasta el enfocado si no cabe), Jugar/Continuar enfocado al abrir y al volver a la fila de botones desde la descripción o desde "Más de…" (`focusProperties { enter }` + `focusGroup`), "Configurar núcleo" abre el diálogo de opciones
   (`TVGameContextMenu.show(..., startWithCoreOptions = true)`). La ficha se muestra entera cuando están los datos
   locales (`State.isReady`); la descripción ocupa las líneas que necesita (hasta 4) y no se dibuja si no hay, así que lo
-  demás sube; solo si no cabe se enfoca con ↑ desde los botones, muestra "Leer más" y con OK se abre completa en un
-  diálogo (↑ ↓ la desplazan). Botones de 44 dp de alto. "Más de…" usa tarjetas como las de Inicio (tamaño, fondo, título y
-  subtítulo) con margen para el zoom; la ficha se mide con su alto completo (`wrapContentHeight(unbounded = true)`)
+  demás sube; solo si no cabe se enfoca con ↑ desde los botones (sin borde ni "Leer más": solo se aclara su fondo) y con OK se abre completa en un
+  diálogo (↑ ↓ la desplazan). Botones de 44 dp de alto. "Más de…" usa tarjetas como las de Inicio (celda cuadrada con la
+  tarjeta arriba y con la forma real de la carátula, título y subtítulo sobre `tv_card_info_background`; con foco solo
+  crecen, sin borde; en el móvil es `LemuroidGameGridCard` con la forma de la consola) con margen para el zoom; la ficha se mide con su alto completo (`wrapContentHeight(unbounded = true)`)
   para que esa fila no se recorte. Al volver de un juego abierto desde "Más de…", el foco va a su tarjeta y no a Jugar
   (`TVGameDetailsFragment.openedGameId`). Al volver, el foco regresa a la carátula abierta en Inicio
   (`TVHomeFragment.gameToRefocus`; `TVMainTabsFragment` devuelve el foco al contenido si lo tenía en `onPause`).
-  En la TV el borde de foco es blanco (tarjetas `tv_card_focus_foreground.xml`, ficha y Acerca de).
+  En la TV el borde de foco es blanco (tarjetas `tv_card_focus_foreground.xml`, botones y Acerca de). La parte de abajo
+  de las tarjetas de juegos (nombre y subtítulo) usa el tono claro del fondo de las imágenes de las consolas
+  (`surfaceContainerHigh`, #2C2F2A): TV `tv_card_info_background`, móvil `LemuroidGameGridCard`.
   Tamaños: títulos de fila 20 sp en TV y `titleMedium` en móvil, siempre mayores que los nombres de los juegos.
   Móvil: `mobile/feature/details/GameDetailsScreen.kt` (ruta `MainRoute.GAME_DETAILS`; bajo la captura solo el
   logo o nombre y `consola · compañía · país`, sin carátula). Es inmersiva: la captura sube hasta el borde superior,
   por detrás de la barra de estado, sin barra superior y con la flecha de volver y la lupa encima
   (`OverlayIconButton`); la descripción larga se recorta a 2 líneas más "Leer más" debajo; mantiene la barra inferior, que marca la pestaña desde la que se abrió
   (argumento `tab`, `navigateToGameDetails` / `mainTab`); sin la línea "Núcleo" (tampoco en la TV). La ficha de TV y la del móvil
-  muestran los textos en el mismo orden: título, `consola · desarrollador · región`, descripción y "Última partida". Al volver, Inicio, juegos de una consola, Favoritos y Búsqueda conservan su posición: Inicio lee su
+  muestran los textos en el mismo orden: título, `consola · desarrollador · región`, descripción y "Última partida".
+  En la ficha de TV la línea de consola va siempre pegada al título; el último texto antes de los botones (línea de consola, descripción o "Última vez")
+  queda centrado entre el texto anterior y los botones, con `TEXTS_GAP` (28 dp, como el espacio bajo los botones) a
+  cada lado; sin margen sobre el título "Más de…" (ya queda el espacio del nombre del botón enfocado). Al volver, Inicio, juegos de una consola, Favoritos y Búsqueda conservan su posición: Inicio lee su
   `StateFlow` sin estado vacío inicial, las listas paginadas van con `cachedIn`, su estado de desplazamiento se guarda
   fuera de la lista y no se muestra "vacío" mientras cargan; Búsqueda solo borra el texto al entrar desde la lupa.
   Mientras se abre otra pantalla encima, la de atrás mantiene sus márgenes (`stablePadding` en
   `MainNavigationRoutes.kt`) para no crecer y perder posición.
   Dispositivos externos no dibuja sus opciones hasta tener los mandos (`State.isLoaded`); sin mandos activados, las
-  asignaciones y atajos emiten listas vacías (`InputDeviceManager`), antes no emitían nada. Capturas en `shared/covers/GameScreenshots.kt` y recorte de franjas en `TrimBlackBordersTransformation`.
+  asignaciones y atajos emiten listas vacías (`InputDeviceManager`), antes no emitían nada. Capturas en `shared/covers/GameScreenshots.kt` y recorte de franjas en `TrimBlackBordersTransformation`; los logos (ficha y fila inmersiva) pasan por `TrimTransparentBordersTransformation`, porque algunos vienen centrados en un lienzo 16:9 con márgenes transparentes que separaban la línea de consola del logo.
   Logo del juego (`Named_Logos` del mismo servidor, `GameScreenshots.logoUrl`) en lugar del título en la lista
   inmersiva (`tv_immersive_logo`, hasta 360×72 dp), la ficha de TV (480×96 dp) y la del móvil (56 dp de alto)
   (`shared/covers/GameLogo.kt`, `GameLogoOrTitle`); mientras carga o si no hay logo (muchos juegos, y PSP y DS

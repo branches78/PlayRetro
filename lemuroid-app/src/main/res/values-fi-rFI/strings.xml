@@ -187,6 +187,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Oma nimi</string>
     <string name="game_context_menu_core_options">Määritä ydin</string>
     <string name="game_context_menu_select_core">Valitse ydin</string>
+    <string name="game_context_menu_open_details">Siirry pelin kuvaukseen</string>
     <string name="game_context_menu_no_image_picker">Tällä laitteella ei ole sovellusta kuvien valitsemiseen.</string>
     <string name="title_about">Tietoja</string>
     <string name="about_version">Versio %1$s</string>

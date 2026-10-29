@@ -195,6 +195,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Своё название</string>
     <string name="game_context_menu_core_options">Настроить ядро</string>
     <string name="game_context_menu_select_core">Выбрать ядро</string>
+    <string name="game_context_menu_open_details">Перейти к описанию игры</string>
     <string name="game_context_menu_no_image_picker">На этом устройстве нет приложения для выбора изображений.</string>
     <string name="title_about">О приложении</string>
     <string name="about_version">Версия %1$s</string>

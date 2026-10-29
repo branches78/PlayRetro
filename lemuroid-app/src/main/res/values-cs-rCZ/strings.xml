@@ -192,6 +192,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Vlastní název</string>
     <string name="game_context_menu_core_options">Nastavit jádro</string>
     <string name="game_context_menu_select_core">Vybrat jádro</string>
+    <string name="game_context_menu_open_details">Přejít na popis hry</string>
     <string name="game_context_menu_no_image_picker">V tomto zařízení není aplikace pro výběr obrázků.</string>
     <string name="title_about">O aplikaci</string>
     <string name="about_version">Verze %1$s</string>

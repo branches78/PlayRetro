@@ -193,6 +193,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Eigener Name</string>
     <string name="game_context_menu_core_options">Core konfigurieren</string>
     <string name="game_context_menu_select_core">Kern auswählen</string>
+    <string name="game_context_menu_open_details">Zur Spielbeschreibung</string>
     <string name="game_context_menu_no_image_picker">Auf diesem Gerät gibt es keine App zur Bildauswahl.</string>
     <string name="title_about">Über</string>
     <string name="about_version">Version %1$s</string>

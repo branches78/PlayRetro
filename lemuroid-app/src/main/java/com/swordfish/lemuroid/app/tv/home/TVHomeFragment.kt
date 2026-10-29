@@ -2,6 +2,9 @@ package com.swordfish.lemuroid.app.tv.home
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.Gravity
@@ -13,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.leanback.app.RowsSupportFragment
+import androidx.leanback.graphics.ColorOverlayDimmer
 import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.BaseGridView
 import androidx.leanback.widget.ClassPresenterSelector
@@ -36,6 +40,7 @@ import coil.load
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.shared.GameInteractor
 import com.swordfish.lemuroid.app.shared.covers.GameScreenshots
+import com.swordfish.lemuroid.app.shared.covers.TrimTransparentBordersTransformation
 import com.swordfish.lemuroid.app.shared.details.GameDescriptionProvider
 import com.swordfish.lemuroid.app.shared.details.gameCleanTitle
 import com.swordfish.lemuroid.app.shared.details.gameRegion
@@ -209,6 +214,8 @@ class TVHomeFragment : RowsSupportFragment() {
         }
         // A new load cancels the previous one of the view, so the result always belongs to this game.
         info.logo.load(logoUrl) {
+            // Without the empty margins some logos have, like in the details.
+            transformations(TrimTransparentBordersTransformation())
             listener(
                 onSuccess = { _, _ ->
                     info.logo.isVisible = true
@@ -461,7 +468,12 @@ class TVHomeFragment : RowsSupportFragment() {
                     // A square cell with the cover inside it, like in the grids of the consoles, small enough for 5
                     // whole cells in the content width with the spacing of the rows. The covers start at the top of
                     // the row, aligned whatever their height.
-                    GamePresenter(cardWidth, gameInteractor, fitInCell = true),
+                    GamePresenter(
+                        cardWidth,
+                        gameInteractor,
+                        fitInCell = true,
+                        onOpenDetails = { TVGameDetailsFragment.open(this@TVHomeFragment, it) },
+                    ),
                 )
                 addClassPresenter(TVSetting::class.java, SettingPresenter(cardHeight, settingsCardPadding, cardWidth))
                 addClassPresenter(
@@ -503,8 +515,32 @@ class TVHomeFragment : RowsSupportFragment() {
             // Rows without a title (the immersive list) don't keep the empty space of the title.
             (headerPresenter as? RowHeaderPresenter)?.isNullItemVisibilityGone = true
             // The shadow container of each card covers its whole cell, also the margins that center the cover in
-            // it, and showed a grey box above and below the cover. Like in the grids of the consoles, no shadow.
+            // it, and showed a grey box above and below the cover. Like in the grids of the consoles, no shadow, and
+            // no leanback corners either (they would replace the rounded outline of the cards).
             shadowEnabled = false
+            enableChildRoundedCorners(false)
+        }
+
+        private var dimmer: ColorOverlayDimmer? = null
+
+        // The default dimming of the rows without focus paints a rectangle over each card, which hides its rounded
+        // corners. The cards themselves are dimmed instead (see applySelectLevelToChild).
+        override fun isUsingDefaultListSelectEffect(): Boolean = false
+
+        /** Dims the card like leanback does, with a color filter that keeps its rounded corners. */
+        override fun applySelectLevelToChild(
+            rowViewHolder: ListRowPresenter.ViewHolder,
+            childView: View,
+        ) {
+            val dimmer = dimmer ?: ColorOverlayDimmer.createDefault(childView.context).also { dimmer = it }
+            dimmer.setActiveLevel(rowViewHolder.selectLevel)
+            if (dimmer.needsDraw()) {
+                val paint = Paint()
+                paint.colorFilter = PorterDuffColorFilter(dimmer.paint.color, PorterDuff.Mode.SRC_ATOP)
+                childView.setLayerType(View.LAYER_TYPE_HARDWARE, paint)
+            } else {
+                childView.setLayerType(View.LAYER_TYPE_NONE, null)
+            }
         }
 
         override fun initializeRowViewHolder(holder: RowPresenter.ViewHolder) {

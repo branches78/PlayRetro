@@ -193,6 +193,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Nome personalizado</string>
     <string name="game_context_menu_core_options">Configurar núcleo</string>
     <string name="game_context_menu_select_core">Selecionar núcleo</string>
+    <string name="game_context_menu_open_details">Ir para a descrição do jogo</string>
     <string name="game_context_menu_no_image_picker">Não existe nenhuma aplicação para escolher imagens neste dispositivo.</string>
     <string name="title_about">Acerca de</string>
     <string name="about_version">Versão %1$s</string>

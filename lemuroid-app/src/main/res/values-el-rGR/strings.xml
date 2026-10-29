@@ -193,6 +193,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Προσαρμοσμένο όνομα</string>
     <string name="game_context_menu_core_options">Ρύθμιση πυρήνα</string>
     <string name="game_context_menu_select_core">Επιλογή πυρήνα</string>
+    <string name="game_context_menu_open_details">Μετάβαση στην περιγραφή του παιχνιδιού</string>
     <string name="game_context_menu_no_image_picker">Δεν υπάρχει εφαρμογή επιλογής εικόνων σε αυτή τη συσκευή.</string>
     <string name="title_about">Πληροφορίες</string>
     <string name="about_version">Έκδοση %1$s</string>

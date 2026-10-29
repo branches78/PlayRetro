@@ -192,6 +192,7 @@
     <string name="game_context_menu_custom_name_dialog_title">اسم مخصص</string>
     <string name="game_context_menu_core_options">إعداد النواة</string>
     <string name="game_context_menu_select_core">اختيار النواة</string>
+    <string name="game_context_menu_open_details">الانتقال إلى وصف اللعبة</string>
     <string name="game_context_menu_no_image_picker">لا يوجد تطبيق لاختيار الصور على هذا الجهاز.</string>
     <string name="title_about">حول</string>
     <string name="about_version">الإصدار %1$s</string>

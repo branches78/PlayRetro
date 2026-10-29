@@ -36,7 +36,15 @@ fun GameLogoOrTitle(
     // Loaded at its own size even while it is not drawn (the title is drawn instead until it arrives).
     val painter =
         rememberAsyncImagePainter(
-            model = remember(logoUrl) { ImageRequest.Builder(context).data(logoUrl).size(Size.ORIGINAL).build() },
+            model =
+                remember(logoUrl) {
+                    ImageRequest.Builder(context)
+                        .data(logoUrl)
+                        .size(Size.ORIGINAL)
+                        // Without the empty margins some logos have, so the line below is always right under it.
+                        .transformations(TrimTransparentBordersTransformation())
+                        .build()
+                },
         )
     val hasLogo = logoUrl != null && painter.state is AsyncImagePainter.State.Success
 

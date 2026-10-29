@@ -193,6 +193,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Eget navn</string>
     <string name="game_context_menu_core_options">Konfigurer kerne</string>
     <string name="game_context_menu_select_core">Vælg kerne</string>
+    <string name="game_context_menu_open_details">Gå til spilbeskrivelse</string>
     <string name="game_context_menu_no_image_picker">Der er ingen app til at vælge billeder på denne enhed.</string>
     <string name="title_about">Om</string>
     <string name="about_version">Version %1$s</string>

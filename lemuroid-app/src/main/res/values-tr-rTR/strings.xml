@@ -194,6 +194,7 @@ $SYSTEMS.
     <string name="game_context_menu_custom_name_dialog_title">Özel ad</string>
     <string name="game_context_menu_core_options">Çekirdeği yapılandır</string>
     <string name="game_context_menu_select_core">Çekirdek seç</string>
+    <string name="game_context_menu_open_details">Oyun açıklamasına git</string>
     <string name="game_context_menu_no_image_picker">Bu cihazda resim seçmek için bir uygulama yok.</string>
     <string name="title_about">Hakkında</string>
     <string name="about_version">Sürüm %1$s</string>

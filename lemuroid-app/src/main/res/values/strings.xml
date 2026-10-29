@@ -255,6 +255,7 @@
     <string name="game_context_menu_start">Play</string>
     <string name="game_context_menu_core_options">Configure core</string>
     <string name="game_context_menu_select_core">Select core</string>
+    <string name="game_context_menu_open_details">Go to game details</string>
     <string name="game_context_menu_no_image_picker">There is no app to pick images on this device.</string>
     <string name="title_about">About</string>
     <string name="about_version">Version %1$s</string>

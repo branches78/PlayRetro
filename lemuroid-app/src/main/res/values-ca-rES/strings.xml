@@ -104,6 +104,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Nom personalitzat</string>
     <string name="game_context_menu_core_options">Configura el nucli</string>
     <string name="game_context_menu_select_core">Selecciona el nucli</string>
+    <string name="game_context_menu_open_details">Ves a la descripció del joc</string>
     <string name="game_context_menu_no_image_picker">No hi ha cap aplicació per triar imatges en aquest dispositiu.</string>
     <string name="title_about">Quant a</string>
     <string name="about_version">Versió %1$s</string>

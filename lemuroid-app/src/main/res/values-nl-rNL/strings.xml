@@ -195,6 +195,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Eigen naam</string>
     <string name="game_context_menu_core_options">Core configureren</string>
     <string name="game_context_menu_select_core">Core kiezen</string>
+    <string name="game_context_menu_open_details">Naar spelbeschrijving</string>
     <string name="game_context_menu_no_image_picker">Er is geen app om afbeeldingen te kiezen op dit apparaat.</string>
     <string name="title_about">Over</string>
     <string name="about_version">Versie %1$s</string>

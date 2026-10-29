@@ -6,9 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.leanback.app.VerticalGridSupportFragment
 import androidx.leanback.paging.PagingDataAdapter
-import androidx.leanback.widget.FocusHighlight
 import androidx.leanback.widget.OnItemViewClickedListener
-import androidx.leanback.widget.VerticalGridPresenter
 import androidx.leanback.widget.VerticalGridView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -37,10 +35,7 @@ class TVFavoritesFragment : VerticalGridSupportFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Without the focus dimmer the covers always keep their colors; the focused card is already zoomed.
-        val gridPresenter = VerticalGridPresenter(FocusHighlight.ZOOM_FACTOR_LARGE, false)
-        gridPresenter.numberOfColumns = TVHomeFragment.cardsPerRow(resources)
-        setGridPresenter(gridPresenter)
+        setGridPresenter(TVTabGrids.gamesGridPresenter(resources))
     }
 
     override fun onViewCreated(
@@ -54,7 +49,7 @@ class TVFavoritesFragment : VerticalGridSupportFragment() {
         view.findViewById<VerticalGridView>(androidx.leanback.R.id.browse_grid)?.let { grid ->
             val topPadding = resources.getDimensionPixelSize(R.dimen.tv_games_grid_top_padding)
             grid.setPadding(grid.paddingLeft, topPadding, grid.paddingRight, grid.paddingBottom)
-            TVTabGrids.setUpHomeCardsGrid(grid)
+            TVTabGrids.setUpGamesGrid(grid)
             TVTabGrids.allowFocusUpToTabs(this, grid, TVHomeFragment.cardsPerRow(resources))
         }
 
@@ -64,7 +59,12 @@ class TVFavoritesFragment : VerticalGridSupportFragment() {
         val cardSize = TVHomeFragment.homeCardSize(resources)
         val pagingAdapter =
             PagingDataAdapter(
-                GamePresenter(cardSize, gameInteractor, fitInCell = true),
+                GamePresenter(
+                    cardSize,
+                    gameInteractor,
+                    fitInCell = true,
+                    onOpenDetails = { TVGameDetailsFragment.open(this, it) },
+                ),
                 Game.DIFF_CALLBACK,
             )
 

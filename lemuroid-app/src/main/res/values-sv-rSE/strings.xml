@@ -194,6 +194,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Eget namn</string>
     <string name="game_context_menu_core_options">Konfigurera kärna</string>
     <string name="game_context_menu_select_core">Välj kärna</string>
+    <string name="game_context_menu_open_details">Gå till spelbeskrivning</string>
     <string name="game_context_menu_no_image_picker">Det finns ingen app för att välja bilder på den här enheten.</string>
     <string name="title_about">Om</string>
     <string name="about_version">Version %1$s</string>

@@ -83,6 +83,7 @@ class TVSearchFragment : SearchSupportFragment(), SearchSupportFragment.SearchRe
             GamePresenter(
                 resources.getDimensionPixelSize(com.swordfish.lemuroid.lib.R.dimen.card_size),
                 gameInteractor,
+                onOpenDetails = { TVGameDetailsFragment.open(this, it) },
             )
 
         val gamesAdapter = PagingDataAdapter(gamePresenter, Game.DIFF_CALLBACK)

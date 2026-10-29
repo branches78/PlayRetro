@@ -1,5 +1,6 @@
 package com.swordfish.lemuroid.app.tv.shared
 
+import android.content.res.Resources
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.KeyEvent
@@ -8,6 +9,9 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.leanback.widget.BaseGridView
+import androidx.leanback.widget.FocusHighlight
+import androidx.leanback.widget.VerticalGridPresenter
 import androidx.leanback.widget.VerticalGridView
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.tv.home.TVHomeFragment
@@ -96,6 +100,34 @@ object TVTabGrids {
             it.gravity = Gravity.CENTER_HORIZONTAL
             grid.layoutParams = it
         }
+    }
+
+    /**
+     * Presenter of the grids of games (games of a system, favorites), like the home rows: the focused card grows by
+     * 1.1, and without the leanback shadow and corners, which replaced the rounded outline of the cards.
+     */
+    fun gamesGridPresenter(resources: Resources): VerticalGridPresenter {
+        // Without the focus dimmer the covers always keep their colors; the focused card is already zoomed.
+        val gridPresenter = VerticalGridPresenter(FocusHighlight.ZOOM_FACTOR_SMALL, false)
+        gridPresenter.numberOfColumns = TVHomeFragment.cardsPerRow(resources)
+        gridPresenter.shadowEnabled = false
+        gridPresenter.enableChildRoundedCorners(false)
+        return gridPresenter
+    }
+
+    /**
+     * [setUpHomeCardsGrid] for a grid of games, with room between the rows for the zoom of the focused card: a tall
+     * cover fills its whole cell, and the zoom must not cover the row below.
+     * The cards have the height of their cover (a wide one is shorter) and all of them start at the top of their row,
+     * so the grid is aligned from that top (half a cell below it), not from the middle of the focused card: otherwise
+     * the rows moved up and down when the focus went to a card of another height in the same row.
+     */
+    fun setUpGamesGrid(grid: VerticalGridView) {
+        setUpHomeCardsGrid(grid)
+        val resources = grid.resources
+        grid.verticalSpacing = resources.getDimensionPixelSize(R.dimen.tv_games_grid_row_spacing)
+        grid.itemAlignmentOffsetPercent = BaseGridView.ITEM_ALIGN_OFFSET_PERCENT_DISABLED
+        grid.itemAlignmentOffset = TVHomeFragment.homeCardSize(resources) / 2
     }
 
     private const val TITLE_TEXT_SIZE_SP = 28f

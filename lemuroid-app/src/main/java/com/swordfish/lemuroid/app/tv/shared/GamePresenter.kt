@@ -23,6 +23,8 @@ class GamePresenter(
     private val fitInCell: Boolean = false,
     // System in the home rows, favorites and search; developer inside a system.
     private val subtitle: GameCardSubtitle = GameCardSubtitle.SYSTEM,
+    // Opens the details of a game from the last action of the long press menu.
+    private val onOpenDetails: ((Game) -> Unit)? = null,
 ) : Presenter() {
     override fun onBindViewHolder(
         viewHolder: Presenter.ViewHolder?,
@@ -39,7 +41,7 @@ class GamePresenter(
         viewHolder.updateCardViewImage(game) { updateCardShape(viewHolder, game) }
         // A long press opens the same actions menu as on mobile, everywhere.
         viewHolder.view.setOnLongClickListener {
-            TVGameContextMenu.show(it.context, game, gameInteractor)
+            TVGameContextMenu.show(it.context, game, gameInteractor, onOpenDetails = onOpenDetails)
             true
         }
     }

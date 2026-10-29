@@ -63,6 +63,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Egyéni név</string>
     <string name="game_context_menu_core_options">Mag beállítása</string>
     <string name="game_context_menu_select_core">Mag kiválasztása</string>
+    <string name="game_context_menu_open_details">Ugrás a játék leírásához</string>
     <string name="game_context_menu_no_image_picker">Ezen az eszközön nincs képválasztó alkalmazás.</string>
     <string name="title_about">Névjegy</string>
     <string name="about_version">Verzió: %1$s</string>

@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RestartAlt
@@ -87,6 +88,7 @@ fun MainGameContextActions(
     onSetCustomCoverUri: (Game, String) -> Unit,
     onClearCustomCoverUri: (Game) -> Unit,
     onOpenCoreOptions: (Game) -> Unit,
+    onOpenDetails: (Game) -> Unit,
 ) {
     val modalSheetState = rememberModalBottomSheetState(true)
     val selectedGame = selectedGameState.value
@@ -117,6 +119,7 @@ fun MainGameContextActions(
                 onSetCustomCoverUri = onSetCustomCoverUri,
                 onClearCustomCoverUri = onClearCustomCoverUri,
                 onOpenCoreOptions = onOpenCoreOptions,
+                onOpenDetails = onOpenDetails,
             )
         }
     }
@@ -124,7 +127,8 @@ fun MainGameContextActions(
 
 /**
  * Actions of a game, opened with a long press. Shared by the mobile bottom sheet and the TV dialog
- * ([requestInitialFocus] focuses the first action, needed when it is used with a remote).
+ * ([requestInitialFocus] focuses the first action, needed when it is used with a remote). With [onOpenDetails] the
+ * last action opens the details of the game, also when choosing a game starts it right away.
  */
 @Composable
 fun GameContextMenuContent(
@@ -140,6 +144,7 @@ fun GameContextMenuContent(
     onSetCustomCoverUri: (Game, String) -> Unit,
     onClearCustomCoverUri: (Game) -> Unit,
     onOpenCoreOptions: (Game) -> Unit,
+    onOpenDetails: ((Game) -> Unit)? = null,
     requestInitialFocus: Boolean = false,
 ) {
     val context = LocalContext.current
@@ -292,6 +297,17 @@ fun GameContextMenuContent(
                 icon = Icons.Default.Memory,
                 onClick = {
                     onOpenCoreOptions(selectedGame)
+                    onDismiss()
+                },
+            )
+        }
+
+        if (onOpenDetails != null) {
+            ContextActionEntry(
+                label = stringResource(id = R.string.game_context_menu_open_details),
+                icon = Icons.Default.Info,
+                onClick = {
+                    onOpenDetails(selectedGame)
                     onDismiss()
                 },
             )

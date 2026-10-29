@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.horizontalScroll
@@ -48,10 +48,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -68,6 +71,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -86,6 +90,7 @@ import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameImage
 import com.swordfish.lemuroid.app.shared.GameInteractor
+import com.swordfish.lemuroid.app.shared.covers.CoverAspectRatio
 import com.swordfish.lemuroid.app.shared.covers.GameLogoOrTitle
 import com.swordfish.lemuroid.app.shared.details.GameAction
 import com.swordfish.lemuroid.app.shared.details.GameActionsHost
@@ -216,6 +221,7 @@ class TVGameDetailsFragment : Fragment() {
 }
 
 @Composable
+@OptIn(ExperimentalComposeUiApi::class)
 private fun TVGameDetailsScreen(
     state: GameDetailsViewModel.State,
     game: Game,
@@ -264,17 +270,19 @@ private fun TVGameDetailsScreen(
                 TVDetailsTexts(state, game) { showFullDescription = true }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
             GameActionsHost(game, gameInteractor, onOpenCoreOptions) { actions ->
                 val playFocusRequester = remember { FocusRequester() }
                 // Only Play/Resume has its name; the other buttons are round icons whose name shows below them while
                 // focused. The row still scrolls to the focused one if it doesn't fit (the padding is inside the
                 // scroll, so the zoom of the first and last ones is not cut).
+                // Coming from the description or from "More from", the focus always enters on Play/Resume, not on
+                // the button closest to where it was.
                 Row(
                     modifier =
                         Modifier
                             .graphicsLayer { alpha = detailsAlpha }
+                            .focusProperties { enter = { playFocusRequester } }
+                            .focusGroup()
                             .horizontalScroll(rememberScrollState())
                             .padding(horizontal = SIDE_PADDING.dp),
                     horizontalArrangement = Arrangement.spacedBy(BUTTON_SPACING.dp),
@@ -301,7 +309,8 @@ private fun TVGameDetailsScreen(
 
             if (state.moreGames.isNotEmpty()) {
                 Text(
-                    modifier = Modifier.padding(start = SIDE_PADDING.dp, top = 28.dp, bottom = 4.dp),
+                    // Right below the room of the name of the focused button.
+                    modifier = Modifier.padding(start = SIDE_PADDING.dp, bottom = 4.dp),
                     text = stringResource(R.string.game_details_more_from, gameSystemName(game).orEmpty()),
                     color = colorResource(R.color.md_theme_dark_onSurfaceVariant),
                     // Same size as the titles of the home rows (Leanback headers), bigger than the game names.
@@ -314,6 +323,7 @@ private fun TVGameDetailsScreen(
                     modifier = Modifier.onFocusChanged { moreRowFocused = it.hasFocus },
                     horizontalArrangement = Arrangement.spacedBy(homeCardSpacing()),
                     contentPadding = PaddingValues(horizontal = SIDE_PADDING.dp, vertical = MORE_ROW_ZOOM_ROOM.dp),
+                    verticalAlignment = Alignment.Top,
                 ) {
                     items(state.moreGames, key = { it.id }) { other ->
                         TVMoreGameCard(
@@ -353,6 +363,18 @@ private fun TVDetailsTexts(
     val meta =
         listOfNotNull(gameSystemName(game), game.developer?.takeIf { it.isNotBlank() }, gameRegion(game))
             .joinToString(" · ")
+    val facts =
+        listOfNotNull(
+            game.lastPlayedAt?.let {
+                stringResource(R.string.game_details_last_played) to
+                    DateUtils.getRelativeTimeSpanString(it, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)
+                        .toString()
+            },
+        )
+
+    // TEXTS_GAP (the room below the buttons) separates the last text from the buttons; the facts are centered between
+    // the description or the meta line and the buttons. The meta line always stays right below the title, and it and
+    // the description already keep 8dp below them (padding of the description highlight).
     Text(
         modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
         text = meta,
@@ -362,16 +384,11 @@ private fun TVDetailsTexts(
 
     TVDescription(state.description, onOpenDescription)
 
-    val facts =
-        listOfNotNull(
-            game.lastPlayedAt?.let {
-                stringResource(R.string.game_details_last_played) to
-                    DateUtils.getRelativeTimeSpanString(it, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)
-                        .toString()
-            },
-        )
     if (facts.isNotEmpty()) {
-        Column(modifier = Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(
+            modifier = Modifier.padding(top = (TEXTS_GAP - 8).dp, bottom = TEXTS_GAP.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
             facts.forEach { (label, value) ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(modifier = Modifier.width(110.dp), text = label, color = Color(0xFF9AA395), fontSize = 12.sp)
@@ -379,13 +396,16 @@ private fun TVDetailsTexts(
                 }
             }
         }
+    } else {
+        // The meta line or the description is the last one: the same gap above the buttons.
+        Spacer(modifier = Modifier.height((TEXTS_GAP - 8).dp))
     }
 }
 
 /**
  * Description of the game, as tall as its text up to four lines, and nothing at all when the game has none: what
- * follows moves up. Only when the text doesn't fit it can be focused (up from the buttons) and shows "Read more": OK
- * opens it whole in a dialog.
+ * follows moves up. Only when the text doesn't fit it can be focused (up from the buttons): its background lights up,
+ * and OK opens it whole in a dialog.
  */
 @Composable
 private fun TVDescription(
@@ -396,40 +416,26 @@ private fun TVDescription(
     var focused by remember { mutableStateOf(false) }
     var overflows by remember(description) { mutableStateOf(false) }
     val shape = RoundedCornerShape(12.dp)
-    val primary = colorResource(R.color.md_theme_dark_primary)
 
-    // The focus border is white, like the rest of the TV.
+    // Focused, only the background changes (no border).
     // The padding of the highlight is taken back with the offset, so the text stays aligned with the title.
-    Column(
+    Text(
         modifier =
             Modifier
                 .offset(x = (-DESCRIPTION_PADDING).dp)
                 .clip(shape)
                 .background(if (focused) colorResource(R.color.md_theme_dark_surfaceContainerHigh) else Color.Transparent)
-                .border(2.dp, if (focused) Color.White else Color.Transparent, shape)
                 .onFocusChanged { focused = it.isFocused }
                 .then(if (overflows) Modifier.clickable(onClick = onOpen) else Modifier)
                 .padding(DESCRIPTION_PADDING.dp),
-    ) {
-        Text(
-            text = description,
-            color = colorResource(R.color.md_theme_dark_onSurfaceVariant),
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            maxLines = DESCRIPTION_LINES,
-            overflow = TextOverflow.Ellipsis,
-            onTextLayout = { overflows = it.hasVisualOverflow },
-        )
-        if (overflows) {
-            Text(
-                modifier = Modifier.padding(top = 2.dp).graphicsLayer { alpha = if (focused) 1f else 0f },
-                text = stringResource(R.string.game_details_read_more),
-                color = primary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-            )
-        }
-    }
+        text = description,
+        color = colorResource(R.color.md_theme_dark_onSurfaceVariant),
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        maxLines = DESCRIPTION_LINES,
+        overflow = TextOverflow.Ellipsis,
+        onTextLayout = { overflows = it.hasVisualOverflow },
+    )
 }
 
 /** The whole description: ↑ and ↓ scroll it, back closes it. */
@@ -574,8 +580,9 @@ private fun TVActionButton(
 }
 
 /**
- * Card of another game, like the cards of the TV home rows: same size, the whole cover centered in a square, title
- * and system below, and the same border and zoom when focused.
+ * Card of another game, like the cards of the TV home rows: a square cell with room for the texts, and inside it,
+ * at the top and centered, the card with the real shape of the cover and the title and system below, on the light
+ * tone of the cards. Focused it only grows (no border).
  */
 @Composable
 private fun TVMoreGameCard(
@@ -586,39 +593,51 @@ private fun TVMoreGameCard(
     var focused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (focused) 1.1f else 1f, label = "cardScale")
     val shape = RoundedCornerShape(12.dp)
-    val context = LocalContext.current
     val cardSize = homeCardSize()
+    // Real shape of the cover once loaded, the usual one of its system before.
+    val coverRatio = CoverAspectRatio.forGame(game)
+    val coverWidth = if (coverRatio >= 1f) cardSize else cardSize * coverRatio
 
-    Column(
-        modifier =
-            modifier
-                .width(cardSize)
-                .scale(scale)
-                .onFocusChanged { focused = it.isFocused }
-                .clip(shape)
-                .background(colorResource(R.color.md_theme_dark_surfaceContainerLow))
-                .border(3.dp, if (focused) Color.White else Color.Transparent, shape)
-                .clickable(onClick = onClick),
-    ) {
-        Box(modifier = Modifier.size(cardSize).background(Color.Black), contentAlignment = Alignment.Center) {
-            LemuroidGameImage(game = game, fixedRatio = 1f)
+    Box(modifier = Modifier.width(cardSize), contentAlignment = Alignment.TopCenter) {
+        // Size of the cell: the square of the cover and the texts, the same whatever the shape of the cover.
+        Column(modifier = Modifier.fillMaxWidth().alpha(0f).clearAndSetSemantics { }) {
+            Spacer(modifier = Modifier.size(cardSize))
+            TVMoreGameTexts(game)
         }
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp)) {
-            Text(
-                text = game.displayName(),
-                color = colorResource(R.color.md_theme_dark_onSurface),
-                fontSize = 14.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = remember(game.id) { GameUtils.getGameSubtitle(context, game) },
-                color = colorResource(R.color.md_theme_dark_onSurfaceVariant),
-                fontSize = 12.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+        Column(
+            modifier =
+                modifier
+                    .width(coverWidth)
+                    .scale(scale)
+                    .onFocusChanged { focused = it.isFocused }
+                    .clip(shape)
+                    .background(colorResource(R.color.tv_card_info_background))
+                    .clickable(onClick = onClick),
+        ) {
+            LemuroidGameImage(game = game, fixedRatio = coverRatio)
+            TVMoreGameTexts(game)
         }
+    }
+}
+
+@Composable
+private fun TVMoreGameTexts(game: Game) {
+    val context = LocalContext.current
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp)) {
+        Text(
+            text = game.displayName(),
+            color = colorResource(R.color.md_theme_dark_onSurface),
+            fontSize = 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = remember(game.id) { GameUtils.getGameSubtitle(context, game) },
+            color = colorResource(R.color.md_theme_dark_onSurfaceVariant),
+            fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
@@ -649,6 +668,9 @@ private const val DETAILS_SCROLL = 250
 private const val DESCRIPTION_LINES = 4
 private const val ROW_TITLE_SIZE = 20
 private const val DESCRIPTION_PADDING = 8
+
+// Between the last text of the details and the buttons, like the room below the buttons.
+private const val TEXTS_GAP = 28
 private const val MORE_ROW_ZOOM_ROOM = 12
 private const val DIALOG_SCROLL_STEP = 120
 private const val FOCUS_ATTEMPTS = 20

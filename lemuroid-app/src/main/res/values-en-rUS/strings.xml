@@ -26,6 +26,7 @@
     <string name="game_context_menu_start">Play</string>
     <string name="game_context_menu_resume">Resume</string>
     <string name="game_context_menu_select_core">Select core</string>
+    <string name="game_context_menu_open_details">Go to game details</string>
     <string name="game_context_menu_add_custom_name">Rename</string>
     <string name="game_context_menu_add_custom_artwork">Change cover</string>
     <string name="game_context_menu_remove_custom_name">Remove name</string>

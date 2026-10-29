@@ -193,6 +193,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Nom personnalisé</string>
     <string name="game_context_menu_core_options">Configurer le cœur</string>
     <string name="game_context_menu_select_core">Choisir le cœur</string>
+    <string name="game_context_menu_open_details">Aller à la description du jeu</string>
     <string name="game_context_menu_no_image_picker">Aucune application ne permet de choisir des images sur cet appareil.</string>
     <string name="title_about">À propos</string>
     <string name="about_version">Version %1$s</string>

@@ -181,6 +181,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Nume personalizat</string>
     <string name="game_context_menu_core_options">Configurează nucleul</string>
     <string name="game_context_menu_select_core">Selectează nucleul</string>
+    <string name="game_context_menu_open_details">Mergi la descrierea jocului</string>
     <string name="game_context_menu_no_image_picker">Pe acest dispozitiv nu există nicio aplicație pentru alegerea imaginilor.</string>
     <string name="title_about">Despre</string>
     <string name="about_version">Versiunea %1$s</string>

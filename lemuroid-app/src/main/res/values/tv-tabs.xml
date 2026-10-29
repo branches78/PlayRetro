@@ -29,6 +29,9 @@
     <!-- Grids of square cards (games of a system, favorites, consoles): 5 per row fill the content width. -->
     <integer name="tv_home_cards_per_row">5</integer>
     <dimen name="tv_home_card_spacing">12dp</dimen>
+    <!-- Between the rows of the grids of games: room for the zoom of the focused card (1.1), so a tall cover never
+         covers the row below. -->
+    <dimen name="tv_games_grid_row_spacing">20dp</dimen>
     <!-- Home rows: 16:9 cards (about 153 x 86dp on a 960dp wide screen), 5 of them fill the content width, with the
          spacing of the immersive list guidelines. Covers of other shapes are shown whole inside them. -->
     <integer name="tv_home_row_cards">5</integer>
@@ -84,6 +87,8 @@
 
 
     <!-- Like Google TV: the focused tab is a white pill with dark text, the rest of the tabs use white text. -->
+    <!-- Bottom of the game cards (name and subtitle): the light tone behind the images of the consoles. -->
+    <color name="tv_card_info_background">@color/md_theme_dark_surfaceContainerHigh</color>
     <color name="tv_tab_focused_background">@android:color/white</color>
     <!-- Accent of the TV buttons and search: the soft green of the selected tab instead of the bright primary. -->
     <color name="tv_alphabet_unavailable">#4C5249</color>

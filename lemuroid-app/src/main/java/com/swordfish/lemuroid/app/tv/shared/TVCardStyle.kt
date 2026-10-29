@@ -13,7 +13,8 @@ object TVCardStyle {
     fun apply(cardView: ImageCardView) {
         val context = cardView.context
         val cornerRadius = context.resources.getDimension(R.dimen.tv_card_corner_radius)
-        val cardColor = ContextCompat.getColor(context, R.color.md_theme_dark_surfaceContainerLow)
+        // The light tone behind the images of the consoles.
+        val cardColor = ContextCompat.getColor(context, R.color.tv_card_info_background)
 
         cardView.setBackgroundColor(cardColor)
         cardView.setInfoAreaBackgroundColor(cardColor)

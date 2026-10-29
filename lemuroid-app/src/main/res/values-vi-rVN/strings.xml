@@ -176,6 +176,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Tên tùy chỉnh</string>
     <string name="game_context_menu_core_options">Cấu hình lõi</string>
     <string name="game_context_menu_select_core">Chọn lõi</string>
+    <string name="game_context_menu_open_details">Đi tới mô tả trò chơi</string>
     <string name="game_context_menu_no_image_picker">Thiết bị này không có ứng dụng để chọn hình ảnh.</string>
     <string name="title_about">Giới thiệu</string>
     <string name="about_version">Phiên bản %1$s</string>

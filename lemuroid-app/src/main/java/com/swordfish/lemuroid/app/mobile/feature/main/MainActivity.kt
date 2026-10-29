@@ -458,6 +458,7 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                 onSetCustomCoverUri = { game, uri -> gameInteractor.onSetCustomCoverUri(game, uri) },
                 onClearCustomCoverUri = { game -> gameInteractor.onClearCustomCoverUri(game) },
                 onOpenCoreOptions = { game -> navController.navigateToCoreOptions(game.systemId, game.id) },
+                onOpenDetails = { game -> navController.navigateToGameDetails(game) },
             )
         }
     }

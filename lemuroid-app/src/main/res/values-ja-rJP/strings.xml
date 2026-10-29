@@ -194,6 +194,7 @@
     <string name="game_context_menu_custom_name_dialog_title">カスタム名</string>
     <string name="game_context_menu_core_options">コアを設定</string>
     <string name="game_context_menu_select_core">コアを選択</string>
+    <string name="game_context_menu_open_details">ゲームの説明へ移動</string>
     <string name="game_context_menu_no_image_picker">このデバイスには画像を選択するアプリがありません。</string>
     <string name="title_about">このアプリについて</string>
     <string name="about_version">バージョン %1$s</string>

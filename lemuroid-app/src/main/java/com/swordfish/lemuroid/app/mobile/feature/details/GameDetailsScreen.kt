@@ -60,8 +60,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.swordfish.lemuroid.R
-import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameImage
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameGridCard
 import com.swordfish.lemuroid.app.shared.GameInteractor
+import com.swordfish.lemuroid.app.shared.covers.CoverAspectRatio
 import com.swordfish.lemuroid.app.shared.covers.GameLogoOrTitle
 import com.swordfish.lemuroid.app.shared.covers.GameScreenshots
 import com.swordfish.lemuroid.app.shared.covers.TrimBlackBordersTransformation
@@ -71,6 +72,7 @@ import com.swordfish.lemuroid.app.shared.details.GameDetailsViewModel
 import com.swordfish.lemuroid.app.shared.details.gameCleanTitle
 import com.swordfish.lemuroid.app.shared.details.gameRegion
 import com.swordfish.lemuroid.app.shared.details.gameSystemName
+import com.swordfish.lemuroid.app.utils.games.GameCardSubtitle
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 
 /**
@@ -134,12 +136,23 @@ fun GameDetailsScreen(
                 }
             }
             if (state.moreGames.isNotEmpty()) {
+                // The cards of the home rows: all the games are of this system, so the cells have its cover shape,
+                // and every card starts at the top of the row.
+                val cellRatio = remember(game.id) { CoverAspectRatio.forGameSystem(game) }
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
+                    verticalAlignment = Alignment.Top,
                 ) {
                     items(state.moreGames, key = { it.id }) { other ->
-                        MoreGameCard(other) { onOpenGame(other) }
+                        LemuroidGameGridCard(
+                            modifier = Modifier.width(MORE_CARD_SIZE.dp),
+                            game = other,
+                            cellRatio = cellRatio,
+                            // The system is the same for all of them.
+                            subtitle = GameCardSubtitle.DEVELOPER,
+                            onClick = { onOpenGame(other) },
+                        )
                     }
                 }
             }
@@ -368,32 +381,6 @@ private fun GameFacts(game: Game) {
                 Text(text = value, style = MaterialTheme.typography.bodyMedium)
             }
         }
-    }
-}
-
-@Composable
-private fun MoreGameCard(
-    game: Game,
-    onClick: () -> Unit,
-) {
-    Column(modifier = Modifier.width(MORE_CARD_SIZE.dp).clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick)) {
-        Box(
-            modifier =
-                Modifier
-                    .size(MORE_CARD_SIZE.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Black),
-            contentAlignment = Alignment.Center,
-        ) {
-            LemuroidGameImage(game = game, fixedRatio = 1f)
-        }
-        Text(
-            modifier = Modifier.padding(top = 4.dp),
-            text = gameCleanTitle(game),
-            style = MaterialTheme.typography.bodySmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
     }
 }
 

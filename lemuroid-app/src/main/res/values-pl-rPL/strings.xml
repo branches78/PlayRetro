@@ -193,6 +193,7 @@
     <string name="game_context_menu_custom_name_dialog_title">Własna nazwa</string>
     <string name="game_context_menu_core_options">Konfiguruj rdzeń</string>
     <string name="game_context_menu_select_core">Wybierz rdzeń</string>
+    <string name="game_context_menu_open_details">Przejdź do opisu gry</string>
     <string name="game_context_menu_no_image_picker">Na tym urządzeniu nie ma aplikacji do wybierania obrazów.</string>
     <string name="title_about">O aplikacji</string>
     <string name="about_version">Wersja %1$s</string>

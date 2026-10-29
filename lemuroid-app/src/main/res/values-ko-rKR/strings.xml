@@ -195,6 +195,7 @@
     <string name="game_context_menu_custom_name_dialog_title">사용자 지정 이름</string>
     <string name="game_context_menu_core_options">코어 설정</string>
     <string name="game_context_menu_select_core">코어 선택</string>
+    <string name="game_context_menu_open_details">게임 설명으로 이동</string>
     <string name="game_context_menu_no_image_picker">이 기기에는 이미지를 선택할 앱이 없습니다.</string>
     <string name="title_about">정보</string>
     <string name="about_version">버전 %1$s</string>
