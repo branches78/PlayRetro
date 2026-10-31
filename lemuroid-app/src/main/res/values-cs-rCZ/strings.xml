@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Rychlé načtení</string>
     <string name="game_toast_quick_save_saved">Rychlé uložení</string>
     <string name="empty_view_default">Žádné položky</string>
-    <string name="core_settings_category_preferences">Preference</string>
     <string name="core_settings_category_controllers">Ovladače</string>
     <string name="core_settings_controller">Ovladač %1$s</string>
     <string name="game_menu_title">Herní menu</string>
@@ -210,7 +209,6 @@
     <string name="library_loading_cores">Příprava emulačních jader: %1$d z %2$d</string>
     <string name="core_options_scope_game">Jen tato hra</string>
     <string name="core_options_scope_system">Všechny hry pro %1$s</string>
-    <string name="core_options_scope_title">Uložit změny pro</string>
     <string name="core_options_game_value">Tato hra</string>
     <string name="core_options_category_display">Obraz</string>
     <string name="core_options_clear_game">Odstranit vlastní nastavení této hry</string>

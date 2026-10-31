@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Быстрая загрузка</string>
     <string name="game_toast_quick_save_saved">Быстрое сохранение</string>
     <string name="empty_view_default">Нет элементов</string>
-    <string name="core_settings_category_preferences">Предпочтения</string>
     <string name="core_settings_category_controllers">Контроллеры</string>
     <string name="core_settings_controller">Контроллер %1$s</string>
     <string name="game_menu_title">Меню игры</string>
@@ -213,7 +212,6 @@
     <string name="library_loading_cores">Подготовка ядер эмуляции: %1$d из %2$d</string>
     <string name="core_options_scope_game">Только эта игра</string>
     <string name="core_options_scope_system">Все игры %1$s</string>
-    <string name="core_options_scope_title">Сохранять изменения для</string>
     <string name="core_options_game_value">Эта игра</string>
     <string name="core_options_category_display">Экран</string>
     <string name="core_options_clear_game">Удалить собственные настройки этой игры</string>

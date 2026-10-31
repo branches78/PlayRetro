@@ -21,6 +21,7 @@ import com.swordfish.lemuroid.lib.storage.local.DocumentFileParser
 import com.swordfish.lemuroid.lib.storage.local.GameCacheUtils
 import com.swordfish.lemuroid.lib.storage.local.StorageAccessFrameworkProvider
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.flow.Flow
@@ -105,13 +106,13 @@ class SmbStorageProvider(private val context: Context) : StorageProvider {
         if (isZipped && dataFiles.isEmpty()) {
             val cacheFile = GameCacheUtils.getCacheFileForGame(SMB_CACHE_SUBFOLDER, context, game)
             if (!cacheFile.exists()) {
-                ZipInputStream(getInputStream(uri)).use { it.extractEntryToFile(game.fileName, cacheFile) }
+                ZipInputStream(openGameStream(uri)).use { it.extractEntryToFile(game.fileName, cacheFile) }
             }
             return RomFiles.Standard(listOf(cacheFile))
         }
 
         if (allowVirtualFiles && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val config = configStore.load()!!
+            val config = requireConfig()
             val gameEntry = virtualEntry(config, game.fileName, uri)
             val dataEntries = dataFiles.map { virtualEntry(config, it.fileName, Uri.parse(it.fileUri)) }
             return RomFiles.Virtual(listOf(gameEntry) + dataEntries)
@@ -148,13 +149,20 @@ class SmbStorageProvider(private val context: Context) : StorageProvider {
         if (cacheFile.exists()) return cacheFile
         val partFile = File(cacheFile.parentFile, cacheFile.name + PART_SUFFIX)
         try {
-            getInputStream(uri)!!.writeToFile(partFile)
-            partFile.renameTo(cacheFile)
+            openGameStream(uri).writeToFile(partFile)
+            // Renaming can fail on some storages: then it is copied, so the game never starts from a missing file.
+            if (!partFile.renameTo(cacheFile)) partFile.copyTo(cacheFile, overwrite = true)
         } finally {
             partFile.delete()
         }
         return cacheFile
     }
+
+    // The share may have been removed in the settings while the library still has its games: the game then fails
+    // to load with the usual error instead of closing the app.
+    private fun requireConfig(): SmbConfig = configStore.load() ?: throw IOException("Network share not configured")
+
+    private fun openGameStream(uri: Uri): InputStream = share(requireConfig()).openRead(pathInShare(uri))
 
     @Synchronized
     private fun share(config: SmbConfig): SmbShare {

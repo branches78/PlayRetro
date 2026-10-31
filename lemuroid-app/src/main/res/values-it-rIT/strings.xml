@@ -103,7 +103,6 @@
     <string name="game_toast_quick_save_loaded">Caricamento rapido</string>
     <string name="game_toast_quick_save_saved">Veloce salvata</string>
     <string name="empty_view_default">Nessun Elemento</string>
-    <string name="core_settings_category_preferences">Impostazioni</string>
     <string name="core_settings_category_controllers">Controller</string>
     <string name="core_settings_controller">Controller %1$s</string>
     <string name="game_menu_title">Menu di gioco</string>
@@ -212,7 +211,6 @@
     <string name="library_loading_cores">Preparazione dei core di emulazione: %1$d di %2$d</string>
     <string name="core_options_scope_game">Solo questo gioco</string>
     <string name="core_options_scope_system">Tutti i giochi %1$s</string>
-    <string name="core_options_scope_title">Salva le modifiche per</string>
     <string name="core_options_game_value">Questo gioco</string>
     <string name="core_options_category_display">Schermo</string>
     <string name="core_options_clear_game">Rimuovi le impostazioni di questo gioco</string>

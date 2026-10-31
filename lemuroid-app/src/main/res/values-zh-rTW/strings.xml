@@ -97,7 +97,6 @@
     <string name="game_toast_settings_button_using_gamepad">檢測到遊戲控制器。 請至設置選單設定 %1$s</string>
     <string name="game_toast_load_state_failed">無法讀取這個遊戲存檔</string>
     <string name="empty_view_default">沒有任何項目</string>
-    <string name="core_settings_category_preferences">偏好設定</string>
     <string name="core_settings_category_controllers">控制器</string>
     <string name="core_settings_controller">控制器 %1$s</string>
     <string name="game_menu_title">遊戲選單</string>
@@ -196,7 +195,6 @@
     <string name="library_loading_cores">正在準備模擬核心：%1$d / %2$d</string>
     <string name="core_options_scope_game">僅此遊戲</string>
     <string name="core_options_scope_system">所有 %1$s 遊戲</string>
-    <string name="core_options_scope_title">變更儲存到</string>
     <string name="core_options_game_value">此遊戲</string>
     <string name="core_options_category_display">畫面</string>
     <string name="core_options_clear_game">移除此遊戲的專屬設定</string>

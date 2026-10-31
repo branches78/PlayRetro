@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Hızlı kayıt yüklendi</string>
     <string name="game_toast_quick_save_saved">Hızlı kayıt kaydedildi</string>
     <string name="empty_view_default">Öğe bulunamadı</string>
-    <string name="core_settings_category_preferences">Tercihler</string>
     <string name="core_settings_category_controllers">Kontroller</string>
     <string name="core_settings_controller">%1$s Kontrolleri</string>
     <string name="game_menu_title">Oyun Menüsü</string>
@@ -134,7 +133,7 @@
     <string name="tv_folder_storage_title">Depolama Alanını Seçin</string>
     <string name="tv_home_section_favorites">Favoriler</string>
     <string name="tv_home_section_recents">Oynamaya devam et</string>
-    <string name="gamepad_binding_update_title">gamepad bağlama güncelleme başlığı</string>
+    <string name="gamepad_binding_update_title">\"RetroPad %1$s\" ile ilişkilendir</string>
     <string name="gamepad_binding_update_description">\"%1$s\" üzerinde bir tuşa basın</string>
     <string name="shortcut_binding_update_title">\"Kısayol %1$s\" ile ilişkilendirilmiş</string>
     <string name="shortcut_binding_update_description">\"%1$s\" karakterinize bir kombo atamak için önce birinci, sonra ikinci düğmeye basın</string>
@@ -212,7 +211,6 @@ $SYSTEMS.
     <string name="library_loading_cores">Emülasyon çekirdekleri hazırlanıyor: %2$d çekirdekten %1$d</string>
     <string name="core_options_scope_game">Yalnızca bu oyun</string>
     <string name="core_options_scope_system">Tüm %1$s oyunları</string>
-    <string name="core_options_scope_title">Değişiklikleri kaydet:</string>
     <string name="core_options_game_value">Bu oyun</string>
     <string name="core_options_category_display">Ekran</string>
     <string name="core_options_clear_game">Bu oyunun kendi ayarlarını kaldır</string>

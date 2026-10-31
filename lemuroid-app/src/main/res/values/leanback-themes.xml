@@ -1,5 +1,4 @@
 <resources>
-
     <!-- Cards use the same color as the mobile cards (Material 3 surfaceContainerLow). -->
     <color name="lb_basic_card_bg_color">@color/md_theme_dark_surfaceContainerLow</color>
     <color name="lb_basic_card_info_bg_color">@color/leanback_info</color>
@@ -25,13 +24,5 @@
     <!-- Row titles with the same text color as on mobile. -->
     <style name="LemuroidLeanbackTheme.RowHeader" parent="Widget.Leanback.Row.Header">
         <item name="android:textColor">@color/md_theme_dark_onBackground</item>
-    </style>
-
-    <style name="LemuroidLeanbackPreferencesTheme" parent="Theme.Leanback">
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Leanback</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:colorPrimary">@color/main_color</item>
     </style>
 </resources>

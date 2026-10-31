@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Prędkie Władowanie</string>
     <string name="game_toast_quick_save_saved">Prędki Zapis</string>
     <string name="empty_view_default">Brak elementów</string>
-    <string name="core_settings_category_preferences">Preferencje</string>
     <string name="core_settings_category_controllers">Kontrolery</string>
     <string name="core_settings_controller">Kontroler %1$s</string>
     <string name="game_menu_title">Menu gry</string>
@@ -211,7 +210,6 @@
     <string name="library_loading_cores">Przygotowywanie rdzeni emulacji: %1$d z %2$d</string>
     <string name="core_options_scope_game">Tylko ta gra</string>
     <string name="core_options_scope_system">Wszystkie gry %1$s</string>
-    <string name="core_options_scope_title">Zapisz zmiany dla</string>
     <string name="core_options_game_value">Ta gra</string>
     <string name="core_options_category_display">Obraz</string>
     <string name="core_options_clear_game">Usuń własne ustawienia tej gry</string>

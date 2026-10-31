@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Швидко завантажити</string>
     <string name="game_toast_quick_save_saved">Швидке збереження</string>
     <string name="empty_view_default">Немає елементів</string>
-    <string name="core_settings_category_preferences">Налаштування</string>
     <string name="core_settings_category_controllers">Контролери</string>
     <string name="core_settings_controller">Контролер %1$s</string>
     <string name="game_menu_title">Меню гри</string>
@@ -211,7 +210,6 @@
     <string name="library_loading_cores">Підготовка ядер емуляції: %1$d з %2$d</string>
     <string name="core_options_scope_game">Лише ця гра</string>
     <string name="core_options_scope_system">Усі ігри %1$s</string>
-    <string name="core_options_scope_title">Зберігати зміни для</string>
     <string name="core_options_game_value">Ця гра</string>
     <string name="core_options_category_display">Екран</string>
     <string name="core_options_clear_game">Видалити власні налаштування цієї гри</string>

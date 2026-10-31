@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">クイック読み込み中</string>
     <string name="game_toast_quick_save_saved">クイック保存</string>
     <string name="empty_view_default">アイテムがありません</string>
-    <string name="core_settings_category_preferences">設定</string>
     <string name="core_settings_category_controllers">コントローラ</string>
     <string name="core_settings_controller">コントローラ %1$s</string>
     <string name="game_menu_title">ゲームメニュー</string>
@@ -212,7 +211,6 @@
     <string name="library_loading_cores">エミュレーションコアを準備しています: %1$d / %2$d</string>
     <string name="core_options_scope_game">このゲームのみ</string>
     <string name="core_options_scope_system">%1$s のすべてのゲーム</string>
-    <string name="core_options_scope_title">変更の保存先</string>
     <string name="core_options_game_value">このゲーム</string>
     <string name="core_options_category_display">画面</string>
     <string name="core_options_clear_game">このゲーム専用の設定を削除</string>

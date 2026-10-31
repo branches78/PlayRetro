@@ -37,7 +37,7 @@
     <string name="settings_description_immersive_mode">تلوين الخلفية بشكل ديناميكي استناداً إلى مرئيات اللعبة</string>
     <string name="settings_title_gamepad_settings">أجهزة خارجية</string>
     <string name="settings_description_gamepad_settings">تهيئة أجهزة التحكم ولوحات المفاتيح</string>
-    <string name="settings_retropad_button_name">لوحة قديمة %1$s</string>
+    <string name="settings_retropad_button_name">RetroPad %1$s</string>
     <string name="settings_gamepad_category_enabled">الأجهزة المفعلة</string>
     <string name="settings_gamepad_category_general">عام</string>
     <string name="settings_gamepad_title_reset_bindings">إعادة ضبط الارتباطات</string>
@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">تحميل سريع</string>
     <string name="game_toast_quick_save_saved">حفظ سريع</string>
     <string name="empty_view_default">لا توجد عناصر</string>
-    <string name="core_settings_category_preferences">التفضيلات</string>
     <string name="core_settings_category_controllers">التحكم</string>
     <string name="core_settings_controller">التحكم %1$s</string>
     <string name="game_menu_title">قائمة اللعبة</string>
@@ -210,7 +209,6 @@
     <string name="library_loading_cores">جارٍ تجهيز نوى المحاكاة: %1$d من %2$d</string>
     <string name="core_options_scope_game">هذه اللعبة فقط</string>
     <string name="core_options_scope_system">كل ألعاب %1$s</string>
-    <string name="core_options_scope_title">حفظ التغييرات لـ</string>
     <string name="core_options_game_value">هذه اللعبة</string>
     <string name="core_options_category_display">الشاشة</string>
     <string name="core_options_clear_game">إزالة إعدادات هذه اللعبة الخاصة</string>

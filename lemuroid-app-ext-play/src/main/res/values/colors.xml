@@ -20,7 +20,4 @@
 
 <resources>
     <color name="grey">#33ffffff</color>
-    <color name="bronze">#cd7f32</color>
-    <color name="silver">#ffffff</color>
-    <color name="gold">#ffd700</color>
 </resources>

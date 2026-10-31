@@ -225,7 +225,10 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   (lo sincronizado se recuerda en las preferencias `smb_save_sync`). Continuar jugando (la fecha más reciente) y
   Favoritos (gana el último cambio; en la primera sincronización de un dispositivo se suman los de los dos lados) en
   `playretro-sync.json` en la raíz de la biblioteca. Si ese archivo existe pero no se puede leer, no se escribe (para no
-  borrar lo de otros dispositivos). Solo se trabaja si hay cambios: huella local (archivos, favoritos, fechas, núcleos)
+  borrar lo de otros dispositivos). Todo lo que se sube al NAS (partidas, estados y ese JSON) va por
+  `SmbShare.replaceFile`: se escribe a un `.part` y se renombra al terminar, así un corte de red nunca deja un archivo a
+  medias que los otros dispositivos descargarían. Las carpetas del campo `folder` se validan (`SyncMetadata.isSafeFolder`:
+  sin `..`, `/` ni `:`), porque cualquiera con acceso al NAS puede editar el JSON. Solo se trabaja si hay cambios: huella local (archivos, favoritos, fechas, núcleos)
   y `revision` del JSON, que sube cada vez que un dispositivo sube algo; si ninguna cambió, termina enseguida. Se
   sincroniza al abrir la app (si la automática está activa, `SaveSyncWork.enqueueStartupWork`), al salir de un juego,
   con la nube del móvil (a la izquierda de la lupa), la nube junto a la lupa en la TV (`tv_sync_orb`) y con

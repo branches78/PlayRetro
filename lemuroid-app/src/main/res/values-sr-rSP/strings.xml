@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Брзо учитано</string>
     <string name="game_toast_quick_save_saved">Брзо сачувано</string>
     <string name="empty_view_default">Нема ставки</string>
-    <string name="core_settings_category_preferences">Подешавања</string>
     <string name="core_settings_category_controllers">Контролери</string>
     <string name="core_settings_controller">Контролер %1$s</string>
     <string name="game_menu_title">Мени игре</string>
@@ -211,7 +210,6 @@
     <string name="library_loading_cores">Припрема језгара за емулацију: %1$d од %2$d</string>
     <string name="core_options_scope_game">Само ова игра</string>
     <string name="core_options_scope_system">Све игре за %1$s</string>
-    <string name="core_options_scope_title">Сачувај измене за</string>
     <string name="core_options_game_value">Ова игра</string>
     <string name="core_options_category_display">Екран</string>
     <string name="core_options_clear_game">Уклони посебна подешавања ове игре</string>

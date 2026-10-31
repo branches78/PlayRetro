@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Hurtig lastet</string>
     <string name="game_toast_quick_save_saved">Rask lagret</string>
     <string name="empty_view_default">Ingen elementer</string>
-    <string name="core_settings_category_preferences">Preferanser</string>
     <string name="core_settings_category_controllers">Kontrollere</string>
     <string name="core_settings_controller">Kontroller %1$s</string>
     <string name="game_menu_title">Spill meny</string>
@@ -211,7 +210,6 @@
     <string name="library_loading_cores">Klargjør emuleringskjerner: %1$d av %2$d</string>
     <string name="core_options_scope_game">Bare dette spillet</string>
     <string name="core_options_scope_system">Alle %1$s-spill</string>
-    <string name="core_options_scope_title">Lagre endringer for</string>
     <string name="core_options_game_value">Dette spillet</string>
     <string name="core_options_category_display">Skjerm</string>
     <string name="core_options_clear_game">Fjern dette spillets egne innstillinger</string>

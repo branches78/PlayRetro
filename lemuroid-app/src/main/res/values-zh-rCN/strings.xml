@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">快速加载</string>
     <string name="game_toast_quick_save_saved">快速保存</string>
     <string name="empty_view_default">没有项目</string>
-    <string name="core_settings_category_preferences">选项</string>
     <string name="core_settings_category_controllers">控制器</string>
     <string name="core_settings_controller">控制器 %1$s</string>
     <string name="game_menu_title">游戏菜单</string>
@@ -211,7 +210,6 @@
     <string name="library_loading_cores">正在准备模拟核心：%1$d / %2$d</string>
     <string name="core_options_scope_game">仅此游戏</string>
     <string name="core_options_scope_system">所有 %1$s 游戏</string>
-    <string name="core_options_scope_title">更改保存到</string>
     <string name="core_options_game_value">此游戏</string>
     <string name="core_options_category_display">画面</string>
     <string name="core_options_clear_game">移除此游戏的专属设置</string>

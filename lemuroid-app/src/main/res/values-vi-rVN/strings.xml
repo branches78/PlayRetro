@@ -94,7 +94,6 @@
     <string name="game_toast_settings_button_using_gamepad">Đã phát hiện gamepad. Hãy truy cập menu cài đặt bằng %1$s.</string>
     <string name="game_toast_load_state_failed">Không thể tải trạng thái này</string>
     <string name="empty_view_default">Không có mục nào</string>
-    <string name="core_settings_category_preferences">Tuỳ chọn</string>
     <string name="core_settings_category_controllers">Điều khiển</string>
     <string name="core_settings_controller">Điều khiển %1$s</string>
     <string name="game_menu_title">Menu trò chơi</string>
@@ -194,7 +193,6 @@
     <string name="library_loading_cores">Đang chuẩn bị lõi giả lập: %1$d / %2$d</string>
     <string name="core_options_scope_game">Chỉ trò chơi này</string>
     <string name="core_options_scope_system">Tất cả trò chơi %1$s</string>
-    <string name="core_options_scope_title">Lưu thay đổi cho</string>
     <string name="core_options_game_value">Trò chơi này</string>
     <string name="core_options_category_display">Màn hình</string>
     <string name="core_options_clear_game">Xóa cài đặt riêng của trò chơi này</string>
@@ -239,4 +237,5 @@
     <string name="save_sync_provider">Đồng bộ với</string>
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Đang đồng bộ trò chơi, vui lòng chờ</string>
+    <string name="gamepad_binding_update_title">Gán \"RetroPad %1$s\"</string>
 </resources>

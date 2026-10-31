@@ -21,7 +21,7 @@ data class LemuroidCoreOption(
     }
 
     fun isBoolean(): Boolean {
-        return getEntriesValues().toSet() == CoreOptionsPreferenceHelper.BOOLEAN_SET
+        return getEntriesValues().toSet() == BOOLEAN_VALUES
     }
 
     fun getEntries(context: Context): List<String> {
@@ -51,3 +51,6 @@ data class LemuroidCoreOption(
             .filter { it.key in coreOption.optionValues }
     }
 }
+
+// Values of the options shown as a switch.
+private val BOOLEAN_VALUES = setOf("enabled", "disabled")

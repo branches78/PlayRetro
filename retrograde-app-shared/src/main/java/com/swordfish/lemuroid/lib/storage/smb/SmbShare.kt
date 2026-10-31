@@ -103,7 +103,7 @@ class SmbShare private constructor(
     }
 
     /** Stream that replaces the content of a file of the share (created when missing); closing it closes the file. */
-    fun openWrite(path: String): OutputStream {
+    private fun openWrite(path: String): OutputStream {
         val file =
             share.openFile(
                 path,
@@ -118,6 +118,38 @@ class SmbShare private constructor(
                 runCatching { super.close() }
                 file.close()
             }
+        }
+    }
+
+    /**
+     * Replaces the content of [path] with what [write] writes, without ever leaving it half written: it goes to a
+     * temporary file next to it, which takes its place only once complete. If the connection drops in the middle, the
+     * old file stays as it was (other devices would otherwise download a cut save).
+     */
+    fun replaceFile(
+        path: String,
+        write: (OutputStream) -> Unit,
+    ) {
+        val partPath = path + PART_SUFFIX
+        try {
+            openWrite(partPath).use(write)
+            val entry =
+                share.open(
+                    partPath,
+                    EnumSet.of(AccessMask.DELETE, AccessMask.GENERIC_WRITE),
+                    null,
+                    SMB2ShareAccess.ALL,
+                    SMB2CreateDisposition.FILE_OPEN,
+                    null,
+                )
+            try {
+                entry.rename(path, true)
+            } finally {
+                entry.close()
+            }
+        } catch (e: Exception) {
+            runCatching { share.rm(partPath) }
+            throw e
         }
     }
 
@@ -168,6 +200,7 @@ class SmbShare private constructor(
     companion object {
         private const val TIMEOUT_SECONDS = 30L
         private const val READ_BUFFER_SIZE = 1024 * 1024
+        private const val PART_SUFFIX = ".part"
 
         /** Connects to the share of the [config], signing in when it uses authentication. */
         fun open(config: SmbConfig): SmbShare {

@@ -101,7 +101,6 @@
     <string name="game_toast_quick_save_loaded">Nopea ladattu</string>
     <string name="game_toast_quick_save_saved">Nopea tallennus</string>
     <string name="empty_view_default">Ei Kohteita</string>
-    <string name="core_settings_category_preferences">Asetukset</string>
     <string name="core_settings_category_controllers">Ohjaimet</string>
     <string name="core_settings_controller">Ohjain %1$s</string>
     <string name="game_menu_title">Pelivalikko</string>
@@ -205,7 +204,6 @@
     <string name="library_loading_cores">Valmistellaan emulointiytimiä: %1$d / %2$d</string>
     <string name="core_options_scope_game">Vain tämä peli</string>
     <string name="core_options_scope_system">Kaikki %1$s-pelit</string>
-    <string name="core_options_scope_title">Tallenna muutokset kohteelle</string>
     <string name="core_options_game_value">Tämä peli</string>
     <string name="core_options_category_display">Näyttö</string>
     <string name="core_options_clear_game">Poista tämän pelin omat asetukset</string>

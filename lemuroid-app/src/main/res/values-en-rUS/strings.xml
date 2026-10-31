@@ -9,7 +9,6 @@
     <string name="library_loading_cores">Preparing emulation cores: %1$d of %2$d</string>
     <string name="core_options_scope_game">Only this game</string>
     <string name="core_options_scope_system">All %1$s games</string>
-    <string name="core_options_scope_title">Save changes for</string>
     <string name="core_options_game_value">This game</string>
     <string name="core_options_category_display">Display</string>
     <string name="core_options_clear_game">Remove this game\'s own settings</string>
@@ -64,4 +63,6 @@
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Syncing games, please wait</string>
     <string name="game_interactory_busy">Checking sync, please wait</string>
+    <string name="settings_retropad_button_name">RetroPad %1$s</string>
+    <string name="gamepad_binding_update_title">Associate \"RetroPad %1$s\"</string>
 </resources>

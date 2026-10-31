@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Încărcare rapidă</string>
     <string name="game_toast_quick_save_saved">Salvat rapid</string>
     <string name="empty_view_default">Nu există articole</string>
-    <string name="core_settings_category_preferences">Preferințe</string>
     <string name="core_settings_category_controllers">Controlori</string>
     <string name="core_settings_controller">Controller %1$s</string>
     <string name="game_menu_title">Meniul jocului</string>
@@ -199,7 +198,6 @@
     <string name="library_loading_cores">Se pregătesc nucleele de emulare: %1$d din %2$d</string>
     <string name="core_options_scope_game">Doar acest joc</string>
     <string name="core_options_scope_system">Toate jocurile %1$s</string>
-    <string name="core_options_scope_title">Salvează modificările pentru</string>
     <string name="core_options_game_value">Acest joc</string>
     <string name="core_options_category_display">Ecran</string>
     <string name="core_options_clear_game">Elimină setările proprii ale acestui joc</string>

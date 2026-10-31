@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Chargement rapide</string>
     <string name="game_toast_quick_save_saved">Sauvegarde rapide</string>
     <string name="empty_view_default">Aucun élément</string>
-    <string name="core_settings_category_preferences">Paramètres</string>
     <string name="core_settings_category_controllers">Manettes</string>
     <string name="core_settings_controller">Manette %1$s</string>
     <string name="game_menu_title">Menu du jeu</string>
@@ -211,7 +210,6 @@
     <string name="library_loading_cores">Préparation des cœurs d\'émulation : %1$d sur %2$d</string>
     <string name="core_options_scope_game">Ce jeu seulement</string>
     <string name="core_options_scope_system">Tous les jeux %1$s</string>
-    <string name="core_options_scope_title">Enregistrer les modifications pour</string>
     <string name="core_options_game_value">Ce jeu</string>
     <string name="core_options_category_display">Affichage</string>
     <string name="core_options_clear_game">Supprimer les réglages propres à ce jeu</string>

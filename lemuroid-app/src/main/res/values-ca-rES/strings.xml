@@ -66,7 +66,6 @@
     <string name="game_toast_settings_button_using_gamepad">S\'ha detectat el gamepad. Accediu al menú de configuració amb %1$s.</string>
     <string name="game_toast_load_state_failed">No es pot carregar aquest estat</string>
     <string name="empty_view_default">Sense elements</string>
-    <string name="core_settings_category_preferences">Preferències</string>
     <string name="core_settings_category_controllers">Comandaments</string>
     <string name="core_settings_controller">Comandament %1$s</string>
     <string name="game_menu_title">Menú de jocs</string>
@@ -122,7 +121,6 @@
     <string name="library_loading_cores">Preparant els nuclis d\'emulació: %1$d de %2$d</string>
     <string name="core_options_scope_game">Només aquest joc</string>
     <string name="core_options_scope_system">Tots els jocs de %1$s</string>
-    <string name="core_options_scope_title">Desa els canvis per a</string>
     <string name="core_options_game_value">Aquest joc</string>
     <string name="core_options_category_display">Pantalla</string>
     <string name="core_options_clear_game">Elimina la configuració pròpia d\'aquest joc</string>
@@ -168,4 +166,5 @@
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Sincronitzant partides, espera si us plau</string>
     <string name="game_interactory_busy">Verificant la sincronització, espera si us plau</string>
+    <string name="gamepad_binding_update_title">Associa «RetroPad %1$s»</string>
 </resources>

@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Snel geladen</string>
     <string name="game_toast_quick_save_saved">Snel opgeslagen</string>
     <string name="empty_view_default">Geen Items</string>
-    <string name="core_settings_category_preferences">Voorkeuren</string>
     <string name="core_settings_category_controllers">Controllers</string>
     <string name="core_settings_controller">Controller %1$s</string>
     <string name="game_menu_title">Spelmenu</string>
@@ -213,7 +212,6 @@
     <string name="library_loading_cores">Emulatiecores voorbereiden: %1$d van %2$d</string>
     <string name="core_options_scope_game">Alleen deze game</string>
     <string name="core_options_scope_system">Alle %1$s-games</string>
-    <string name="core_options_scope_title">Wijzigingen opslaan voor</string>
     <string name="core_options_game_value">Deze game</string>
     <string name="core_options_category_display">Beeld</string>
     <string name="core_options_clear_game">Eigen instellingen van deze game verwijderen</string>

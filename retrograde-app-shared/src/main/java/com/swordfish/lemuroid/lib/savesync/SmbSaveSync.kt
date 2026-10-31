@@ -190,7 +190,7 @@ class SmbSaveSync(
                 changedRemote = metadata.merge(remoteJson, games, romFolders) || changedRemote
                 metadata.prepareWrite(remoteJson, changedRemote)
                 if (changedRemote) {
-                    share.openWrite(metadataPath).use { it.write(remoteJson.toString().encodeToByteArray()) }
+                    share.replaceFile(metadataPath) { it.write(remoteJson.toString().encodeToByteArray()) }
                 }
                 // After the downloads, the changes to the library and the write, so they don't count as changes.
                 metadata.commit(remoteJson, fingerprint(libraryGames(config), cores))
@@ -370,7 +370,7 @@ class SmbSaveSync(
             }
 
         if (upload) {
-            local.inputStream().use { input -> share.openWrite(remotePath).use { input.copyTo(it) } }
+            local.inputStream().use { input -> share.replaceFile(remotePath) { input.copyTo(it) } }
         } else {
             local.parentFile?.mkdirs()
             val partFile = File(local.parentFile, local.name + PART_SUFFIX)

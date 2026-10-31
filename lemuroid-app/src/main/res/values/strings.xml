@@ -135,7 +135,6 @@
 
     <string name="empty_view_default">No Items</string>
 
-    <string name="core_settings_category_preferences">Preferences</string>
     <string name="core_settings_category_controllers">Controllers</string>
     <string name="core_settings_controller">Controller %1$s</string>
 
@@ -273,7 +272,6 @@
     <string name="library_loading_cores">Preparing emulation cores: %1$d of %2$d</string>
     <string name="core_options_scope_game">Only this game</string>
     <string name="core_options_scope_system">All %1$s games</string>
-    <string name="core_options_scope_title">Save changes for</string>
     <string name="core_options_game_value">This game</string>
     <string name="core_options_category_display">Display</string>
     <string name="core_options_clear_game">Remove this game\'s own settings</string>

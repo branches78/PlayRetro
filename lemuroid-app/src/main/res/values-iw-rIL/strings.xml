@@ -85,7 +85,6 @@
     <string name="game_toast_settings_button_using_gamepad">זוהה שלט חיצוני. גש למסך ההגדרות עם %1$s.</string>
     <string name="game_toast_load_state_failed">טעינת מצב משחק זו נכשלה</string>
     <string name="empty_view_default">אין שום דבר</string>
-    <string name="core_settings_category_preferences">העדפות</string>
     <string name="core_settings_category_controllers">בקרי משחק</string>
     <string name="core_settings_controller">בקר %1$s</string>
     <string name="game_menu_title">תפריט משחק</string>
@@ -160,7 +159,6 @@
     <string name="library_loading_cores">מכין ליבות אמולציה: %1$d מתוך %2$d</string>
     <string name="core_options_scope_game">רק המשחק הזה</string>
     <string name="core_options_scope_system">כל משחקי %1$s</string>
-    <string name="core_options_scope_title">שמירת השינויים עבור</string>
     <string name="core_options_game_value">המשחק הזה</string>
     <string name="core_options_category_display">תצוגה</string>
     <string name="core_options_clear_game">הסרת ההגדרות של המשחק הזה</string>
@@ -206,4 +204,5 @@
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">מסנכרן משחקים, נא להמתין</string>
     <string name="game_interactory_busy">בודק סנכרון, נא להמתין</string>
+    <string name="gamepad_binding_update_title">שיוך \"RetroPad %1$s\"</string>
 </resources>

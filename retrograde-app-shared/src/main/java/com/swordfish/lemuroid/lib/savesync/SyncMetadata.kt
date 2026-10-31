@@ -59,7 +59,16 @@ class SyncMetadata(
         remoteJson.optJSONObject(KEY_GAMES)
             ?.optJSONObject("${game.systemId}/${game.fileName}")
             ?.optString(KEY_FOLDER)
-            ?.takeIf { it.isNotEmpty() }
+            ?.takeIf { isSafeFolder(it) }
+
+    /**
+     * The file is on the share, where anyone with access can change it: a folder that goes up ("..") or is not a
+     * plain relative path is ignored, so the saves are never written outside the folders of the library.
+     */
+    private fun isSafeFolder(folder: String): Boolean {
+        if (folder.isEmpty() || folder.contains('/') || folder.contains(':')) return false
+        return folder.split('\\').all { it.isNotEmpty() && it != "." && it != ".." }
+    }
 
     /** Whether the file couldn't be read in the last sync (see [setReadable]), shown in the settings. */
     fun isUnreadable(): Boolean = records.getBoolean(KEY_UNREADABLE, false)
@@ -127,7 +136,7 @@ class SyncMetadata(
             }
             // Folder of the game on the network share: set by the devices with the library there, or found on the share by
             // the others (see SmbSaveSync), and kept.
-            val folder = romFolders[key] ?: entry.optString(KEY_FOLDER).takeIf { it.isNotEmpty() }
+            val folder = romFolders[key] ?: entry.optString(KEY_FOLDER).takeIf { isSafeFolder(it) }
             remoteGames.put(
                 key,
                 JSONObject().apply {

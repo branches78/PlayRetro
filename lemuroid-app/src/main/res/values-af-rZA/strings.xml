@@ -8,7 +8,6 @@
     <string name="library_loading_cores">Berei emulasiekerne voor: %1$d van %2$d</string>
     <string name="core_options_scope_game">Net hierdie speletjie</string>
     <string name="core_options_scope_system">Alle %1$s-speletjies</string>
-    <string name="core_options_scope_title">Stoor veranderinge vir</string>
     <string name="core_options_game_value">Hierdie speletjie</string>
     <string name="core_options_category_display">Skerm</string>
     <string name="core_options_clear_game">Verwyder hierdie speletjie se eie instellings</string>
@@ -63,4 +62,6 @@
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Speletjies word gesinkroniseer, wag asseblief</string>
     <string name="game_interactory_busy">Sinkronisering word nagegaan, wag asseblief</string>
+    <string name="settings_retropad_button_name">RetroPad %1$s</string>
+    <string name="gamepad_binding_update_title">Koppel \"RetroPad %1$s\"</string>
 </resources>

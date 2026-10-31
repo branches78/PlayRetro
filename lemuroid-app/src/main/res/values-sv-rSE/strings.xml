@@ -102,7 +102,6 @@
     <string name="game_toast_quick_save_loaded">Snabb laddad</string>
     <string name="game_toast_quick_save_saved">Snabb sparad</string>
     <string name="empty_view_default">Inga objekt</string>
-    <string name="core_settings_category_preferences">Inställningar</string>
     <string name="core_settings_category_controllers">Handkontroller</string>
     <string name="core_settings_controller">Handkontroll %1$s</string>
     <string name="game_menu_title">Spelmeny</string>
@@ -212,7 +211,6 @@
     <string name="library_loading_cores">Förbereder emuleringskärnor: %1$d av %2$d</string>
     <string name="core_options_scope_game">Bara det här spelet</string>
     <string name="core_options_scope_system">Alla %1$s-spel</string>
-    <string name="core_options_scope_title">Spara ändringar för</string>
     <string name="core_options_game_value">Det här spelet</string>
     <string name="core_options_category_display">Bild</string>
     <string name="core_options_clear_game">Ta bort spelets egna inställningar</string>
