@@ -24,6 +24,7 @@ import androidx.documentfile.provider.DocumentFile
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.PushbackInputStream
 import java.security.MessageDigest
@@ -63,16 +64,28 @@ fun InputStream.writeToFile(file: File) {
     }
 }
 
+/**
+ * Extracts [entryName] to [gameFile]. It is written to a ".part" file first and renamed when complete: an extraction
+ * cut short (app closed, storage full, network share dropped) would otherwise leave a truncated game that is used
+ * from then on because the file exists.
+ */
 fun ZipInputStream.extractEntryToFile(
     entryName: String,
     gameFile: File,
 ) {
     this.use { inputStream ->
         while (true) {
-            val entry = inputStream.nextEntry
+            val entry = inputStream.nextEntry ?: throw FileNotFoundException("$entryName not found in the archive")
             if (entry.name == entryName) break
         }
-        inputStream.writeToFile(gameFile)
+        val partFile = File(gameFile.parentFile, gameFile.name + ".part")
+        try {
+            partFile.outputStream().use { inputStream.copyTo(it) }
+            // Renaming can fail on some storages: then it is copied.
+            if (!partFile.renameTo(gameFile)) partFile.copyTo(gameFile, overwrite = true)
+        } finally {
+            partFile.delete()
+        }
     }
 }
 

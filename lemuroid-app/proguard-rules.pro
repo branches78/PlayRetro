@@ -85,3 +85,15 @@
 
 ## LibretroDroid
 -keep class com.swordfish.libretrodroid.** { *; }
+
+## Network share (SMB): smbj and the libraries it uses find classes at run time (security providers of
+## BouncyCastle, event handlers of MBassador found by their annotations), so they are kept whole.
+-keep class com.hierynomus.** { *; }
+-keep class net.engio.mbassy.** { *; }
+-keep class org.bouncycastle.** { *; }
+-keepattributes *Annotation*
+-dontwarn com.hierynomus.**
+-dontwarn net.engio.mbassy.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.slf4j.**
+-dontwarn javax.el.**

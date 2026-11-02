@@ -30,6 +30,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -66,6 +69,8 @@ fun SmbSettingsScreen(
     val state by viewModel.uiState.collectAsState()
     val config = state.config
     var showPassword by remember { mutableStateOf(false) }
+    val passwordFocus = remember { FocusRequester() }
+    val showPasswordFocus = remember { FocusRequester() }
     // Explicit color: on TV the content is not inside a Surface, so the default text color is black.
     val textColor = MaterialTheme.colorScheme.onSurface
     val testing = state.testResult == SmbSettingsViewModel.TestResult.Testing
@@ -133,8 +138,18 @@ fun SmbSettingsScreen(
                 isTV = isTV,
                 keyboardType = KeyboardType.Password,
                 visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                focusRequester = passwordFocus,
+                trailingIconFocus = showPasswordFocus,
                 trailingIcon = {
-                    IconButton(onClick = { showPassword = !showPassword }) {
+                    IconButton(
+                        modifier =
+                            Modifier
+                                .focusRequester(showPasswordFocus)
+                                // Inside the field, so ← wouldn't find it by position.
+                                .focusProperties { left = passwordFocus }
+                                .focusBorder(),
+                        onClick = { showPassword = !showPassword },
+                    ) {
                         Icon(
                             imageVector = if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                             contentDescription = stringResource(R.string.smb_show_password),
@@ -185,6 +200,8 @@ private fun SmbTextField(
     supportingText: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    focusRequester: FocusRequester? = null,
+    trailingIconFocus: FocusRequester? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     val focusManager = LocalFocusManager.current
@@ -201,6 +218,7 @@ private fun SmbTextField(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .let { if (focusRequester != null) it.focusRequester(focusRequester) else it }
                     .onFocusChanged { if (isTV && !it.isFocused) editing = false }
                     .onPreviewKeyEvent { event ->
                         val isOk = event.key == Key.DirectionCenter || event.key == Key.Enter || event.key == Key.NumPadEnter
@@ -215,6 +233,12 @@ private fun SmbTextField(
                                 if (event.type == KeyEventType.KeyDown && !focusManager.moveFocus(FocusDirection.Up)) {
                                     view.focusSearch(View.FOCUS_UP)?.requestFocus()
                                 }
+                                true
+                            }
+                            // The text field keeps → for its cursor, so the icon at its end (the eye of the password)
+                            // is reached explicitly.
+                            isTV && !editing && event.key == Key.DirectionRight && trailingIconFocus != null -> {
+                                if (event.type == KeyEventType.KeyDown) trailingIconFocus.requestFocus()
                                 true
                             }
                             else -> false

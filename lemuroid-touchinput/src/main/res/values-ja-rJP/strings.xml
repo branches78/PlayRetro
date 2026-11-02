@@ -2,5 +2,4 @@
 <resources>
     <string name="touch_customize_button_done">完了</string>
     <string name="touch_customize_button_reset">リセット</string>
-    <string name="touch_customize_info">ドラッグ＆ピンチ操作で位置やサイズを変更可能</string>
 </resources>

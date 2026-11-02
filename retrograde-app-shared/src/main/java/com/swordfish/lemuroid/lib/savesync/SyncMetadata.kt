@@ -119,16 +119,19 @@ class SyncMetadata(
             val lastPlayed = listOfNotNull(game.lastPlayedAt, remotePlayed).maxOrNull()
 
             val lastSyncedFavorite = records.getString("$FAVORITE_RECORD$key", null)?.toBooleanStrictOrNull()
+            // A value that isn't a boolean (a file edited by hand or damaged) counts as missing, instead of stopping
+            // the whole merge.
+            val remoteFavorite = runCatching { entry.getBoolean(KEY_FAVORITE) }.getOrNull()
             val favorite =
                 when {
-                    !entry.has(KEY_FAVORITE) -> game.isFavorite
+                    remoteFavorite == null -> game.isFavorite
                     // First sync of this device, or its last write was lost: the favorites of both sides.
-                    lastSyncedFavorite == null || overwritten -> game.isFavorite || entry.getBoolean(KEY_FAVORITE)
+                    lastSyncedFavorite == null || overwritten -> game.isFavorite || remoteFavorite
                     game.isFavorite != lastSyncedFavorite -> game.isFavorite
-                    else -> entry.getBoolean(KEY_FAVORITE)
+                    else -> remoteFavorite
                 }
             val favoriteChangedAt =
-                if (favorite != entry.optBoolean(KEY_FAVORITE, !favorite)) now else entry.optLong(KEY_FAVORITE_AT, now)
+                if (favorite != remoteFavorite) now else entry.optLong(KEY_FAVORITE_AT, now)
 
             if (lastPlayed != game.lastPlayedAt || favorite != game.isFavorite) {
                 updatedGames += game.copy(lastPlayedAt = lastPlayed, isFavorite = favorite)

@@ -18,6 +18,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.fredporciuncula.flow.preferences.FlowSharedPreferences
@@ -70,9 +71,24 @@ class TVSettingsTabFragment : Fragment() {
     @Inject
     lateinit var inputDeviceManager: InputDeviceManager
 
+    private var navController: NavHostController? = null
+
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
+    }
+
+    /**
+     * Closes the inner screens (BIOS, cores...). The tab is kept while another one is selected (see
+     * TVMainTabsFragment), and it opens on the main list again.
+     */
+    fun showMainScreen() {
+        navController?.popBackStack(MainRoute.SETTINGS.route, inclusive = false)
+    }
+
+    override fun onDestroyView() {
+        navController = null
+        super.onDestroyView()
     }
 
     override fun onCreateView(
@@ -89,7 +105,7 @@ class TVSettingsTabFragment : Fragment() {
                 TVNavigationSounds {
                     AppTheme {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                            val navController = rememberNavController()
+                            val navController = rememberNavController().also { this@TVSettingsTabFragment.navController = it }
                             // The settings cards have their own side padding: they end up at the side margins of the
                             // other tabs.
                             val sideMargin = dimensionResource(R.dimen.tv_content_side_margin) - CARDS_SIDE_PADDING

@@ -150,9 +150,15 @@ class GameDescriptionProvider(context: Context, private val okHttpClient: OkHttp
 
     private fun cacheKey(game: Game) = "${deviceLanguage()}|${game.systemId}|${game.title}"
 
-    private fun deviceLanguage(): String = Locale.getDefault().toLanguageTag().substringBefore('-').ifBlank { FALLBACK_LANGUAGE }
+    private fun deviceLanguage(): String {
+        val language = Locale.getDefault().toLanguageTag().substringBefore('-').ifBlank { FALLBACK_LANGUAGE }
+        // Wikipedia names some languages with another code: Norwegian Bokmål is "no" and Filipino is "tl".
+        return WIKIPEDIA_LANGUAGES[language] ?: language
+    }
 
     companion object {
+        private val WIKIPEDIA_LANGUAGES = mapOf("nb" to "no", "fil" to "tl")
+
         private const val PREFERENCES_NAME = "game_descriptions"
         private const val PREFIX_MISSING = "missing:"
         private val MISSING_RETRY_MS = TimeUnit.DAYS.toMillis(30)

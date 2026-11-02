@@ -46,7 +46,8 @@ if (usePlayDynamicFeatures()) {
         ":lemuroid_core_prosystem",
         ":lemuroid_core_snes9x",
         ":lemuroid_core_stella",
-        ":lemuroid_core_citra"
+        ":lemuroid_core_citra",
+        ":lemuroid_core_swanstation"
     )
 
     project(":lemuroid_core_gambatte").projectDir = File("lemuroid-cores/lemuroid_core_gambatte")
@@ -68,4 +69,5 @@ if (usePlayDynamicFeatures()) {
     project(":lemuroid_core_mednafen_wswan").projectDir = File("lemuroid-cores/lemuroid_core_mednafen_wswan")
     project(":lemuroid_core_dosbox_pure").projectDir = File("lemuroid-cores/lemuroid_core_dosbox_pure")
     project(":lemuroid_core_citra").projectDir = File("lemuroid-cores/lemuroid_core_citra")
+    project(":lemuroid_core_swanstation").projectDir = File("lemuroid-cores/lemuroid_core_swanstation")
 }

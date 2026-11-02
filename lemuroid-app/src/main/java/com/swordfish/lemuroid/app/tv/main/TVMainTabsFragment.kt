@@ -8,6 +8,9 @@ import android.os.Bundle
 import android.view.FocusFinder
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import androidx.activity.addCallback
@@ -34,6 +37,8 @@ import com.swordfish.lemuroid.app.tv.settings.TVSettingsTabFragment
 import com.swordfish.lemuroid.app.tv.systems.TVSystemsFragment
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -91,10 +96,14 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
                 onFocusSearch(focused, direction)
             }
 
+        settingsAdded = childFragmentManager.findFragmentById(R.id.tv_settings_content) != null
+        setSettingsShown(selectedTab == TAB_SETTINGS)
         if (childFragmentManager.findFragmentById(R.id.tv_tab_content) == null) {
             showTabContent(selectedTab, previousTab = null)
         }
         updateTabsState(animate = false)
+        scheduleSettingsPreload()
+        view.viewTreeObserver.addOnGlobalFocusChangeListener(settingsPreloadFocusListener)
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             when {
@@ -221,6 +230,7 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
     }
 
     override fun onDestroyView() {
+        view?.viewTreeObserver?.removeOnGlobalFocusChangeListener(settingsPreloadFocusListener)
         pillAnimator?.cancel()
         pillAnimator = null
         tabPill = null
@@ -286,22 +296,129 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
     ) {
         // The games of a system and the favorites belong to their tab: they are closed when another tab is selected.
         childFragmentManager.popBackStack(BACK_STACK_INNER_SCREEN, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        val (enterAnimation, exitAnimation) =
+            when {
+                previousTab == null || previousTab == index -> null to null
+                index > previousTab -> R.anim.tv_tab_enter_from_end to R.anim.tv_tab_exit_to_start
+                else -> R.anim.tv_tab_enter_from_start to R.anim.tv_tab_exit_to_end
+            }
         val fragment =
             when (index) {
                 TAB_SYSTEMS -> TVSystemsFragment()
-                TAB_SETTINGS -> TVSettingsTabFragment()
+                // The settings have their own container (see showSettings): the content of the other tab just leaves.
+                TAB_SETTINGS -> Fragment()
                 TAB_ABOUT -> TVAboutFragment()
                 else -> TVHomeFragment()
             }
         val transaction = childFragmentManager.beginTransaction()
-        when {
-            previousTab == null || previousTab == index -> Unit
-            index > previousTab -> transaction.setCustomAnimations(R.anim.tv_tab_enter_from_end, R.anim.tv_tab_exit_to_start)
-            else -> transaction.setCustomAnimations(R.anim.tv_tab_enter_from_start, R.anim.tv_tab_exit_to_end)
+        if (enterAnimation != null && exitAnimation != null) {
+            transaction.setCustomAnimations(enterAnimation, exitAnimation)
         }
         transaction
             .replace(R.id.tv_tab_content, fragment)
             .commit()
+
+        when {
+            index == TAB_SETTINGS -> showSettings(enterAnimation)
+            previousTab == TAB_SETTINGS -> hideSettings(exitAnimation)
+        }
+    }
+
+    /** Whether the settings fragment was added (it may still be pending in the fragment manager). */
+    private var settingsAdded = false
+
+    private var settingsPreloadJob: Job? = null
+
+    // Each move of the focus restarts the wait (see scheduleSettingsPreload).
+    private val settingsPreloadFocusListener = ViewTreeObserver.OnGlobalFocusChangeListener { _, _ -> scheduleSettingsPreload() }
+
+    /**
+     * Building the settings freezes the screen for a moment: it is done once the focus has stayed still for a
+     * while, so it doesn't land on a move to another tab or along a row.
+     */
+    private fun scheduleSettingsPreload() {
+        if (settingsAdded || view == null || settingsBuildJob?.isActive == true) return
+        settingsPreloadJob?.cancel()
+        settingsPreloadJob =
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(SETTINGS_PRELOAD_IDLE_MS)
+                addSettings()
+            }
+    }
+
+    /**
+     * The settings are built once, before their tab is selected, and then only shown and hidden: built when
+     * their tab was selected, they froze the screen for longer than the slide of the tab, so they appeared at once.
+     */
+    private fun addSettings(fadeIn: Boolean = false) {
+        if (settingsAdded || childFragmentManager.isStateSaved) return
+        settingsAdded = true
+        val transaction = childFragmentManager.beginTransaction()
+        if (fadeIn) transaction.setCustomAnimations(R.anim.tv_details_fade_in, 0)
+        transaction
+            .add(R.id.tv_settings_content, TVSettingsTabFragment())
+            .commit()
+    }
+
+    // Builds the settings selected before they were built in advance (see showSettings).
+    private var settingsBuildJob: Job? = null
+
+    private fun showSettings(enterAnimation: Int?) {
+        val container = view?.findViewById<View>(R.id.tv_settings_content) ?: return
+        container.clearAnimation()
+        setSettingsShown(true)
+        if (!settingsAdded) {
+            // Selected right after opening the screen: building them now would hold the pill on the previous tab, so
+            // they are built once it has reached this one, and fade in.
+            if (settingsBuildJob?.isActive != true) {
+                settingsPreloadJob?.cancel()
+                settingsBuildJob =
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        delay(resources.getInteger(R.integer.tv_tab_animation_duration).toLong())
+                        addSettings(fadeIn = selectedTab == TAB_SETTINGS)
+                    }
+            }
+            return
+        }
+        enterAnimation?.let { container.startAnimation(AnimationUtils.loadAnimation(requireContext(), it)) }
+    }
+
+    private fun hideSettings(exitAnimation: Int?) {
+        val container = view?.findViewById<View>(R.id.tv_settings_content) ?: return
+        container.clearAnimation()
+        if (exitAnimation == null) {
+            onSettingsHidden()
+            return
+        }
+        // Still drawn while it slides out, but the focus can't go into it anymore.
+        (container as ViewGroup).descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+        val animation = AnimationUtils.loadAnimation(requireContext(), exitAnimation)
+        animation.setAnimationListener(
+            object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation) = Unit
+
+                override fun onAnimationRepeat(animation: Animation) = Unit
+
+                // Also called when the slide is cut short because the settings tab is selected again.
+                override fun onAnimationEnd(animation: Animation) {
+                    if (selectedTab != TAB_SETTINGS) onSettingsHidden()
+                }
+            },
+        )
+        container.startAnimation(animation)
+    }
+
+    private fun onSettingsHidden() {
+        setSettingsShown(false)
+        (childFragmentManager.findFragmentById(R.id.tv_settings_content) as? TVSettingsTabFragment)?.showMainScreen()
+    }
+
+    /** Hidden, the settings stay invisible (and not gone) so they are laid out in advance too. */
+    private fun setSettingsShown(shown: Boolean) {
+        val container = view?.findViewById<ViewGroup>(R.id.tv_settings_content) ?: return
+        container.visibility = if (shown) View.VISIBLE else View.INVISIBLE
+        container.descendantFocusability =
+            if (shown) ViewGroup.FOCUS_AFTER_DESCENDANTS else ViewGroup.FOCUS_BLOCK_DESCENDANTS
     }
 
     private fun updateTabsState(animate: Boolean = true) {
@@ -456,11 +573,15 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
         getContentView()?.requestFocus()
     }
 
-    private fun getContentView(): ViewGroup? = view?.findViewById(R.id.tv_tab_content)
+    private fun getContentView(): ViewGroup? =
+        view?.findViewById(if (selectedTab == TAB_SETTINGS) R.id.tv_settings_content else R.id.tv_tab_content)
 
     companion object {
         private const val KEY_SELECTED_TAB = "selected_tab"
         private const val CONTENT_FOCUS_WAIT_MS = 600L
+
+        // Time the focus has to stay still before the settings are built.
+        private const val SETTINGS_PRELOAD_IDLE_MS = 2000L
         private const val BACK_STACK_INNER_SCREEN = "inner_screen"
         private const val TAB_HOME = 0
         private const val TAB_SYSTEMS = 1

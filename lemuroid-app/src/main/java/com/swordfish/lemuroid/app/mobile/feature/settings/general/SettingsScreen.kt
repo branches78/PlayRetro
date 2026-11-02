@@ -51,7 +51,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val state =
         viewModel.uiState
-            .collectAsState(SettingsViewModel.State())
+            .collectAsState()
             .value
 
     val scanInProgress =
@@ -64,10 +64,7 @@ fun SettingsScreen(
             .collectAsState(false)
             .value
 
-    val cacheState =
-        viewModel.cacheState
-            .collectAsState()
-            .value
+    val cacheState = viewModel.cacheState
 
     // "Directory" asks first whether the games come from a folder of the device or a network share.
     var showSourceDialog by remember { mutableStateOf(false) }

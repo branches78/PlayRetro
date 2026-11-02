@@ -23,8 +23,6 @@ suspend fun <T> Flow<T>.safeCollect(
         }
 }
 
-fun <T> Flow<T>.batchWithTime(maxMillis: Int) = batchWithSizeAndTime(Int.MAX_VALUE, maxMillis)
-
 fun <T> Flow<T>.batchWithSizeAndTime(
     maxSize: Int,
     maxMillis: Int,

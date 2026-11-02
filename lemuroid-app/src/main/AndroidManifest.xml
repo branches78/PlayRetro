@@ -34,7 +34,7 @@
         android:banner="@mipmap/ic_banner"
         android:icon="@mipmap/lemuroid_launcher"
         android:isGame="true"
-        android:label="@string/lemuroid_name"
+        android:label="@string/launcher_name"
         android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/lemuroid_launcher_round"
@@ -42,7 +42,8 @@
         android:theme="@style/LemuroidMaterialTheme">
         <activity
             android:name="com.swordfish.lemuroid.app.mobile.feature.main.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/launcher_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -106,6 +107,7 @@
         <activity
             android:name=".app.tv.main.MainTVActivity"
             android:exported="true"
+            android:label="@string/launcher_name"
             android:theme="@style/LemuroidLeanbackTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

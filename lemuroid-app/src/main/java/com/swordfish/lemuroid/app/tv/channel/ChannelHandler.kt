@@ -150,8 +150,11 @@ class ChannelHandler(
                 .data(coverUrl)
                 .allowHardware(false)
                 .build()
-        val cover = (appContext.imageLoader.execute(request) as? SuccessResult)?.drawable
-            ?: CoverUtils.getFallbackDrawable(game)
+        val downloaded = (appContext.imageLoader.execute(request) as? SuccessResult)?.drawable
+        val cover = downloaded ?: CoverUtils.getFallbackDrawable(game)
+        // The cover could not be downloaded (e.g. no connection): the poster with the fallback gets another name, so
+        // the cover is tried again on the next update instead of keeping the fallback forever.
+        val posterName = if (downloaded != null) name else "game_${game.id}_fallback.png"
 
         val poster = Bitmap.createBitmap(POSTER_WIDTH, POSTER_HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(poster)
@@ -167,11 +170,11 @@ class ChannelHandler(
         cover.setBounds(left, top, left + width, top + height)
         cover.draw(canvas)
 
-        val partFile = File(file.parentFile, "$name.part")
+        val partFile = File(file.parentFile, "$posterName.part")
         partFile.outputStream().use { poster.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        partFile.renameTo(file)
+        partFile.renameTo(File(file.parentFile, posterName))
         poster.recycle()
-        return name
+        return posterName
     }
 
     private fun deleteOldPosters(names: List<String>) {

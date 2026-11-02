@@ -13,6 +13,8 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
 3. **Una corrección a la vez:** el usuario menciona las correcciones una por una; aplica solo la que pide.
 4. **Revisiones de código muerto, bugs o seguridad:** empieza siempre por un **resumen de hallazgos**
    (cantidad por tipo y gravedad) y después el detalle. No corrijas nada hasta que el usuario lo apruebe.
+   Ojo: `lemuroid-cores` (submódulo con los módulos de núcleos de Play) usa recursos de la app que no aparecen al buscar,
+   como `res/values/core_names.xml` (`dist:title` de los módulos de núcleos de Play): no son código muerto.
 5. **Diseño:** antes de cambios visuales grandes, ofrece un mockup.
 6. **Commits:** no hagas commit ni push de nada hasta que el usuario lo diga, aunque un hook lo pida.
 7. **Textos en todos los idiomas:** cualquier cambio de texto visible se aplica al español, al inglés por
@@ -49,7 +51,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   graphic 1024×500). **Icono del lanzador:** mando negro con botones blancos sobre verde #00C64E
   (`lemuroid_launcher_foreground.xml`, `lemuroid_launcher_background`, PNG de `mipmap-*` y canal de TV), el de la
   primera versión del fork.
-- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.0.0` (`versionCode` 1).
+- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.0.0` (`versionCode` 1). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
   Antes era `com.gamestation.tv`: es una app distinta para Android, así que la antigua hay que desinstalarla aparte
   y sus datos (partidas, ajustes, biblioteca) no pasan a la nueva.
 - Variante que se compila: **freeDynamicDebug** (sin librerías de Google; los cores se descargan al usarlos).
@@ -59,7 +61,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   Un tono casi gris del verde del logo (`playretro_soft_green`, #54635A, con contenido blanco) va en los interruptores
   (`BrandGreenFills` en `Components.kt`), en la pestaña seleccionada de TV cuando la barra no tiene el foco
   (`tv_tab_selected_background`) y en el botón seleccionado de la barra inferior del móvil (`MainNavigationBar.kt`). Colores en
-  `lemuroid-app/src/main/java/.../mobile/shared/compose/ui/Color.kt` y `res/values/material-colors.xml` (deben coincidir).
+  `lemuroid-app/src/main/java/.../mobile/shared/compose/ui/Color.kt` y `res/values/material-colors.xml` (deben coincidir). Solo hay tema oscuro (`AppTheme` siempre usa `DarkColorScheme`).
 - Base de datos de la app (Room): versión 11 (`fileSize` y `fileLastModified` para detectar archivos cambiados al re-escanear).
 
 ## Piezas importantes
@@ -110,7 +112,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   hacer scroll (`TVTabGrids.addTitle`). La pestaña se llama "Consolas" también en el móvil (`title_consoles`). En el móvil, Consolas tiene el mismo botón de lista/cuadrícula que los juegos de una consola, con su propio modo guardado (`systems_grid_mode`, `MainViewModel`), y la cuadrícula es de 3 por fila (`MetaSystemScreen.kt`).
   El foco no sale del contenido de una pestaña con ←, → o ↓ (antes ← en la primera tarjeta saltaba a la lupa);
   con ↑ va a la pestaña seleccionada (`TVMainTabsFragment.onFocusSearch`). Las rejillas de TV no oscurecen las tarjetas sin foco (`VerticalGridPresenter(..., useFocusDimmer = false)`); Ajustes de TV reutilizan las
-  pantallas Compose del móvil (`tv/settings/TVSettingsTabFragment.kt`); al abrir una sub-opción el foco va a su primera
+  pantallas Compose del móvil (`tv/settings/TVSettingsTabFragment.kt`; `SettingsViewModel` da sus valores reales desde el primer cuadro, sin estados vacíos, para que la pestaña no salte al entrar deslizándose). Armarla costaba ~300 ms, más que el deslizamiento (280 ms), así que aparecía de golpe: `TVMainTabsFragment` la crea una sola vez cuando el foco lleva 2 s quieto (cada movimiento reinicia la espera, para que la pausa de armarla no caiga sobre un cambio de pestaña) en su propio contenedor (`tv_settings_content`, invisible y no `gone` para que también quede medida) y solo la muestra u oculta con las mismas animaciones (si se elige antes de estar armada, el selector se mueve primero y se arma al terminar, apareciendo con un fundido); al ocultarse vuelve a la lista principal (`showMainScreen`); al abrir una sub-opción el foco va a su primera
   opción y al volver con Atrás a la que la abrió (`TVSettingsDestination` + `SettingsFocusMemory.kt`, que registra las
   filas de `Components.kt`; la primera es la que está más arriba en pantalla; como pantallas como Dispositivos externos
   cargan sus opciones en segundo plano, durante 3 s el foco sigue a la de más arriba mientras el usuario no lo mueva); estilo de tarjetas en `tv/shared/TVCardStyle.kt`.
@@ -185,6 +187,9 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   (`baseUri` en `lemuroid-app-ext-free/.../CoreUpdaterImpl.kt`; `CORES_VERSION` y las huellas de cada core en
   `CoreChecksums.kt`, junto a él). Para añadir o actualizar un core: subirlo a `master` de PlayRetroCores, crear una
   etiqueta nueva, cambiar `CORES_VERSION` y regenerar las huellas (si no coinciden, la app rechaza el core).
+  La versión de Play no descarga cores (Play prohíbe bajar código nativo de fuera): van como módulos dinámicos
+  desde el submódulo `lemuroid-cores`, que apunta a PlayRetroCores `pr-1.0.1` (= `pr-1.0.0` más los archivos de
+  módulo de SwanStation). Se baja con `git submodule update --init --depth 1` (~820 MB).
   PlayStation tiene dos cores: PCSX ReARMed (por defecto) y SwanStation (necesita BIOS scph5500/5501/5502).
   SwanStation dibuja por software (`swanstation_GPU_Renderer` = Software en sus `defaultSettings`): con Auto/OpenGL
   pide un contexto de OpenGL de escritorio, LibretroDroid se lo da y sus shaders GLSL 130 no compilan en OpenGL ES
@@ -202,14 +207,14 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   `settings/smb`) guarda servidor, ruta desde el recurso compartido, usuario y contraseña (cifrada con una clave del
   almacén de Android, `SmbConfigStore`); botones Probar, Guardar y Cancelar centrados (Probar no se desactiva mientras
   prueba, para no perder el foco). En la TV lleva el título arriba y los campos solo abren el teclado al pulsar OK
-  (`SmbTextField`); la tecla del teclado es "siguiente". Botones de diálogos y formularios con borde blanco al
+  (`SmbTextField`); la tecla del teclado es "siguiente". El campo se queda la tecla → para su cursor, así que el ojo de la contraseña se alcanza con → explícitamente (`trailingIconFocus`) y ← vuelve al campo. Botones de diálogos y formularios con borde blanco al
   enfocar (`utils/android/FocusBorder.kt`). Librería **smbj** 0.13.0 (SMB2/3, con
   BouncyCastle). `lib/storage/smb/`: `SmbShare` (conexión, listar, leer), `SmbStorageProvider` (URIs
   `smb://servidor/recurso/ruta`, una conexión reutilizada, lectura en bloques de 1 MB; los núcleos que leen por descriptor de archivo —PCSX
   ReARMed, PPSSPP, Citra— leen el juego directamente del NAS con `SmbProxyFile`, bloques de 1 MB y 8 en memoria, y
   si la conexión se cierra a mitad de partida vuelve a conectar y reintenta hasta 4 veces (sin timeout de socket,
   que cortaba conexiones solo por estar quietas, y cerrando las rotas en segundo plano para no esperar 30 s); los
-  demás copian la ROM a la caché `smb-games` la primera vez, con `.part` mientras se copia). `DocumentFileParser` lee con la función de cada proveedor. Con la biblioteca vacía, "Elegir
+  demás copian la ROM a la caché `smb-games` la primera vez, con `.part` mientras se copia). Los juegos dentro de un `.zip` (local, SAF y SMB) también se extraen a un `.part` (`extractEntryToFile` en `FileKt.kt`): una extracción cortada no deja un juego truncado en la caché. `DocumentFileParser` lee con la función de cada proveedor. Con la biblioteca vacía, "Elegir
   carpeta" (Inicio del móvil y tarjeta de Inicio/Consolas en TV) abre `shared/settings/LibrarySourceActivity.kt`:
   el mismo diálogo de origen y, si se elige SMB, el formulario en la misma actividad.
   Mientras se ve "Cargando tus juegos" en la TV no se muestran la captura ni los textos de la lista inmersiva.
@@ -345,6 +350,10 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   textos sin uso, descargas de cores atómicas y verificadas con `CoreChecksums.kt`, Zip Slip en ROM y en archivos
   de PSP, enlaces externos inválidos, BIOS de SwanStation, carátulas por HTTPS, firma fuera del código en
   `keystore.properties`). Al cambiar `CORES_VERSION` hay que regenerar `CoreChecksums.kt` con `git ls-tree -r <tag>`.
+  La clave de firma existe desde 2026-11-01: `release.jks` (alias `playretro`) y `keystore.properties` en la raíz
+  del proyecto, ignorados por git; nunca leer ni mostrar las contraseñas. En *release* R8 está activo: las reglas de
+  `lemuroid-app/proguard-rules.pro` conservan entero el cliente SMB (`com.hierynomus`, `net.engio.mbassy`,
+  `org.bouncycastle`), que busca clases en tiempo de ejecución.
 - Ronda 2 (2026-10-22): corregidos todos los hallazgos. La limpieza de la biblioteca solo se hace si el escaneo
   terminó bien (antes "Detener" o un error borraban juegos), la caché de opciones no guarda como valor de la consola
   el propio de un juego, descargas de cores de una en una (`Mutex` en `CoreUpdaterImpl`), progreso que no retrocede,

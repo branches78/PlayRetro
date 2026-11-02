@@ -42,6 +42,7 @@ android {
                 ":lemuroid_core_snes9x",
                 ":lemuroid_core_stella",
                 ":lemuroid_core_citra",
+                ":lemuroid_core_swanstation",
             ),
         )
     }
@@ -108,11 +109,14 @@ android {
             signingConfig = signingConfigs["release"]
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
             resValue("string", "lemuroid_name", "PlayRetro")
+            resValue("string", "launcher_name", "PlayRetro")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
             resValue("string", "lemuroid_name", "PlayRetro")
+            // Only the launchers show it, so the debug build installed next to the release one can be told apart.
+            resValue("string", "launcher_name", "PlayRetro Debug")
         }
     }
 

@@ -13,7 +13,7 @@ import com.swordfish.lemuroid.lib.savesync.SaveSyncManager
 import com.swordfish.lemuroid.lib.storage.cache.CacheCleaner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -51,20 +51,22 @@ class SettingsViewModel(
         val displayNames: List<String>,
     )
 
-    val cacheState =
-        flow { emit(buildCacheState(context)) }
-            .stateIn(viewModelScope, SharingStarted.Lazily, null)
+    // Ready from the first frame: on TV the screen slides in with its tab, and anything that appears a moment later
+    // (the cache option, the sync section, the folder) made the content jump during the animation.
+    val cacheState: CacheState = buildCacheState(context)
 
     val indexingInProgress = PendingOperationsMonitor(context).anyLibraryOperationInProgress()
 
     val directoryScanInProgress = PendingOperationsMonitor(context).isDirectoryScanInProgress()
 
-    val uiState =
+    private val folderPreference =
         sharedPreferences.getString(context.getString(com.swordfish.lemuroid.lib.R.string.pref_key_extenral_folder))
-            .asFlow()
-            .flowOn(Dispatchers.IO)
-            .stateIn(viewModelScope, SharingStarted.Lazily, "")
+
+    val uiState: StateFlow<State> =
+        folderPreference.asFlow()
             .map { State(it, saveSyncManager.isSupported()) }
+            .flowOn(Dispatchers.IO)
+            .stateIn(viewModelScope, SharingStarted.Lazily, State(folderPreference.get(), saveSyncManager.isSupported()))
 
     fun changeLocalStorageFolder() {
         settingsInteractor.changeLocalStorageFolder()

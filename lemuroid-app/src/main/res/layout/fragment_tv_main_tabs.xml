@@ -116,4 +116,12 @@
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/tv_top_bar_height" />
 
+    <!-- The settings are built in advance and kept here, shown and hidden with their tab (see TVMainTabsFragment). -->
+    <FrameLayout
+        android:id="@+id/tv_settings_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/tv_top_bar_height"
+        android:visibility="invisible" />
+
 </androidx.leanback.widget.BrowseFrameLayout>
