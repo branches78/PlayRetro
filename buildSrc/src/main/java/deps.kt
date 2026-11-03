@@ -101,7 +101,6 @@ object deps {
                 const val ui = "androidx.compose.ui:ui"
 
                 object accompanist {
-                    const val systemUiController = "com.google.accompanist:accompanist-systemuicontroller:${versions.accompanist}"
                     const val navigationMaterial = "com.google.accompanist:accompanist-navigation-material:${versions.accompanist}"
                     const val drawablePainter = "com.google.accompanist:accompanist-drawablepainter:${versions.accompanist}"
                 }

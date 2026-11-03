@@ -207,7 +207,6 @@ dependencies {
     debugImplementation(deps.libs.androidx.compose.tooling)
     implementation(deps.libs.androidx.compose.toolingPreview)
     implementation(deps.libs.androidx.compose.extendedIcons)
-    implementation(deps.libs.androidx.compose.accompanist.systemUiController)
     implementation(deps.libs.androidx.compose.accompanist.navigationMaterial)
     implementation(deps.libs.androidx.compose.accompanist.drawablePainter)
     implementation(deps.libs.androidx.paging.compose)
