@@ -79,6 +79,10 @@ subprojects {
                     targetCompatibility = JavaVersion.VERSION_17
                 }
             }
+            // Kotlin must target the same JVM as Java; modules that don't set it (the cores) would get the JDK's.
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+                kotlinOptions.jvmTarget = "17"
+            }
         }
     }
 
