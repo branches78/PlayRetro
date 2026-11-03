@@ -65,4 +65,6 @@
     <string name="game_interactory_busy">Checking sync, please wait</string>
     <string name="settings_retropad_button_name">RetroPad %1$s</string>
     <string name="gamepad_binding_update_title">Associate \"RetroPad %1$s\"</string>
+    <string name="settings_title_language">Language</string>
+    <string name="settings_language_device">Device language</string>
 </resources>

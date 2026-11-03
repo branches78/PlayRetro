@@ -66,6 +66,8 @@ class HomeViewModel(
         val showNoGamesCard: Boolean = false,
         // More favorites than the ones shown in the row: a "Show all" card is added at its end.
         val hasMoreFavorites: Boolean = false,
+        // False until the library has been read: the empty rows are not real yet.
+        val loaded: Boolean = false,
     )
 
     private val microphonePermissionEnabledState = MutableStateFlow(true)
@@ -133,6 +135,7 @@ class HomeViewModel(
             showNoGamesCard = noGames,
             dynamicRows = dynamicRows,
             hasMoreFavorites = favoritesGames.size > CAROUSEL_MAX_ITEMS,
+            loaded = true,
         )
     }
 

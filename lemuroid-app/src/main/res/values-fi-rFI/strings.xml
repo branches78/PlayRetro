@@ -247,4 +247,6 @@
     <string name="save_sync_provider">Synkronoi kohteeseen</string>
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Synkronoidaan pelejä, odota</string>
+    <string name="settings_title_language">Kieli</string>
+    <string name="settings_language_device">Laitteen kieli</string>
 </resources>

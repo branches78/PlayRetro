@@ -200,8 +200,9 @@ private fun HomeScreen(
         HomeRow(
             stringResource(id = R.string.discover),
             state.discoveryGames,
-            // With an empty library (e.g. first launch) the row stays hidden: the directory card is shown instead.
-            stringResource(id = R.string.home_row_empty_discover).takeUnless { state.showNoGamesCard },
+            // Hidden until the library has been read (its message showed for a moment on start), and with an empty
+            // library (e.g. first launch), where the directory card is shown instead.
+            stringResource(id = R.string.home_row_empty_discover).takeIf { state.loaded && !state.showNoGamesCard },
             onGameClicked,
             onGameLongClick,
         )

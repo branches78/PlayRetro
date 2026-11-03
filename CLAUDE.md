@@ -62,6 +62,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   (`BrandGreenFills` en `Components.kt`), en la pestaña seleccionada de TV cuando la barra no tiene el foco
   (`tv_tab_selected_background`) y en el botón seleccionado de la barra inferior del móvil (`MainNavigationBar.kt`). Colores en
   `lemuroid-app/src/main/java/.../mobile/shared/compose/ui/Color.kt` y `res/values/material-colors.xml` (deben coincidir). Solo hay tema oscuro (`AppTheme` siempre usa `DarkColorScheme`).
+- **Idioma (solo debug):** Ajustes → Otros tiene "Idioma" solo en la versión debug y con Android 13+ (`DebugLanguageSetting.kt`, idioma por app de `LocaleManager`), para tomar las capturas de la Play Store en todos los idiomas; la lista sale de las carpetas `res/values-*`.
 - Base de datos de la app (Room): versión 11 (`fileSize` y `fileLastModified` para detectar archivos cambiados al re-escanear).
 
 ## Piezas importantes
@@ -72,7 +73,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   Clásicos de…, Más de…. Las filas sin juegos se ocultan (Añadidos recientemente siempre tiene juegos);
   con la biblioteca vacía no hay filas. Descubrir (`shared/home/HomeDiscovery.kt`, móvil y TV) muestra juegos sin
   jugar de distintas consolas (una de cada en turno), en un orden que cambia cada día y cada vez que se juega; si no
-  hay bastantes, completa con los jugados hace más tiempo. En la TV, Descubrir va siempre primero y sin título, como lista inmersiva
+  hay bastantes, completa con los jugados hace más tiempo (solo queda vacía sin juegos). En el móvil no se muestra hasta leer la biblioteca (`UIState.loaded`): su mensaje de fila vacía salía un instante al abrir. En la TV, Descubrir va siempre primero y sin título, como lista inmersiva
   (ver más abajo).
 - **Descubrir inmersivo (TV):** al enfocar un juego de la primera fila se muestran arriba su título, consola ·
   desarrollador · región y descripción, en el mismo orden que en la ficha (`tv_home_immersive_info.xml`, `TVHomeFragment.showImmersiveGame`), y detrás de la barra
@@ -112,7 +113,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   hacer scroll (`TVTabGrids.addTitle`). La pestaña se llama "Consolas" también en el móvil (`title_consoles`). En el móvil, Consolas tiene el mismo botón de lista/cuadrícula que los juegos de una consola, con su propio modo guardado (`systems_grid_mode`, `MainViewModel`), y la cuadrícula es de 3 por fila (`MetaSystemScreen.kt`).
   El foco no sale del contenido de una pestaña con ←, → o ↓ (antes ← en la primera tarjeta saltaba a la lupa);
   con ↑ va a la pestaña seleccionada (`TVMainTabsFragment.onFocusSearch`). Las rejillas de TV no oscurecen las tarjetas sin foco (`VerticalGridPresenter(..., useFocusDimmer = false)`); Ajustes de TV reutilizan las
-  pantallas Compose del móvil (`tv/settings/TVSettingsTabFragment.kt`; `SettingsViewModel` da sus valores reales desde el primer cuadro, sin estados vacíos, para que la pestaña no salte al entrar deslizándose). Armarla costaba ~300 ms, más que el deslizamiento (280 ms), así que aparecía de golpe: `TVMainTabsFragment` la crea una sola vez cuando el foco lleva 2 s quieto (cada movimiento reinicia la espera, para que la pausa de armarla no caiga sobre un cambio de pestaña) en su propio contenedor (`tv_settings_content`, invisible y no `gone` para que también quede medida) y solo la muestra u oculta con las mismas animaciones (si se elige antes de estar armada, el selector se mueve primero y se arma al terminar, apareciendo con un fundido); al ocultarse vuelve a la lista principal (`showMainScreen`); al abrir una sub-opción el foco va a su primera
+  pantallas Compose del móvil (`tv/settings/TVSettingsTabFragment.kt`; `SettingsViewModel` da sus valores reales desde el primer cuadro, sin estados vacíos, para que la pestaña no salte al entrar deslizándose). Armarla costaba ~300 ms, más que el deslizamiento (280 ms), así que aparecía de golpe: `TVMainTabsFragment` la crea una sola vez cuando el foco lleva 2 s quieto (cada movimiento reinicia la espera, para que la pausa de armarla no caiga sobre un cambio de pestaña) en su propio contenedor (`tv_settings_content`, invisible y no `gone` para que también quede medida) y solo la muestra u oculta con las mismas animaciones (si se elige antes de estar armada, el selector se mueve primero y se arma cuando terminó y el texto oscuro de la pestaña ya se dibujó —`awaitFrame`—, apareciendo con un fundido); al ocultarse vuelve a la lista principal (`showMainScreen`); al abrir una sub-opción el foco va a su primera
   opción y al volver con Atrás a la que la abrió (`TVSettingsDestination` + `SettingsFocusMemory.kt`, que registra las
   filas de `Components.kt`; la primera es la que está más arriba en pantalla; como pantallas como Dispositivos externos
   cargan sus opciones en segundo plano, durante 3 s el foco sigue a la de más arriba mientras el usuario no lo mueva); estilo de tarjetas en `tv/shared/TVCardStyle.kt`.

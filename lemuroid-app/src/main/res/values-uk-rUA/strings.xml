@@ -253,4 +253,6 @@
     <string name="save_sync_provider">Синхронізувати з</string>
     <string name="save_sync_provider_drive">Google Диск</string>
     <string name="save_sync_in_progress_banner">Синхронізація ігор, зачекайте</string>
+    <string name="settings_title_language">Мова</string>
+    <string name="settings_language_device">Мова пристрою</string>
 </resources>

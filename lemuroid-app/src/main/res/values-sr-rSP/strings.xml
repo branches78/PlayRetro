@@ -253,4 +253,6 @@
     <string name="save_sync_provider">Синхронизуј са</string>
     <string name="save_sync_provider_drive">Google диск</string>
     <string name="save_sync_in_progress_banner">Синхронизација игара, сачекајте</string>
+    <string name="settings_title_language">Језик</string>
+    <string name="settings_language_device">Језик уређаја</string>
 </resources>

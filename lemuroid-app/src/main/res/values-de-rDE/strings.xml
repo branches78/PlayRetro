@@ -253,4 +253,6 @@
     <string name="save_sync_provider">Synchronisieren mit</string>
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Spielstände werden synchronisiert, bitte warten</string>
+    <string name="settings_title_language">Sprache</string>
+    <string name="settings_language_device">Gerätesprache</string>
 </resources>

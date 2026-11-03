@@ -241,4 +241,6 @@
     <string name="save_sync_provider">Sincronizează cu</string>
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Se sincronizează jocurile, te rugăm să aștepți</string>
+    <string name="settings_title_language">Limbă</string>
+    <string name="settings_language_device">Limba dispozitivului</string>
 </resources>

@@ -253,4 +253,6 @@
     <string name="save_sync_provider">Synchroniser avec</string>
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Synchronisation des parties, veuillez patienter</string>
+    <string name="settings_title_language">Langue</string>
+    <string name="settings_language_device">Langue de l\'appareil</string>
 </resources>

@@ -253,4 +253,6 @@
     <string name="save_sync_provider">Synkroniser med</string>
     <string name="save_sync_provider_drive">Google Disk</string>
     <string name="save_sync_in_progress_banner">Synkroniserer spill, vent litt</string>
+    <string name="settings_title_language">Språk</string>
+    <string name="settings_language_device">Enhetens språk</string>
 </resources>

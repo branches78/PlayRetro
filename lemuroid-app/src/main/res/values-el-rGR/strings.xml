@@ -253,4 +253,6 @@
     <string name="save_sync_provider">Συγχρονισμός με</string>
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Συγχρονισμός παιχνιδιών, περίμενε</string>
+    <string name="settings_title_language">Γλώσσα</string>
+    <string name="settings_language_device">Γλώσσα συσκευής</string>
 </resources>

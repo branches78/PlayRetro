@@ -237,4 +237,6 @@
     <string name="save_sync_provider_drive">Google Drive</string>
     <string name="save_sync_in_progress_banner">Đang đồng bộ trò chơi, vui lòng chờ</string>
     <string name="gamepad_binding_update_title">Gán \"RetroPad %1$s\"</string>
+    <string name="settings_title_language">Ngôn ngữ</string>
+    <string name="settings_language_device">Ngôn ngữ của thiết bị</string>
 </resources>

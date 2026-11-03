@@ -253,4 +253,6 @@
     <string name="save_sync_provider">Synchronizuj z</string>
     <string name="save_sync_provider_drive">Dysk Google</string>
     <string name="save_sync_in_progress_banner">Synchronizowanie gier, proszę czekać</string>
+    <string name="settings_title_language">Język</string>
+    <string name="settings_language_device">Język urządzenia</string>
 </resources>

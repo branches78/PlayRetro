@@ -205,4 +205,6 @@
     <string name="save_sync_in_progress_banner">מסנכרן משחקים, נא להמתין</string>
     <string name="game_interactory_busy">בודק סנכרון, נא להמתין</string>
     <string name="gamepad_binding_update_title">שיוך \"RetroPad %1$s\"</string>
+    <string name="settings_title_language">שפה</string>
+    <string name="settings_language_device">שפת המכשיר</string>
 </resources>

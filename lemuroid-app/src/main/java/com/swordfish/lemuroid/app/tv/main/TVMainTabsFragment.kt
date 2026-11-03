@@ -38,6 +38,7 @@ import com.swordfish.lemuroid.app.tv.systems.TVSystemsFragment
 import com.swordfish.lemuroid.lib.library.db.entity.Game
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -375,6 +376,10 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
                 settingsBuildJob =
                     viewLifecycleOwner.lifecycleScope.launch {
                         delay(resources.getInteger(R.integer.tv_tab_animation_duration).toLong())
+                        // Building them freezes the screen: first the pill ends its slide and the dark text of the
+                        // tab is drawn, otherwise the tab stayed a blank white pill until they were built.
+                        while (pillAnimator?.isRunning == true) awaitFrame()
+                        repeat(2) { awaitFrame() }
                         addSettings(fadeIn = selectedTab == TAB_SETTINGS)
                     }
             }

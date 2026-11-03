@@ -166,4 +166,6 @@
     <string name="save_sync_in_progress_banner">Sincronitzant partides, espera si us plau</string>
     <string name="game_interactory_busy">Verificant la sincronització, espera si us plau</string>
     <string name="gamepad_binding_update_title">Associa «RetroPad %1$s»</string>
+    <string name="settings_title_language">Idioma</string>
+    <string name="settings_language_device">Idioma del dispositiu</string>
 </resources>
