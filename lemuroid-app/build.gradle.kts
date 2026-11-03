@@ -57,6 +57,9 @@ android {
 
         create("play") {
             dimension = "opensource"
+            // Every module of a bundle must have the same ABIs and the SwanStation core module is ARM only
+            // (the core modules get the same filter in the root build.gradle.kts).
+            ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
         }
 
         // Include cores in the final apk

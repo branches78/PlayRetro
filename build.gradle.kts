@@ -62,6 +62,10 @@ subprojects {
                     minSdkVersion(deps.android.minSdkVersion)
                     targetSdkVersion(deps.android.targetSdkVersion)
                     multiDexEnabled = true
+                    // Core modules are only bundled in the Play version, which is ARM only (see its flavor).
+                    if (project.name.startsWith("lemuroid_core_")) {
+                        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+                    }
                 }
                 lintOptions {
                     isAbortOnError = true
