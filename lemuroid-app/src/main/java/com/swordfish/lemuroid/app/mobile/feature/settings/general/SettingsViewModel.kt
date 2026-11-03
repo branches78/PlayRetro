@@ -55,7 +55,8 @@ class SettingsViewModel(
     // (the cache option, the sync section, the folder) made the content jump during the animation.
     val cacheState: CacheState = buildCacheState(context)
 
-    val indexingInProgress = PendingOperationsMonitor(context).anyLibraryOperationInProgress()
+    // Only the scan of the games: the core update run at every start (about 20 s in the Play version) would disable the controls.
+    val indexingInProgress = PendingOperationsMonitor(context).isDirectoryScanInProgress()
 
     val directoryScanInProgress = PendingOperationsMonitor(context).isDirectoryScanInProgress()
 

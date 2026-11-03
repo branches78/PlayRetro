@@ -102,8 +102,9 @@ class TVHomeViewModel(retrogradeDb: RetrogradeDatabase, appContext: Context) : V
     private fun directoryScanProgress(appContext: Context) =
         PendingOperationsMonitor(appContext).directoryScanProgress()
 
+    // Only the scan of the games: the core update run at every start (about 20 s in the Play version) would disable the controls.
     private fun indexingInProgress(appContext: Context) =
-        PendingOperationsMonitor(appContext).anyLibraryOperationInProgress()
+        PendingOperationsMonitor(appContext).isDirectoryScanInProgress()
 
     private fun availableSystems(
         retrogradeDb: RetrogradeDatabase,

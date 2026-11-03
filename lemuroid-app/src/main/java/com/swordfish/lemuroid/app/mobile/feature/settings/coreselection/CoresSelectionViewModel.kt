@@ -36,7 +36,8 @@ class CoresSelectionViewModel(
     private val appContext = context.applicationContext
     private val coreOptionsCache = CoreOptionsCache(appContext)
 
-    val indexingInProgress = PendingOperationsMonitor(context).anyLibraryOperationInProgress()
+    // Only the scan of the games: the core update run at every start (about 20 s in the Play version) would disable the controls.
+    val indexingInProgress = PendingOperationsMonitor(context).isDirectoryScanInProgress()
 
     fun getSelectedCores() = coresSelection.getSelectedCores()
 
