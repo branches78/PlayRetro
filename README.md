@@ -8,8 +8,6 @@
   <a href="https://liberapay.com/branches78/donate"><img alt="support" src="https://img.shields.io/badge/support-%E2%9D%A4-ff69b4?labelColor=1b1f1b"></a>
 </p>
 
-# PlayRetro
-
 PlayRetro is a retro game emulator for Android phones, tablets and Android TV, based on
 [libretro](https://www.libretro.com/) cores.
 
