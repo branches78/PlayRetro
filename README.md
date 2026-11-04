@@ -7,6 +7,33 @@ It started as a fork of [Lemuroid](https://github.com/Swordfish90/Lemuroid) by F
 and is now developed independently. Like the original project, it is distributed under the
 GNU General Public License v3.0 (see `COPYING`).
 
+Everything from Lemuroid is already here, plus:
+
+- New Android TV interface: tabs for Home, Consoles, Settings and About, made for the remote control
+- Immersive home screen on TV: a screenshot, the logo and the description of the selected game
+- New home rows: Because you played, Play again, Classics of… and More from…
+- Discover row that changes every day and mixes games from different consoles
+- Game details page on phone and TV: screenshot, logo, system, developer, region, description and last played
+- Game descriptions from Wikipedia in your language
+- Game logos instead of plain titles
+- Covers shown with their real shape, and better cover and game matching
+- Play your games from a network folder (SMB/NAS), without copying them to the device
+- Sync saves, save states, favorites and "Continue playing" between your devices through your network folder
+- Choose the core for each game
+- Core options for each game or for a whole console, and for every console in Settings
+- SwanStation as a second PlayStation core
+- Aspect ratio and widescreen options for Nintendo 64 and PlayStation
+- Auto Low Latency Mode (ALLM) for smooth, low-lag play
+- Moved or renamed games keep their saves, favorites and play history
+- Alphabet bar to jump between games on TV
+- Grid or list view for consoles on the phone
+- Redesigned in-game menu, the same on phone and TV
+- Screen orientation setting for games on the phone
+- Smooth gameplay on 90 and 120 Hz screens
+- Library loading progress, and folders of unsupported consoles are skipped
+- Improved "Continue playing" channel on the Android TV home screen
+- Navigation sounds on TV
+
 ## Supported systems
 
 | System | Core |
@@ -32,34 +59,6 @@ GNU General Public License v3.0 (see `COPYING`).
 
 Cores are downloaded the first time a system is used and verified before they run.
 SwanStation needs a real PlayStation BIOS (`scph5500.bin`, `scph5501.bin` or `scph5502.bin`, depending on the game region).
-
-## Features
-
-**Library and home screen**
-- Automatic ROM scanning and indexing, including zipped ROMs, with game recognition by checksum and name.
-- Box art from the libretro thumbnails server, shown with the real shape of each cover.
-- Home rows: Continue playing, Favorites, Recently added, Because you played…, Play again, Discover,
-  Classics of a different system every day and More from the same developer.
-- Systems screen with colored system icons, and grid or list view for the games of each system.
-
-**Android TV**
-- Top bar with Home, Systems and Settings tabs, search and full remote control navigation.
-- The same settings screens as on phones.
-
-**Settings**
-- Organized in ROMs, Display, Sound, Input and Others.
-- Cores screen: choose the core of each system (when there is more than one) and change its options
-  outside of the game. The same options are available from the in-game menu.
-- Sensible defaults for slow devices: PlayStation dynamic recompiler and Nintendo DS JIT enabled.
-
-**Gameplay**
-- Automatic save and restore of game states, quick save and load.
-- Optimized and customizable touch controls (size and position), tilt input.
-- Gamepad support with button remapping and local multiplayer.
-- Display filters (LCD/CRT) and HD mode.
-- Cloud save sync (Google Play version only).
-
-**Languages:** the app is translated into 30 languages.
 
 ## Building
 
