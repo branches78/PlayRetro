@@ -1,3 +1,5 @@
+![PlayRetro home screen on Android TV, tablet and phone](docs/images/playretro-devices.png)
+
 # PlayRetro
 
 PlayRetro is a retro game emulator for Android phones, tablets and Android TV, based on
@@ -6,8 +8,6 @@ PlayRetro is a retro game emulator for Android phones, tablets and Android TV, b
 It started as a fork of [Lemuroid](https://github.com/Swordfish90/Lemuroid) by Filippo Scognamiglio (Swordfish90)
 and is now developed independently. Like the original project, it is distributed under the
 GNU General Public License v3.0 (see `COPYING`).
-
-![PlayRetro home screen on Android TV, tablet and phone](docs/images/playretro-devices.png)
 
 Everything from Lemuroid is already here, plus:
 
