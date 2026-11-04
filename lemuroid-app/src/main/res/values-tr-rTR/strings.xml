@@ -256,4 +256,5 @@ $SYSTEMS.
     <string name="save_sync_in_progress_banner">Oyunlar eşitleniyor, lütfen bekle</string>
     <string name="settings_title_language">Dil</string>
     <string name="settings_language_device">Cihaz dili</string>
+    <string name="not_configured">Ayarlanmamış</string>
 </resources>

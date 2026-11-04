@@ -255,4 +255,5 @@
     <string name="save_sync_in_progress_banner">Συγχρονισμός παιχνιδιών, περίμενε</string>
     <string name="settings_title_language">Γλώσσα</string>
     <string name="settings_language_device">Γλώσσα συσκευής</string>
+    <string name="not_configured">Δεν έχει ρυθμιστεί</string>
 </resources>

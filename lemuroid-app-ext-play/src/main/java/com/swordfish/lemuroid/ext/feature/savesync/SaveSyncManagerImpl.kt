@@ -45,12 +45,17 @@ class SaveSyncManagerImpl(
     private val driveMetadata =
         SyncMetadata(retrogradeDb, appContext.getSharedPreferences(DRIVE_RECORDS_PREFERENCES, Context.MODE_PRIVATE))
 
-    private fun useNetworkShare(): Boolean =
+    // Null until the user chooses where to sync: there is no default provider.
+    private fun provider(): String? =
         SharedPreferencesHelper.getSharedPreferences(appContext)
-            .getString(appContext.getString(com.swordfish.lemuroid.lib.R.string.pref_key_save_sync_provider), null) ==
-            PROVIDER_SMB
+            .getString(appContext.getString(com.swordfish.lemuroid.lib.R.string.pref_key_save_sync_provider), null)
+            ?.takeIf { it == PROVIDER_DRIVE || it == PROVIDER_SMB }
+
+    private fun useNetworkShare(): Boolean = provider() == PROVIDER_SMB
 
     override fun hasProviderChoice(): Boolean = true
+
+    override fun hasProvider(): Boolean = provider() != null
 
     private var lastSyncTimestamp: Long by SharedPreferencesDelegates.LongDelegate(
         SharedPreferencesHelper.getSharedPreferences(appContext),
@@ -66,7 +71,11 @@ class SaveSyncManagerImpl(
     override fun isSupported(): Boolean = true
 
     override fun isConfigured(): Boolean =
-        if (useNetworkShare()) smbSaveSync.isConfigured() else GoogleSignIn.getLastSignedInAccount(appContext) != null
+        when {
+            !hasProvider() -> false
+            useNetworkShare() -> smbSaveSync.isConfigured()
+            else -> GoogleSignIn.getLastSignedInAccount(appContext) != null
+        }
 
     override fun getLastSyncInfo(): String {
         if (useNetworkShare()) return smbSaveSync.getLastSyncInfo()
@@ -97,6 +106,7 @@ class SaveSyncManagerImpl(
 
     override suspend fun hasChanges(cores: Set<CoreID>): Boolean =
         withContext(Dispatchers.IO) {
+            if (!hasProvider()) return@withContext false
             if (useNetworkShare()) {
                 return@withContext SMB_LOCK.withLock {
                     runCatching { smbSaveSync.hasChanges(cores) }
@@ -125,6 +135,7 @@ class SaveSyncManagerImpl(
         onCopyStarted: () -> Unit,
     ): Unit =
         withContext(Dispatchers.IO) {
+            if (!hasProvider()) return@withContext
             if (useNetworkShare()) {
                 SMB_LOCK.withLock {
                     runCatching { smbSaveSync.sync(cores, onCopyStarted) }
@@ -503,6 +514,7 @@ class SaveSyncManagerImpl(
     }
 
     companion object {
+        const val PROVIDER_DRIVE = "drive"
         const val PROVIDER_SMB = "smb"
         const val GDRIVE_PROPERTY_LOCAL_PATH = "localPath"
         private const val DRIVE_RECORDS_PREFERENCES = "gdrive_save_sync"

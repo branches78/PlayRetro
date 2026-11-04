@@ -255,4 +255,5 @@
     <string name="save_sync_in_progress_banner">Synkroniserer spill, vent litt</string>
     <string name="settings_title_language">Språk</string>
     <string name="settings_language_device">Enhetens språk</string>
+    <string name="not_configured">Ikke konfigurert</string>
 </resources>

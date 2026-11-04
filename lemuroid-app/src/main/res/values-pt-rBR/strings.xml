@@ -255,4 +255,5 @@
     <string name="save_sync_in_progress_banner">Sincronizando partidas, aguarde</string>
     <string name="settings_title_language">Idioma</string>
     <string name="settings_language_device">Idioma do dispositivo</string>
+    <string name="not_configured">Não configurado</string>
 </resources>

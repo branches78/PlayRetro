@@ -62,37 +62,42 @@ fun SaveSyncSettingsScreen(
                     state =
                         indexPreferenceState(
                             com.swordfish.lemuroid.lib.R.string.pref_key_save_sync_provider,
-                            "drive",
+                            // No default: "Not configured" and nothing selected until the user chooses.
+                            "",
                             listOf("drive", "smb"),
                         ),
                     title = { Text(text = stringResource(id = R.string.save_sync_provider)) },
                     items = providerNames,
+                    noSelectionSubtitle = stringResource(R.string.not_configured),
                     enabled = !isSyncInProgress,
                     onItemSelected = { _, _ -> viewModel.refresh() },
                 )
             }
-            LemuroidSettingsMenuLink(
-                title = {
-                    Text(
-                        text =
-                            stringResource(
-                                id = R.string.settings_save_sync_configure,
-                                saveSyncState.provider,
-                            ),
-                    )
-                },
-                subtitle = { Text(text = saveSyncState.configInfo) },
-                // The network share form inside the settings: with a local library it only sets the folder of the sync.
-                onClick = onClick@{
-                    if (isSyncInProgress) return@onClick
-                    val activity = saveSyncState.settingsActivity
-                    if (activity != null) {
-                        context.startActivity(Intent(context, activity))
-                    } else {
-                        onConfigureNetworkFolder()
-                    }
-                },
-            )
+            // Only once a provider is chosen (Play variant).
+            if (saveSyncState.hasProvider) {
+                LemuroidSettingsMenuLink(
+                    title = {
+                        Text(
+                            text =
+                                stringResource(
+                                    id = R.string.settings_save_sync_configure,
+                                    saveSyncState.provider,
+                                ),
+                        )
+                    },
+                    subtitle = { Text(text = saveSyncState.configInfo) },
+                    // The network share form inside the settings: with a local library it only sets the folder of the sync.
+                    onClick = onClick@{
+                        if (isSyncInProgress) return@onClick
+                        val activity = saveSyncState.settingsActivity
+                        if (activity != null) {
+                            context.startActivity(Intent(context, activity))
+                        } else {
+                            onConfigureNetworkFolder()
+                        }
+                    },
+                )
+            }
             LemuroidSettingsSwitch(
                 state = booleanPreferenceState(R.string.pref_key_save_sync_enable, default = true),
                 title = { Text(text = stringResource(id = R.string.settings_save_sync_include_saves)) },

@@ -257,4 +257,5 @@
     <string name="save_sync_in_progress_banner">게임 동기화 중입니다. 잠시 기다려 주세요</string>
     <string name="settings_title_language">언어</string>
     <string name="settings_language_device">기기 언어</string>
+    <string name="not_configured">설정 안 됨</string>
 </resources>

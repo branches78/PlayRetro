@@ -240,4 +240,5 @@
     <string name="save_sync_in_progress_banner">正在同步遊戲，請稍候</string>
     <string name="settings_title_language">語言</string>
     <string name="settings_language_device">裝置語言</string>
+    <string name="not_configured">未設定</string>
 </resources>

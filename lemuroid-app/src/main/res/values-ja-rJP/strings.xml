@@ -256,4 +256,5 @@
     <string name="save_sync_in_progress_banner">ゲームを同期しています。お待ちください</string>
     <string name="settings_title_language">言語</string>
     <string name="settings_language_device">端末の言語</string>
+    <string name="not_configured">未設定</string>
 </resources>

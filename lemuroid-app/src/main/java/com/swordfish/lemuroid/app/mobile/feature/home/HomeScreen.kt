@@ -6,7 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -26,7 +25,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -48,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameGridCard
-import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LibraryScanProgress
 import com.swordfish.lemuroid.app.shared.covers.CoverAspectRatio
 import com.swordfish.lemuroid.app.shared.home.HomeDynamicRows
 import com.swordfish.lemuroid.app.shared.library.EmptyLibraryLoading
@@ -164,14 +160,7 @@ private fun HomeScreen(
             return@Column
         }
         AnimatedVisibility(state.showNoGamesCard) {
-            HomeNotification(
-                titleId = R.string.home_empty_title,
-                messageId = R.string.home_empty_message,
-                actionId = R.string.home_empty_action,
-                onAction = onSetDirectoryClicked,
-                enabled = !state.indexInProgress,
-                outlined = true,
-            )
+            EmptyLibraryCard(enabled = !state.indexInProgress, onSetDirectory = onSetDirectoryClicked)
         }
         AnimatedVisibility(state.showNoMicrophonePermissionCard) {
             HomeNotification(
@@ -400,79 +389,3 @@ private val HOME_ROW_COVER_HEIGHT = 112.dp
 
 // Cover height plus the texts below it: padding, two title lines and the system name.
 private val HOME_ROW_EMPTY_HEIGHT = HOME_ROW_COVER_HEIGHT + TEXTS_HEIGHT
-
-@Composable
-private fun HomeLibraryLoading(progress: LibraryLoadingProgress) {
-    // The same card as "Choose a folder" while its first scan runs, with the same border.
-    ElevatedCard(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp)
-                .border(CARD_BORDER_WIDTH, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium),
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.library_loading_title),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = stringResource(R.string.library_loading_message),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            LibraryScanProgress(progress = progress, modifier = Modifier.fillMaxWidth())
-        }
-    }
-}
-
-@Composable
-private fun HomeNotification(
-    titleId: Int,
-    messageId: Int,
-    actionId: Int,
-    enabled: Boolean = true,
-    // The thin border of the settings cards ("Choose a folder" of an empty library).
-    outlined: Boolean = false,
-    onAction: () -> Unit = { },
-) {
-    val borderColor = if (outlined) MaterialTheme.colorScheme.outlineVariant else Color.Transparent
-    ElevatedCard(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp)
-                .border(CARD_BORDER_WIDTH, borderColor, MaterialTheme.shapes.medium),
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = stringResource(titleId),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = stringResource(messageId),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            OutlinedButton(
-                modifier = Modifier.align(Alignment.End),
-                onClick = onAction,
-                enabled = enabled,
-            ) {
-                Text(stringResource(id = actionId))
-            }
-        }
-    }
-}
-
-private val CARD_BORDER_WIDTH = 1.dp

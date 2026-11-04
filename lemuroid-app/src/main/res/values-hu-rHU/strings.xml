@@ -131,4 +131,5 @@
     <string name="gamepad_binding_update_title">„RetroPad %1$s” hozzárendelése</string>
     <string name="settings_title_language">Nyelv</string>
     <string name="settings_language_device">Az eszköz nyelve</string>
+    <string name="not_configured">Nincs beállítva</string>
 </resources>

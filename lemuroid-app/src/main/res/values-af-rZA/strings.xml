@@ -66,4 +66,5 @@
     <string name="gamepad_binding_update_title">Koppel \"RetroPad %1$s\"</string>
     <string name="settings_title_language">Taal</string>
     <string name="settings_language_device">Toesteltaal</string>
+    <string name="not_configured">Nie opgestel nie</string>
 </resources>

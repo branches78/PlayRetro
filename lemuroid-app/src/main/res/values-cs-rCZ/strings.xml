@@ -254,4 +254,5 @@
     <string name="save_sync_in_progress_banner">Synchronizace her, čekejte prosím</string>
     <string name="settings_title_language">Jazyk</string>
     <string name="settings_language_device">Jazyk zařízení</string>
+    <string name="not_configured">Není konfigurováno</string>
 </resources>

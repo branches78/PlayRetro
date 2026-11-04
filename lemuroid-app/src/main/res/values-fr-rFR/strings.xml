@@ -255,4 +255,5 @@
     <string name="save_sync_in_progress_banner">Synchronisation des parties, veuillez patienter</string>
     <string name="settings_title_language">Langue</string>
     <string name="settings_language_device">Langue de l\'appareil</string>
+    <string name="not_configured">Pas configuré</string>
 </resources>

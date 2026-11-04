@@ -168,4 +168,5 @@
     <string name="gamepad_binding_update_title">Associa «RetroPad %1$s»</string>
     <string name="settings_title_language">Idioma</string>
     <string name="settings_language_device">Idioma del dispositiu</string>
+    <string name="not_configured">No configurat</string>
 </resources>

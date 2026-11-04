@@ -37,6 +37,9 @@ abstract class SaveSyncManager {
     /** Whether the sync can go to more than one place (Google Drive or the network share, in the Play variant). */
     open fun hasProviderChoice(): Boolean = false
 
+    /** Whether the place of the sync was chosen: with a choice ([hasProviderChoice]) there is none at first. */
+    open fun hasProvider(): Boolean = true
+
     fun getDisplayNameForCore(
         context: Context,
         coreID: CoreID,

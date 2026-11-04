@@ -255,4 +255,5 @@
     <string name="save_sync_in_progress_banner">Синхронізація ігор, зачекайте</string>
     <string name="settings_title_language">Мова</string>
     <string name="settings_language_device">Мова пристрою</string>
+    <string name="not_configured">Не налаштовано</string>
 </resources>

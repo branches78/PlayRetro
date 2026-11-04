@@ -41,6 +41,8 @@ fun LemuroidSettingsList(
     icon: (@Composable () -> Unit)? = null,
     useSelectedValueAsSubtitle: Boolean = true,
     subtitle: (@Composable () -> Unit)? = null,
+    // Shown in the row while no item is selected (not in the dialog).
+    noSelectionSubtitle: String? = null,
     closeDialogDelay: Long = 200,
     action: (@Composable () -> Unit)? = null,
     onItemSelected: ((Int, String) -> Unit)? = null,
@@ -52,10 +54,14 @@ fun LemuroidSettingsList(
     var showDialog by remember { mutableStateOf(false) }
 
     val safeSubtitle =
-        if (state.value >= 0 && useSelectedValueAsSubtitle) {
-            { Text(text = items[state.value]) }
-        } else {
-            subtitle
+        when {
+            state.value >= 0 && useSelectedValueAsSubtitle -> {
+                { Text(text = items[state.value]) }
+            }
+            state.value < 0 && noSelectionSubtitle != null -> {
+                { Text(text = noSelectionSubtitle) }
+            }
+            else -> subtitle
         }
 
     LemuroidSettingsMenuLink(
@@ -74,6 +80,8 @@ fun LemuroidSettingsList(
     val onSelected: (Int, Boolean) -> Unit = { selectedIndex, updateState ->
         coroutineScope.launch {
             if (updateState) state.value = selectedIndex
+            // Once the value is saved, so the listener reads the new one.
+            onItemSelected?.invoke(selectedIndex, items[selectedIndex])
             delay(closeDialogDelay)
             showDialog = false
         }
@@ -106,10 +114,7 @@ fun LemuroidSettingsList(
                                 .selectable(
                                     role = Role.RadioButton,
                                     selected = isSelected,
-                                    onClick = {
-                                        onSelected(index, !isSelected)
-                                        onItemSelected?.invoke(index, items[index])
-                                    },
+                                    onClick = { onSelected(index, !isSelected) },
                                 ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {

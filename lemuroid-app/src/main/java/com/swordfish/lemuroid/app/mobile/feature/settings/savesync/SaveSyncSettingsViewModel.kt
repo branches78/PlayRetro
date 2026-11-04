@@ -44,6 +44,7 @@ class SaveSyncSettingsViewModel(
         val provider: String = "",
         val settingsActivity: Class<out Activity>? = null,
         val hasProviderChoice: Boolean = false,
+        val hasProvider: Boolean = true,
     )
 
     private val state = MutableStateFlow(State())
@@ -78,6 +79,7 @@ class SaveSyncSettingsViewModel(
             saveSyncManager.getProvider(),
             saveSyncManager.getSettingsActivity(),
             saveSyncManager.hasProviderChoice(),
+            saveSyncManager.hasProvider(),
         )
     }
 

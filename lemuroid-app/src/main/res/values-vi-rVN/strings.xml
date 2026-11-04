@@ -239,4 +239,5 @@
     <string name="gamepad_binding_update_title">Gán \"RetroPad %1$s\"</string>
     <string name="settings_title_language">Ngôn ngữ</string>
     <string name="settings_language_device">Ngôn ngữ của thiết bị</string>
+    <string name="not_configured">Chưa được thiết lập</string>
 </resources>

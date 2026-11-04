@@ -256,4 +256,5 @@
     <string name="save_sync_in_progress_banner">Synkroniserar spel, vänta</string>
     <string name="settings_title_language">Språk</string>
     <string name="settings_language_device">Enhetens språk</string>
+    <string name="not_configured">Inte konfigurerad</string>
 </resources>

@@ -243,4 +243,5 @@
     <string name="save_sync_in_progress_banner">Se sincronizează jocurile, te rugăm să aștepți</string>
     <string name="settings_title_language">Limbă</string>
     <string name="settings_language_device">Limba dispozitivului</string>
+    <string name="not_configured">Neconfigurat</string>
 </resources>

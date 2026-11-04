@@ -341,17 +341,19 @@ private fun RomsSettings(
     val context = LocalContext.current
 
     val currentDirectory = state.currentDirectory
-    val emptyDirectory = stringResource(R.string.none)
+    val emptyDirectory = stringResource(R.string.not_configured)
 
-    // The network share when it is the source of the library, otherwise the local folder.
-    val currentDirectoryName =
+    // The network share when it is the source of the library, otherwise the local folder; null without a directory.
+    val configuredDirectoryName =
         remember(state.currentDirectory) {
             val smbStore = SmbConfigStore(context)
             val smbLabel = smbStore.load()?.label?.takeIf { smbStore.librarySource == SmbConfigStore.LibrarySource.SMB }
             smbLabel ?: runCatching {
                 DocumentFile.fromTreeUri(context, Uri.parse(currentDirectory))?.name
-            }.getOrNull() ?: emptyDirectory
+            }.getOrNull()
         }
+    val hasDirectory = configuredDirectoryName != null
+    val currentDirectoryName = configuredDirectoryName ?: emptyDirectory
 
     LemuroidCardSettingsGroup(title = { Text(text = stringResource(id = R.string.roms)) }) {
         val scanProgress by rememberLibraryScanProgress()
@@ -372,8 +374,10 @@ private fun RomsSettings(
         // A single row that changes between "Rescan" and "Stop": with two different rows the focused one would be
         // removed and the remote focus would jump elsewhere. It stays enabled for the same reason, and does nothing
         // while the cores are updated after a scan.
+        // Without a directory every option of the card but "Directory" is disabled: there is nothing to scan or play.
         LemuroidSettingsMenuLink(
             title = { Text(text = stringResource(id = if (scanInProgress) R.string.stop else R.string.rescan)) },
+            enabled = hasDirectory || scanInProgress,
             onClick = {
                 when {
                     scanInProgress -> LibraryIndexScheduler.cancelLibrarySync(context)
@@ -385,11 +389,13 @@ private fun RomsSettings(
             state = booleanPreferenceState(R.string.pref_key_show_game_details, GameInteractor.SHOW_GAME_DETAILS_DEFAULT),
             title = { Text(text = stringResource(id = R.string.settings_title_show_game_details)) },
             subtitle = { Text(text = stringResource(id = R.string.settings_description_show_game_details)) },
+            enabled = hasDirectory,
         )
         LemuroidSettingsSwitch(
             state = booleanPreferenceState(R.string.pref_key_autosave, true),
             title = { Text(text = stringResource(id = R.string.settings_title_enable_autosave)) },
             subtitle = { Text(text = stringResource(id = R.string.settings_description_enable_autosave)) },
+            enabled = hasDirectory,
         )
         if (cacheState != null) {
             LemuroidSettingsList(
@@ -401,12 +407,14 @@ private fun RomsSettings(
                         cacheState.default,
                         cacheState.values,
                     ),
+                enabled = hasDirectory,
             )
         }
         LemuroidSettingsSwitch(
             state = booleanPreferenceState(R.string.pref_key_allow_direct_game_load, true),
             title = { Text(text = stringResource(id = R.string.settings_title_direct_game_load)) },
             subtitle = { Text(text = stringResource(id = R.string.settings_description_direct_game_load)) },
+            enabled = hasDirectory,
         )
         // Only available in the "play" flavor (Google Drive).
         if (state.isSaveSyncSupported) {
@@ -416,6 +424,7 @@ private fun RomsSettings(
                     Text(text = stringResource(id = R.string.settings_description_save_sync))
                 },
                 onClick = { navController.navigateToRoute(MainRoute.SETTINGS_SAVE_SYNC) },
+                enabled = hasDirectory,
             )
         }
     }

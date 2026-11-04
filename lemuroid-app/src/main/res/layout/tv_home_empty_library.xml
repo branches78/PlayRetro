@@ -24,6 +24,7 @@
             android:id="@+id/tv_empty_library_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:text="@string/home_empty_title"
             android:textColor="@color/md_theme_dark_onSurface"
             android:textSize="22sp" />
@@ -41,7 +42,7 @@
             android:id="@+id/tv_empty_library_action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/tv_empty_library_spacing"
             android:background="@drawable/tv_outlined_button_background"
             android:clickable="true"
