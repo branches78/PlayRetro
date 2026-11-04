@@ -29,11 +29,14 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   ni acceso a los dispositivos del usuario.
 - **En local** (PC del usuario, Windows): se compila, se copia el APK y se instala en la TV.
   - Repositorio: `D:\Descargas\Proyectos\PlayRetro\Source-Code` (remoto `https://github.com/branches78/PlayRetro.git`)
-  - APKs: copiar a `D:\Descargas\Proyectos\PlayRetro\Releases\APK-Releases\` como `PlayRetro-debug.apk`
-    (sale de `lemuroid-app\build\outputs\apk\freeDynamic\debug\`). En cmd, cambiar de unidad con `cd /d`.
-  - AAB de Play (`:lemuroid-app:bundlePlayDynamicRelease`, solo ARM): copiar a
-    `D:\Descargas\Proyectos\PlayRetro\Releases\AAB-Releases\` como `PlayRetro-play-release-<versión>.aab`
-    (p. ej. `-1.0.0`). Cada AAB nuevo para Play necesita un `versionCode` mayor que el último publicado.
+  - Carpeta `D:\Descargas\Proyectos\PlayRetro\Releases\` (en cmd, cambiar de unidad con `cd /d`):
+    - APK de depuración (`assembleFreeDynamicDebug`, sale de `lemuroid-app\build\outputs\apk\freeDynamic\debug\`):
+      `APK-Debug-Releases\PlayRetro-debug-<versión>.apk` (p. ej. `PlayRetro-debug-1.0.0.apk`).
+    - APK de GitHub (`:lemuroid-app:assembleFreeDynamicRelease`): `APK-Releases\PlayRetro-<versión>.apk`.
+    - AAB de Play (`:lemuroid-app:bundlePlayDynamicRelease`, solo ARM):
+      `AAB-Releases\PlayRetro-<versión>-vc<versionCode>.aab` (p. ej. `PlayRetro-1.0.0-vc5.aab`). Cada AAB nuevo para
+      Play necesita un `versionCode` mayor que el último publicado.
+    - Primero se compila el de depuración para probar; el APK de GitHub y el AAB, juntos, cuando el usuario lo diga.
   - Compilar con `JAVA_HOME=C:\Users\Ricardo\.jdks\jbr-21.0.11` (el JDK de Android Studio es Java 25, demasiado nuevo
     para Gradle 8.10.2): `./gradlew --no-daemon :lemuroid-app:assembleFreeDynamicDebug`
   - SDK en `D:\Aplicaciones\AndroidSDK` (`local.properties`, no se sube al repositorio).
