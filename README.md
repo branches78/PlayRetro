@@ -1,10 +1,12 @@
 ![PlayRetro home screen on Android TV, tablet and phone](docs/images/playretro-devices.png)
 
-[![release](https://img.shields.io/github/v/release/branches78/PlayRetro?label=release&labelColor=1b1f1b&color=b8e0b8)](https://github.com/branches78/PlayRetro/releases/latest)
-[![downloads](https://img.shields.io/github/downloads/branches78/PlayRetro/total?label=downloads&labelColor=1b1f1b&color=b8e0b8)](https://github.com/branches78/PlayRetro/releases)
-[![Android](https://img.shields.io/badge/Android-10%2B-b8e0b8?labelColor=1b1f1b)](#)
-[![licence](https://img.shields.io/badge/licence-GPL--3.0-b8e0b8?labelColor=1b1f1b)](COPYING)
-[![support](https://img.shields.io/badge/support-%E2%9D%A4-ff69b4?labelColor=1b1f1b)](https://liberapay.com/branches78/donate)
+<p align="center">
+  <a href="https://github.com/branches78/PlayRetro/releases/latest"><img alt="release" src="https://img.shields.io/github/v/release/branches78/PlayRetro?label=release&labelColor=1b1f1b&color=b8e0b8"></a>
+  <a href="https://github.com/branches78/PlayRetro/releases"><img alt="downloads" src="https://img.shields.io/github/downloads/branches78/PlayRetro/total?label=downloads&labelColor=1b1f1b&color=b8e0b8"></a>
+  <img alt="Android" src="https://img.shields.io/badge/Android-10%2B-b8e0b8?labelColor=1b1f1b">
+  <a href="COPYING"><img alt="licence" src="https://img.shields.io/badge/licence-GPL--3.0-b8e0b8?labelColor=1b1f1b"></a>
+  <a href="https://liberapay.com/branches78/donate"><img alt="support" src="https://img.shields.io/badge/support-%E2%9D%A4-ff69b4?labelColor=1b1f1b"></a>
+</p>
 
 # PlayRetro
 
