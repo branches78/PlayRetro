@@ -1,4 +1,4 @@
-![PlayRetro home screen on Android TV, tablet and phone](docs/images/playretro-devices.png)
+![PlayRetro, retro game emulator for Android phones, tablets and TV](docs/images/playretro-banner.png)
 
 <p align="center">
   <a href="https://github.com/branches78/PlayRetro/releases/latest"><img alt="release" src="https://img.shields.io/github/v/release/branches78/PlayRetro?label=release&labelColor=1b1f1b&color=b8e0b8"></a>
