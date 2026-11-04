@@ -7,6 +7,8 @@ It started as a fork of [Lemuroid](https://github.com/Swordfish90/Lemuroid) by F
 and is now developed independently. Like the original project, it is distributed under the
 GNU General Public License v3.0 (see `COPYING`).
 
+![PlayRetro home screen on Android TV, tablet and phone](docs/images/playretro-devices.png)
+
 Everything from Lemuroid is already here, plus:
 
 - New Android TV interface: tabs for Home, Consoles, Settings and About, made for the remote control
@@ -82,3 +84,6 @@ data from a `keystore.properties` file (not committed) with `storeFile`, `storeP
 - System icons: "FlatUI" theme from [RetroArch assets](https://github.com/libretro/retroarch-assets) by libretro,
   licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 - Box art: [libretro thumbnails](https://github.com/libretro-thumbnails/libretro-thumbnails).
+- The screenshots show free homebrew games: Tobu Tobu Girl Deluxe (Tangram Games, CC BY 4.0), uCity (Antonio Niño Díaz,
+  CC BY-SA 4.0), Libbet and the Magic Floor and Thwaite (Damian Yerrick), Gothicvania (donth77, art by ansimuz) and
+  Bit Bang (StudioGuma, CC BY-SA 4.0).
