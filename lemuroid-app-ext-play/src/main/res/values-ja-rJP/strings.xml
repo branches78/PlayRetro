@@ -32,4 +32,5 @@
         \n\u2022 インターネット接続を有効にし、ゲームを再スキャンする
         \n\u2022 Google Playストアがインストールされ、実行されていることを確認する
         \n\u2022 Google Playストアアプリの保留中の操作が完了するまで待つ</string>
+    <string name="gdrive_last_error">前回のエラー: %s</string>
 </resources>

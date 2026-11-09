@@ -3,6 +3,7 @@ package com.swordfish.lemuroid.app.utils.android.settings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentCompositeKeyHash
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -31,6 +32,9 @@ class SettingsFocusMemory {
 
         /** Whether the item (or a view inside it) has the focus. */
         var hasFocus by mutableStateOf(false)
+
+        /** The same, but read while composing without recomposing when it changes. */
+        var hadFocusLastEvent = false
     }
 
     internal val items = mutableStateListOf<Item>()
@@ -77,11 +81,19 @@ internal fun SettingsFocusItem(
         memory.items.add(item)
         onDispose { memory.items.remove(item) }
     }
+    // Read now: once the item is disabled it loses the focus, which would jump out of the settings (to the search button).
+    val focusedWhileComposing = item.hadFocusLastEvent
+    LaunchedEffect(enabled) {
+        if (!enabled && focusedWhileComposing) memory.firstItem()?.let { runCatching { it.requestFocus() } }
+    }
     Box(
         modifier =
             Modifier
                 .focusRequester(requester)
-                .onFocusChanged { item.hasFocus = it.hasFocus }
+                .onFocusChanged {
+                    item.hasFocus = it.hasFocus
+                    item.hadFocusLastEvent = it.hasFocus
+                }
                 .onGloballyPositioned { item.top = it.positionInRoot().y },
     ) {
         content { memory.onItemClicked(key) }

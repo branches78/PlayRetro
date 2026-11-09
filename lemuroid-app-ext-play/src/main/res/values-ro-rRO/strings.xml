@@ -32,4 +32,5 @@
 \u2022 Asigurăți-va ca aveți o conexiune stabile la internet si încercați din nou
 \u2022 Asigurați-va ca Google Play este instalat si ca funcționează
 \u2022 Așteptați ca operațiunile de pe Google Play sa se finalizeze</string>
+    <string name="gdrive_last_error">Ultima eroare: %s</string>
 </resources>

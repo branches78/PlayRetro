@@ -32,4 +32,5 @@
         \n\u2022 Oyunları tekrar taramak için internete bağlanın
         \n\u2022 Play Store\'un açık ve yüklü olduğunu kontrol edin
         \n\u2022 Play Store\'daki işlemlerin tamamlanmasını bekleyin</string>
+    <string name="gdrive_last_error">Son hata: %s</string>
 </resources>

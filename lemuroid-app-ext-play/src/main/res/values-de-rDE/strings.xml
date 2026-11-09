@@ -32,4 +32,5 @@
         \n\u2022 Internetverbindung aktivieren und Spieleverzeichnis erneut scannen
         \n\u2022 Stelle sicher, dass der Google Play Store installiert ist und ausgeführt wird
         \n\u2022 Warte bis ausstehende Aktionen im Google Play Store vollendet sind</string>
+    <string name="gdrive_last_error">Letzter Fehler: %s</string>
 </resources>

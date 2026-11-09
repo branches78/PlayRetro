@@ -37,4 +37,5 @@
         \n\u2022 Make sure Google Play Store is installed and running
         \n\u2022 Wait for pending operations in Google Play Store app to complete</string>
 
+    <string name="gdrive_last_error">Last error: %s</string>
 </resources>

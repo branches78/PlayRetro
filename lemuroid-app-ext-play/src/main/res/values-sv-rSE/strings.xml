@@ -32,4 +32,5 @@
         \n\u2022 Aktivera internetanslutning och omprogrammera dina spel
         \n\u2022 Se till att Google Play Store är installerat och kör
         \n\u2022 Vänta på pågående operationer i Google Play Store för att slutföra</string>
+    <string name="gdrive_last_error">Senaste fel: %s</string>
 </resources>

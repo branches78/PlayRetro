@@ -85,6 +85,9 @@ class SaveSyncManagerImpl(
                 SyncMetadata.FILE_NAME,
             )
         }
+        (lastDriveSyncError ?: lastDriveCheckError)?.let {
+            return appContext.getString(R.string.gdrive_last_error, it)
+        }
         val dateString =
             if (lastSyncTimestamp > 0) {
                 SimpleDateFormat.getDateTimeInstance().format(lastSyncTimestamp)
@@ -125,8 +128,13 @@ class SaveSyncManagerImpl(
                     } else {
                         !driveMetadata.isLocalUpToDate(localFingerprint)
                     }
-                }.onFailure { Timber.e(it, "Error while checking the save sync.") }
-                    .getOrDefault(false)
+                }.onSuccess { lastDriveCheckError = null }
+                    .onFailure {
+                        Timber.e(it, "Error while checking the save sync.")
+                        lastDriveCheckError = describeError(it)
+                    }
+                    // When it can't be checked the manual sync stays available: it is the way to retry and see why.
+                    .getOrDefault(true)
             }
         }
 
@@ -144,8 +152,12 @@ class SaveSyncManagerImpl(
                 return@withContext
             }
             SYNC_LOCK.withLock {
+                lastDriveSyncError = null
                 runCatching { performSaveSyncForCores(cores, onCopyStarted) }
-                    .onFailure { Timber.e(it, "Error while performing save sync.") }
+                    .onFailure {
+                        Timber.e(it, "Error while performing save sync.")
+                        lastDriveSyncError = describeError(it)
+                    }
             }
         }
 
@@ -343,6 +355,9 @@ class SaveSyncManagerImpl(
             } else {
                 false
             }
+        }.onFailure {
+            Timber.e(it, "Error while syncing a file.")
+            lastDriveSyncError = describeError(it)
         }.getOrDefault(false)
     }
 
@@ -522,6 +537,23 @@ class SaveSyncManagerImpl(
         // Marker of a damaged file (compared by identity).
         private val DAMAGED = JSONObject()
         private val SYNC_LOCK = Mutex()
+        private const val MAX_ERROR_LENGTH = 300
+
+        // Shown in "Manual sync". Release builds have no logs, so it is the only way to know why Drive failed.
+        @Volatile
+        private var lastDriveCheckError: String? = null
+
+        @Volatile
+        private var lastDriveSyncError: String? = null
+
+        // The deepest message is the most specific one: the cause of an authorization error, for example.
+        private fun describeError(error: Throwable): String =
+            generateSequence(error) { it.cause }
+                .mapNotNull { it.message }
+                .lastOrNull()
+                ?.replace('\n', ' ')
+                ?.take(MAX_ERROR_LENGTH)
+                ?: error.javaClass.name
         private val SMB_LOCK = Mutex()
     }
 }

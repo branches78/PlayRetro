@@ -192,6 +192,8 @@ abstract class LemuroidApplicationModule {
             biosManager: BiosManager,
             customCoverManager: CustomCoverManager,
             directoriesManager: DirectoriesManager,
+            coresSelection: CoresSelection,
+            coreVariablesManager: CoreVariablesManager,
         ) = LemuroidLibrary(
             db,
             storageProviderRegistry,
@@ -199,6 +201,8 @@ abstract class LemuroidApplicationModule {
             biosManager,
             customCoverManager,
             directoriesManager,
+            coresSelection,
+            coreVariablesManager,
         )
 
         @Provides

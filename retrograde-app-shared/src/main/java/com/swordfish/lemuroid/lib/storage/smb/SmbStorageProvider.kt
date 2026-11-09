@@ -2,8 +2,6 @@ package com.swordfish.lemuroid.lib.storage.smb
 
 import android.content.Context
 import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.leanback.preference.LeanbackPreferenceFragment
 import com.swordfish.lemuroid.common.kotlin.extractEntryToFile
 import com.swordfish.lemuroid.common.kotlin.writeToFile
@@ -111,7 +109,7 @@ class SmbStorageProvider(private val context: Context) : StorageProvider {
             return RomFiles.Standard(listOf(cacheFile))
         }
 
-        if (allowVirtualFiles && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (allowVirtualFiles) {
             val config = requireConfig()
             val gameEntry = virtualEntry(config, game.fileName, uri)
             val dataEntries = dataFiles.map { virtualEntry(config, it.fileName, Uri.parse(it.fileUri)) }
@@ -129,7 +127,6 @@ class SmbStorageProvider(private val context: Context) : StorageProvider {
         return RomFiles.Standard(listOf(gameFile) + dataEntries)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun virtualEntry(
         config: SmbConfig,
         fileName: String,

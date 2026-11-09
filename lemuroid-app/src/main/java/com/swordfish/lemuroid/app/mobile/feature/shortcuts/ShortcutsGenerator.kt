@@ -8,7 +8,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
 import android.net.Uri
-import android.os.Build
 import com.swordfish.lemuroid.app.shared.covers.CoverUtils
 import com.swordfish.lemuroid.app.shared.deeplink.DeepLink
 import com.swordfish.lemuroid.common.bitmap.cropToSquare
@@ -30,10 +29,6 @@ class ShortcutsGenerator(
     private val thumbnailsApi = retrofit.create(ThumbnailsApi::class.java)
 
     suspend fun pinShortcutForGame(game: Game) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return
-        }
-
         val shortcutManager = appContext.getSystemService(ShortcutManager::class.java)!!
         val bitmap = retrieveBitmap(game)
 
@@ -76,10 +71,6 @@ class ShortcutsGenerator(
     }
 
     fun supportShortcuts(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return false
-        }
-
         val shortcutManager = appContext.getSystemService(ShortcutManager::class.java)!!
         return shortcutManager.isRequestPinShortcutSupported
     }

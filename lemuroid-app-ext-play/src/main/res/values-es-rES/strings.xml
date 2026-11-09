@@ -32,4 +32,5 @@
          \n\u2022 Activa la conexión a Internet y vuelve a escanear tus juegos
          \n\u2022 Asegúrate de que Google Play Store esté instalado y funcionando.
          \n\u2022 Espera a que se completen las operaciones pendientes en la aplicación Google Play Store</string>
+    <string name="gdrive_last_error">Último error: %s</string>
 </resources>

@@ -32,4 +32,5 @@
         \n\u2022 Ative a conexão com a internet e verifique novamente seus jogos
         \n\u2022 Certifique-se de que a Google Play Store está instalada e rodando
         \n\u2022 Aguarde as operações pendentes no aplicativo da Google Play Store para concluir</string>
+    <string name="gdrive_last_error">Último erro: %s</string>
 </resources>

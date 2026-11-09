@@ -1,6 +1,7 @@
 package com.swordfish.lemuroid.lib.core
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.swordfish.lemuroid.lib.library.SystemCoreConfig
 import com.swordfish.lemuroid.lib.library.SystemID
 import dagger.Lazy
@@ -47,6 +48,18 @@ class CoreVariablesManager(private val sharedPreferences: Lazy<SharedPreferences
                     result?.let { CoreVariable(key.removePrefix(prefix), it) }
                 }
         }
+
+    /** Forgets the options chosen only for games no longer in the library. */
+    fun clearOptionsForGames(gameIds: List<Int>) {
+        val ids = gameIds.toSet()
+        val keyPrefix = "${GAME_OPTION_PREFIX}_"
+        val preferences = sharedPreferences.get()
+        val keys =
+            preferences.all.keys.filter { key ->
+                key.startsWith(keyPrefix) && key.removePrefix(keyPrefix).substringBefore('_').toIntOrNull() in ids
+            }
+        preferences.edit { keys.forEach { remove(it) } }
+    }
 
     private fun convertMapToCoreVariables(variablesMap: Map<String, String>): List<CoreVariable> {
         return variablesMap.entries.map { CoreVariable(it.key, it.value) }

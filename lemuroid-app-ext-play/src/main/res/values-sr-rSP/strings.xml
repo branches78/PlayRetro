@@ -32,4 +32,5 @@
         \n\u2022 Омогућите Интернет везу и поново скенирајте Ваше игре
         \n\u2022 Осигурајте да је Google Play Store инсталирана и да ради
         \n\u2022 Сачекајте да се текуће операције Google Play Store апликације заврше</string>
+    <string name="gdrive_last_error">Последња грешка: %s</string>
 </resources>

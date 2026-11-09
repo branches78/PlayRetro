@@ -23,11 +23,6 @@ suspend fun GLSurfaceView.takeScreenshot(
 
 private suspend fun GLSurfaceView.takeScreenshot(maxResolution: Int): Bitmap? =
     suspendCoroutine { cont ->
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
-            cont.resume(null)
-            return@suspendCoroutine
-        }
-
         queueEvent {
             try {
                 val outputScaling = maxResolution / maxOf(width, height).toFloat()

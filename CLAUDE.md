@@ -57,11 +57,14 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   graphic 1024×500). **Icono del lanzador:** mando negro con botones blancos sobre verde #00C64E
   (`lemuroid_launcher_foreground.xml`, `lemuroid_launcher_background`, PNG de `mipmap-*` y canal de TV), el de la
   primera versión del fork.
-- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.0.0` (`versionCode` 5; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
+- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.0.1` (`versionCode` 7; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
   Antes era `com.gamestation.tv`: es una app distinta para Android, así que la antigua hay que desinstalarla aparte
   y sus datos (partidas, ajustes, biblioteca) no pasan a la nueva.
 - Variante que se compila: **freeDynamicDebug** (sin librerías de Google; los cores se descargan al usarlos).
-  La sincronización con Google Drive solo existe en la variante `play` y requiere credenciales propias en Google Cloud.
+  La sincronización con Google Drive solo existe en la variante `play`: Google Sign-In y carpeta privada (`drive.appdata`).
+  Clientes Android en Google Cloud (proyecto PlayRetro, en estado Prueba): `com.playretro.tv` con la SHA-1 de la firma
+  de apps de Play y `com.playretro.tv.debug` con la de `debug.keystore` del repositorio. El método por código no sirve:
+  Google rechaza `drive.appdata` con él (`invalid_scope`), aunque su documentación lo incluye.
 - Tema fijo en teléfono y TV (sin Material You): blanco para textos de acento, iconos e interruptores; la lupa y la nube de TV usan el verde del logo (`playretro_brand_green`, icono oscuro; blancas con foco)
   (`primary`; solo el logo es verde) y verde oscuro #3A4B39 para rellenos (`primaryContainer`, `secondaryContainer`).
   Un tono casi gris del verde del logo (`playretro_soft_green`, #54635A, con contenido blanco) va en los interruptores
@@ -255,8 +258,9 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   sincronizando partidas y estados, no se escribe y "Sincronización manual" muestra `sync_metadata_unreadable`.
   Favoritos, Continuar jugando, número de versión y huella van en `lib/savesync/SyncMetadata.kt`, compartido con
   Google Drive (variante `play`): ahí `playretro-sync.json` va en la carpeta privada de la app en Drive, con las
-  mismas reglas y la misma comprobación rápida (registros en las preferencias `gdrive_save_sync`; sin probar, faltan
-  credenciales de Google Cloud). Las nubes del móvil y de la TV solo se
+  mismas reglas y la misma comprobación rápida (registros en las preferencias `gdrive_save_sync`). Si falla la comprobación o
+  la sincronización, "Sincronización manual" sigue activa y muestra el error (`gdrive_last_error`; la versión release no
+  escribe registros). Las nubes del móvil y de la TV solo se
   muestran si hay cambios y no hay una sincronización en curso; "Sincronización manual" solo se activa si hay cambios:
   `SaveSyncManager.hasChanges`, comprobado por `shared/savesync/SaveSyncChanges.kt` al abrir o volver a la pantalla
   principal, cada minuto y al terminar una sincronización. Mientras una sincronización corre o espera (p. ej. la
@@ -365,12 +369,12 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   terminó bien (antes "Detener" o un error borraban juegos), la caché de opciones no guarda como valor de la consola
   el propio de un juego, descargas de cores de una en una (`Mutex` en `CoreUpdaterImpl`), progreso que no retrocede,
   "Cargando tus juegos" guardado fuera de la pantalla (`EmptyLibraryLoading`) y código muerto.
-  Pendiente menor: los valores propios de un juego no se borran al quitarlo de la biblioteca.
 
 ## Pendientes conocidos
 
-- Correcciones de navegación con el mando en TV (el usuario las irá indicando).
-- Sincronización con Google Drive (variante `play` + configuración en Google Cloud).
+- Aviso de 16 KB de Play: núcleos compilados con NDK antiguo, LibretroDroid y Compose.
+- Fallo de PPSSPP en Play (`std::terminate` en `retro_run`, al guardar o cargar partidas): actualizar el núcleo.
+- Publicar el proyecto de Google Cloud antes de abrir Drive a todos (en estado Prueba solo entran los usuarios de prueba).
 - Actualización automática de cores en `PlayRetroCores`: acción de GitHub que descargue periódicamente del buildbot
   de libretro los cores que usa la app y los suba a una rama aparte (`updates`) para probarlos antes de pasarlos
   a `master` y crear una etiqueta nueva. Acordado implementarlo más adelante.

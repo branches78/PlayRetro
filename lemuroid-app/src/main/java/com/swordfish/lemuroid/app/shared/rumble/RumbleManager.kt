@@ -1,7 +1,6 @@
 package com.swordfish.lemuroid.app.shared.rumble
 
 import android.content.Context
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.InputDevice
@@ -82,7 +81,7 @@ class RumbleManager(
 
         if (amplitude == 0) return
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && vibrator.hasAmplitudeControl()) {
+        if (vibrator.hasAmplitudeControl()) {
             vibrator.vibrate(VibrationEffect.createOneShot(MAX_RUMBLE_DURATION_MS, amplitude))
         } else if (amplitude > LEGACY_MIN_RUMBLE_STRENGTH) {
             vibrator.vibrate(MAX_RUMBLE_DURATION_MS)

@@ -32,4 +32,5 @@
         \n\u2022 Attiva la connessione internet e riscansiona i tuoi giochi
         \n\u2022 Assicurati che Google Play Store sia installato ed in esecuzione
         \n\u2022 Attendi che le operazioni in sospeso nell\'app di Google Play Store siano completate</string>
+    <string name="gdrive_last_error">Ultimo errore: %s</string>
 </resources>

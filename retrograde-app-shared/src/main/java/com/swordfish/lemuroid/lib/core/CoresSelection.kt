@@ -93,6 +93,11 @@ class CoresSelection(
         }.commit()
     }
 
+    /** Forgets the core chosen for games no longer in the library, so it isn't kept downloaded for them. */
+    fun clearCoresForGames(gameIds: List<Int>) {
+        sharedPreferences.edit { gameIds.forEach { remove(computeGamePreferenceKey(it)) } }
+    }
+
     /** Cores chosen for single games, so they are downloaded with the ones of the systems. */
     fun getGameSpecificCores(): List<CoreID> {
         return sharedPreferences.all

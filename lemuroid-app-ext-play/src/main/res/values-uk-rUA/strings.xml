@@ -32,4 +32,5 @@
         \n\u2022 Увімкніть підключення до Інтернету та перескануйте ваші ігри
         \n\u2022 Переконайтесь, що Google Play Store встановлено та запущено
         \n\u2022 Зачекайте поки завершаться операції в Google Play Store</string>
+    <string name="gdrive_last_error">Остання помилка: %s</string>
 </resources>

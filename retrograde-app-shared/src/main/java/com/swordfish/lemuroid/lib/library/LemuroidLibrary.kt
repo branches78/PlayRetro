@@ -22,6 +22,8 @@ package com.swordfish.lemuroid.lib.library
 import android.net.Uri
 import com.swordfish.lemuroid.common.coroutines.batchWithSizeAndTime
 import com.swordfish.lemuroid.lib.bios.BiosManager
+import com.swordfish.lemuroid.lib.core.CoreVariablesManager
+import com.swordfish.lemuroid.lib.core.CoresSelection
 import com.swordfish.lemuroid.lib.library.covers.CustomCoverManager
 import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
 import com.swordfish.lemuroid.lib.library.db.entity.DataFile
@@ -59,6 +61,8 @@ class LemuroidLibrary(
     private val biosManager: BiosManager,
     private val customCoverManager: CustomCoverManager,
     private val directoriesManager: DirectoriesManager,
+    private val coresSelection: CoresSelection,
+    private val coreVariablesManager: CoreVariablesManager,
 ) {
     /** Progress of an indexing: [processed] of [total] files. [total] is null while the files are being listed. */
     data class IndexProgress(val processed: Int, val total: Int?)
@@ -541,6 +545,11 @@ class LemuroidLibrary(
         customCoverManager.deleteCoversForGames(games)
 
         retrogradedb.gameDao().delete(games)
+
+        // Ids are never reused: what was chosen only for these games can't be reached anymore.
+        val gameIds = games.map { it.id }
+        coresSelection.clearCoresForGames(gameIds)
+        coreVariablesManager.clearOptionsForGames(gameIds)
     }
 
     fun getGameFiles(

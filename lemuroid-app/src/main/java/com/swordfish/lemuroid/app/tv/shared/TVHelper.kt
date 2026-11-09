@@ -18,8 +18,7 @@ object TVHelper {
                 !packageManager.hasSystemFeature("android.hardware.type.automotive"),
             ).all { it }
 
-        val isNotLegacyStorage =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !Environment.isExternalStorageLegacy()
+        val isNotLegacyStorage = !Environment.isExternalStorageLegacy()
 
         return isStandardHardware || isNotLegacyStorage
     }

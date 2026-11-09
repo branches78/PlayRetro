@@ -32,4 +32,5 @@
         \n\u2022 Ota internet-yhteys käyttöön ja uudelleennimeä pelisi
         \n\u2022 Varmista, että Google Play on asennettu ja käynnissä
         \n\u2022 Odota käynnissä olevia toimintoja Google Play Store -sovelluksessa.</string>
+    <string name="gdrive_last_error">Viimeisin virhe: %s</string>
 </resources>

@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.swordfish.lemuroid.R
@@ -128,15 +127,13 @@ class NotificationsManager(private val applicationContext: Context) {
     }
 
     private fun createDefaultNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = applicationContext.getString(R.string.notification_channel_name)
-            val importance = NotificationManager.IMPORTANCE_MIN
-            val mChannel = NotificationChannel(DEFAULT_CHANNEL_ID, name, importance)
-            val notificationManager =
-                ContextCompat.getSystemService(applicationContext, NotificationManager::class.java)
+        val name = applicationContext.getString(R.string.notification_channel_name)
+        val importance = NotificationManager.IMPORTANCE_MIN
+        val mChannel = NotificationChannel(DEFAULT_CHANNEL_ID, name, importance)
+        val notificationManager =
+            ContextCompat.getSystemService(applicationContext, NotificationManager::class.java)
 
-            notificationManager?.createNotificationChannel(mChannel)
-        }
+        notificationManager?.createNotificationChannel(mChannel)
     }
 
     companion object {

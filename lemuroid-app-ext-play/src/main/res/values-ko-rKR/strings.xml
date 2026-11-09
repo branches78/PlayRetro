@@ -32,4 +32,5 @@
         \n\u2022 인터넷 연결 상태를 확인하고 게임을 다시 검색
         \n\u2022 Google Play 스토어가 설치되어 있고 실행 중인지 확인
         \n\u2022 Google Play 스토어 앱의 진행중인 작업이 끝날 때까지 기다리기</string>
+    <string name="gdrive_last_error">마지막 오류: %s</string>
 </resources>

@@ -32,4 +32,5 @@
         \n\u2022 启用互联网连接并重新扫描您的游戏
         \n\u2022 确保 Google Play 商店已安装并正在运行
         \n\u2022 等待 Google Play 商店应用中的待处理操作完成</string>
+    <string name="gdrive_last_error">上次错误：%s</string>
 </resources>

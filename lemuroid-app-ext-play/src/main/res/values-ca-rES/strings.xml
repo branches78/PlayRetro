@@ -32,4 +32,5 @@
         \n\u2022 Activa la connexió a Internet i torna a escanejar els teus jocs
         \n\u2022 Assegureu-vos que Google Play Store estigui instal·lat i en funcionament
         \n\u2022 Espereu que les operacions pendents a l\'aplicació Google Play Store es completin</string>
+    <string name="gdrive_last_error">Darrer error: %s</string>
 </resources>

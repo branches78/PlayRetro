@@ -28,16 +28,14 @@ class GameActivity : BaseGameActivity() {
      */
     private fun preferGameRefreshRate() {
         val attributes = window.attributes
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            @Suppress("DEPRECATION")
-            val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) display else windowManager.defaultDisplay
-            val current = display?.mode
-            val mode =
-                display?.supportedModes
-                    ?.filter { it.physicalWidth == current?.physicalWidth && it.physicalHeight == current.physicalHeight }
-                    ?.minByOrNull { abs(it.refreshRate - GAME_REFRESH_RATE) }
-            if (mode != null) attributes.preferredDisplayModeId = mode.modeId
-        }
+        @Suppress("DEPRECATION")
+        val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) display else windowManager.defaultDisplay
+        val current = display?.mode
+        val mode =
+            display?.supportedModes
+                ?.filter { it.physicalWidth == current?.physicalWidth && it.physicalHeight == current.physicalHeight }
+                ?.minByOrNull { abs(it.refreshRate - GAME_REFRESH_RATE) }
+        if (mode != null) attributes.preferredDisplayModeId = mode.modeId
         // Also for screens that change their rate without separate modes.
         attributes.preferredRefreshRate = GAME_REFRESH_RATE
         window.attributes = attributes
