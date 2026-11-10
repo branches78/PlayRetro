@@ -318,7 +318,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   En la TV el borde de foco es blanco (tarjetas `tv_card_focus_foreground.xml`, botones y Acerca de). La parte de abajo
   de las tarjetas de juegos (nombre y subtítulo) usa el tono claro del fondo de las imágenes de las consolas
   (`surfaceContainerHigh`, #2C2F2A): TV `tv_card_info_background`, móvil `LemuroidGameGridCard`.
-  Tamaños: títulos de fila 20 sp en TV y `titleMedium` en móvil, siempre mayores que los nombres de los juegos.
+  Tamaños: títulos de fila 18 sp en TV (como las pestañas) y `titleMedium` en móvil, siempre mayores que los nombres de los juegos.
   Móvil: `mobile/feature/details/GameDetailsScreen.kt` (ruta `MainRoute.GAME_DETAILS`; bajo la captura solo el
   logo o nombre y `consola · compañía · país`, sin carátula). Es inmersiva: la captura sube hasta el borde superior,
   por detrás de la barra de estado, sin barra superior y con la flecha de volver y la lupa encima

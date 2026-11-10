@@ -21,8 +21,9 @@
         <item name="infoVisibility">always</item>
     </style>
 
-    <!-- Row titles with the same text color as on mobile. -->
+    <!-- Row titles with the same text color as on mobile, and the same size as the tabs (Leanback uses 20sp). -->
     <style name="LemuroidLeanbackTheme.RowHeader" parent="Widget.Leanback.Row.Header">
         <item name="android:textColor">@color/md_theme_dark_onBackground</item>
+        <item name="android:textSize">18sp</item>
     </style>
 </resources>
