@@ -310,7 +310,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   `HomeLibraryLoading` en `HomeScreen.kt`); al re-escanear, la barra sale bajo "Directorio" en Ajustes
   (`LibraryScanProgress.kt`). Ya no hay línea de progreso en el móvil ni círculo de carga en la TV.
 - **Ficha del juego:** al elegir un juego se abre su ficha en lugar de jugarlo (ajuste "Mostrar ficha del juego",
-  `pref_key_show_game_details`, activado por defecto, en Ajustes → ROMs; `GameInteractor.showDetailsOnClick`).
+  `pref_key_show_game_details`, activado por defecto, en Ajustes → Juegos; `GameInteractor.showDetailsOnClick`).
   Continuar jugando siempre juega directamente. La pulsación larga abre siempre el menú de opciones, en todas partes
   (móvil y TV), también con la ficha activada; su última opción es "Ir a descripción del juego"
   (`GameContextMenuContent(onOpenDetails)`; en TV la pasa cada pantalla a `GamePresenter(onOpenDetails)`). Datos compartidos en `shared/details/`
@@ -369,7 +369,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   Cómo volver a hacerla pestaña: `saved-code/favorites-tab/RESTORE.md`.
 
 - **Ajustes (móvil):** `mobile/feature/settings/general/SettingsScreen.kt`. La pantalla principal es una tarjeta por
-  sección (`SettingsSection`: ROMs, Pantalla, Sonido, Entrada, Otros) con su nombre y una flecha; cada una abre su
+  sección (`SettingsSection`: Juegos (`ROMS`, texto `roms`), Pantalla, Sonido, Entrada, Otros) con su nombre y una flecha; cada una abre su
   subpantalla (rutas `settings/roms`, `settings/display`… en `MainNavigationRoutes.kt`, `SettingsSectionScreen`).
   Las opciones de lista que antes abrían un diálogo abren una subpantalla de elección
   (`utils/android/settings/SettingsChoice.kt`: `SettingsChoiceHost`, ruta `settings/choice`; el título va en la barra

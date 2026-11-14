@@ -67,4 +67,5 @@
     <string name="settings_title_language">Taal</string>
     <string name="settings_language_device">Toesteltaal</string>
     <string name="not_configured">Nie opgestel nie</string>
+    <string name="roms">Speletjies</string>
 </resources>

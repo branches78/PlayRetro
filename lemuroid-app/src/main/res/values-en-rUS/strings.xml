@@ -68,4 +68,5 @@
     <string name="settings_title_language">Language</string>
     <string name="settings_language_device">Device language</string>
     <string name="not_configured">Not configured</string>
+    <string name="roms">Games</string>
 </resources>
