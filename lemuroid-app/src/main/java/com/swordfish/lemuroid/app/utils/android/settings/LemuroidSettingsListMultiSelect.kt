@@ -48,17 +48,6 @@ fun LemuroidSettingsListMultiSelect(
     var showDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    LemuroidSettingsMenuLink(
-        enabled = enabled,
-        icon = icon,
-        title = title,
-        subtitle = subtitle,
-        action = action,
-        onClick = { showDialog = true },
-    )
-
-    if (!showDialog) return
-
     val onAdd: (Int) -> Unit = { selectedIndex ->
         val mutable = state.value.toMutableSet()
         mutable.add(entryValues[selectedIndex])
@@ -69,6 +58,36 @@ fun LemuroidSettingsListMultiSelect(
         mutable.remove(entryValues[selectedIndex])
         state.value = mutable
     }
+
+    // On mobile the values are shown on a screen of their own, with an arrow on the option; they are saved when it
+    // closes, like with the button of the dialog.
+    val choiceHost = LocalSettingsChoiceHost.current
+    val openArrow: @Composable () -> Unit = { SettingsOpenArrow() }
+    LemuroidSettingsMenuLink(
+        enabled = enabled,
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        action = action ?: openArrow.takeIf { choiceHost != null },
+        onClick = {
+            if (choiceHost == null) {
+                showDialog = true
+                return@LemuroidSettingsMenuLink
+            }
+            choiceHost.open(
+                SettingsChoiceRequest(
+                    title = title,
+                    items = entries,
+                    multiSelect = true,
+                    isSelected = { state.value.contains(entryValues[it]) },
+                    onClick = { index -> if (state.value.contains(entryValues[index])) onRemove(index) else onAdd(index) },
+                    onClose = { onItemsSelected?.invoke(entryValues.filter { state.value.contains(it) }) },
+                ),
+            )
+        },
+    )
+
+    if (!showDialog) return
 
     AlertDialog(
         title = title,

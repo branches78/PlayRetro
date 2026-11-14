@@ -57,7 +57,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   graphic 1024×500). **Icono del lanzador:** mando negro con botones blancos sobre verde #00C64E
   (`lemuroid_launcher_foreground.xml`, `lemuroid_launcher_background`, PNG de `mipmap-*` y canal de TV), el de la
   primera versión del fork.
-- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.0.1` (`versionCode` 7; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
+- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.0` (`versionCode` 8; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
   Antes era `com.gamestation.tv`: es una app distinta para Android, así que la antigua hay que desinstalarla aparte
   y sus datos (partidas, ajustes, biblioteca) no pasan a la nueva.
 - Variante que se compila: **freeDynamicDebug** (sin librerías de Google; los cores se descargan al usarlos).
@@ -106,7 +106,13 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   todas con márgenes laterales de 58 dp, como pide la guía (`tv_content_side_margin`; el ancho del contenido es el de la
   pantalla menos ambos márgenes, `TVHomeFragment.contentWidth`; en Ajustes y Acerca de es el padding de Compose). La píldora de la pestaña es una vista
   aparte (`tv_tab_pill`) que se desliza a la pestaña elegida (blanca con texto oscuro si la barra tiene el foco, verde si
-  no) y el contenido entra desde el lado de la pestaña nueva (`res/anim/tv_tab_*`, `tv_tab_animation_duration`). Las filas de Inicio avanzan de una tarjeta
+  no) y el contenido entra desde el lado de la pestaña nueva (`res/anim/tv_tab_*`, `tv_tab_animation_duration`).
+  Medidas de la guía de pestañas de Android TV escaladas a texto de 16 sp (`res/values/tv-tabs.xml`, estilo
+  `GameStationTVTab`): píldora de 36 dp, icono de 20 dp a la izquierda (los del móvil: relleno en la pestaña elegida,
+  contorno en las demás, `ic_tv_tab_*`), márgenes 14/7/18 dp. La lupa y la nube son botones redondos del mismo alto
+  (`tv_search_orb`, `tv_sync_orb`, `ImageView` con `tv_top_bar_button`). Una pestaña cambia de color e icono
+  (`isSelected`) cuando la píldora que se desliza ya cubre su icono y su texto (`pillTab`, `coversLabel` en
+  `TVMainTabsFragment.movePill`; al terminar la animación como respaldo), no antes. Las filas de Inicio avanzan de una tarjeta
   en una con la enfocada en la primera posición y se recortan en ese ancho (`HomeListRowPresenter` en `TVHomeFragment.kt`).
   Los juegos de una consola (`tv/games/TVGamesFragment.kt`) y "Mostrar todo" de Favoritos (`tv/favorites/TVFavoritesFragment.kt`)
   se abren dentro de su pestaña, sin ocultar la barra (`showSystemGames` / `showFavorites`; Atrás vuelve a la pestaña),
@@ -122,7 +128,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   hacer scroll (`TVTabGrids.addTitle`). La pestaña se llama "Consolas" también en el móvil (`title_consoles`). En el móvil, Consolas tiene el mismo botón de lista/cuadrícula que los juegos de una consola, con su propio modo guardado (`systems_grid_mode`, `MainViewModel`), y la cuadrícula es de 3 por fila (`MetaSystemScreen.kt`).
   El foco no sale del contenido de una pestaña con ←, → o ↓ (antes ← en la primera tarjeta saltaba a la lupa);
   con ↑ va a la pestaña seleccionada (`TVMainTabsFragment.onFocusSearch`). Las rejillas de TV no oscurecen las tarjetas sin foco (`VerticalGridPresenter(..., useFocusDimmer = false)`); Ajustes de TV reutilizan las
-  pantallas Compose del móvil (`tv/settings/TVSettingsTabFragment.kt`; `SettingsViewModel` da sus valores reales desde el primer cuadro, sin estados vacíos, para que la pestaña no salte al entrar deslizándose). Armarla costaba ~300 ms, más que el deslizamiento (280 ms), así que aparecía de golpe: `TVMainTabsFragment` la crea una sola vez cuando el foco lleva 2 s quieto (cada movimiento reinicia la espera, para que la pausa de armarla no caiga sobre un cambio de pestaña) en su propio contenedor (`tv_settings_content`, invisible y no `gone` para que también quede medida) y solo la muestra u oculta con las mismas animaciones (si se elige antes de estar armada, el selector se mueve primero y se arma cuando terminó y el texto oscuro de la pestaña ya se dibujó —`awaitFrame`—, apareciendo con un fundido); al ocultarse vuelve a la lista principal (`showMainScreen`); al abrir una sub-opción el foco va a su primera
+  pantallas Compose del móvil (`tv/settings/TVSettingsTabFragment.kt`, ver "Ajustes (TV)" más abajo; `SettingsViewModel` da sus valores reales desde el primer cuadro, sin estados vacíos, para que la pestaña no salte al entrar deslizándose). Armarla costaba ~300 ms, más que el deslizamiento (280 ms), así que aparecía de golpe: `TVMainTabsFragment` la crea una sola vez cuando el foco lleva 2 s quieto (cada movimiento reinicia la espera, para que la pausa de armarla no caiga sobre un cambio de pestaña) en su propio contenedor (`tv_settings_content`, invisible y no `gone` para que también quede medida) y solo la muestra u oculta con las mismas animaciones (si se elige antes de estar armada, el selector se mueve primero y se arma cuando terminó y el texto oscuro de la pestaña ya se dibujó —`awaitFrame`—, apareciendo con un fundido); al ocultarse vuelve a la lista principal (`showMainScreen`); al abrir una sub-opción el foco va a su primera
   opción y al volver con Atrás a la que la abrió (`TVSettingsDestination` + `SettingsFocusMemory.kt`, que registra las
   filas de `Components.kt`; la primera es la que está más arriba en pantalla; como pantallas como Dispositivos externos
   cargan sus opciones en segundo plano, durante 3 s el foco sigue a la de más arriba mientras el usuario no lo mueva); estilo de tarjetas en `tv/shared/TVCardStyle.kt`.
@@ -193,18 +199,24 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   SwanStation aplica el aspecto al momento. PCSX ReARMed no la tiene:
   se indica que hay que elegir SwanStation para ese juego. LibretroDroid no permite forzar la proporción desde la app.
 - **Cores (descarga):** la app los baja de `github.com/branches78/PlayRetroCores` (fork de LemuroidCores), etiqueta
-  `pr-1.0.0`, ruta `lemuroid_core_<core>/src/main/jniLibs/<abi>/lib<core>_libretro_android.so`
+  `pr-1.0.2`, ruta `lemuroid_core_<core>/src/main/jniLibs/<abi>/lib<core>_libretro_android.so`
   (`baseUri` en `lemuroid-app-ext-free/.../CoreUpdaterImpl.kt`; `CORES_VERSION` y las huellas de cada core en
   `CoreChecksums.kt`, junto a él). Para añadir o actualizar un core: subirlo a `master` de PlayRetroCores, crear una
-  etiqueta nueva, cambiar `CORES_VERSION` y regenerar las huellas (si no coinciden, la app rechaza el core).
+  etiqueta nueva, cambiar `CORES_VERSION` y regenerar las huellas (si no coinciden, la app rechaza el core; son ids de
+  blob de git, se pueden calcular antes de subir con `git hash-object`). Los cores se bajan del buildbot de libretro
+  (`nightly/android/latest/<abi>/<core>_libretro_android.so.zip`, como `lemuroid-cores/update_cores.ipy`). En
+  `pr-1.0.2` (2026-11-14) se actualizaron DOSBox Pure, FCEUmm, Gambatte, Genesis Plus GX, Handy, Beetle NGP/PCE
+  Fast/WonderSwan, mGBA, ProSystem, Snes9x, DeSmuME, Citra (solo arm64; las demás ABIs son archivos vacíos) y PPSSPP
+  (corrige el cierre al guardar/cargar estados), compilados con NDK r29: Play avisaba que estaban hechos con un NDK
+  antiguo (página de 16 KB). melonDS (el core de DS que se usa; es melonDS DS 1.2.0) no cambió.
   La versión de Play no descarga cores (Play prohíbe bajar código nativo de fuera): van como módulos dinámicos
-  desde el submódulo `lemuroid-cores`, que apunta a PlayRetroCores `pr-1.0.1` (= `pr-1.0.0` más los archivos de
-  módulo de SwanStation). Se baja con `git submodule update --init --depth 1` (~820 MB).
+  desde el submódulo `lemuroid-cores`, que apunta a PlayRetroCores `pr-1.0.2`. Los `bundled-cores` son enlaces
+  simbólicos a los de cada módulo. Se baja con `git submodule update --init --depth 1` (~820 MB).
   PlayStation tiene dos cores: PCSX ReARMed (por defecto) y SwanStation (necesita BIOS scph5500/5501/5502).
   SwanStation dibuja por software (`swanstation_GPU_Renderer` = Software en sus `defaultSettings`): con Auto/OpenGL
   pide un contexto de OpenGL de escritorio, LibretroDroid se lo da y sus shaders GLSL 130 no compilan en OpenGL ES
   (pantalla negra con sonido). Resolución interna y PGXP (solo OpenGL) se ocultaron; sus textos siguen en strings.
-  Pendiente: compilar LibretroDroid en el proyecto y rechazar OPENGL/OPENGL_CORE para que pase a OpenGL ES.
+  Pendiente: rechazar OPENGL/OPENGL_CORE en LibretroDroid (ya se compila en el proyecto) para que pase a OpenGL ES.
   SwanStation tampoco da el disco actual: `getCurrentDisk` de LibretroDroid hacía caer el proceso del juego al abrir
   el menú (L3+R3) y al guardar el estado al salir. `SystemCoreConfig.supportsDiskControl = false`: no se consulta
   el disco y el menú no muestra "Cambiar disco" (para varios discos, PCSX ReARMed).
@@ -226,7 +238,8 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   que cortaba conexiones solo por estar quietas, y cerrando las rotas en segundo plano para no esperar 30 s); los
   demás copian la ROM a la caché `smb-games` la primera vez, con `.part` mientras se copia). Los juegos dentro de un `.zip` (local, SAF y SMB) también se extraen a un `.part` (`extractEntryToFile` en `FileKt.kt`): una extracción cortada no deja un juego truncado en la caché. `DocumentFileParser` lee con la función de cada proveedor. Con la biblioteca vacía, "Elegir
   carpeta" (Inicio del móvil y tarjeta de Inicio/Consolas en TV) abre `shared/settings/LibrarySourceActivity.kt`:
-  el mismo diálogo de origen y, si se elige SMB, el formulario en la misma actividad.
+  el mismo diálogo de origen y, si se elige SMB, el formulario en la misma actividad (en la TV, con `NoFocusFill` y
+  `rememberEdgeBringIntoViewSpec` como en Ajustes, ver "Ajustes (TV)").
   Mientras se ve "Cargando tus juegos" en la TV no se muestran la captura ni los textos de la lista inmersiva.
   **Sincronización por SMB** (`lib/savesync/SmbSaveSync.kt`): en la variante sin Google es la única
   (`lemuroid-app-ext-free/.../SaveSyncManagerImpl.kt`); en la de Play se elige Google Drive o la carpeta de red
@@ -318,7 +331,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   En la TV el borde de foco es blanco (tarjetas `tv_card_focus_foreground.xml`, botones y Acerca de). La parte de abajo
   de las tarjetas de juegos (nombre y subtítulo) usa el tono claro del fondo de las imágenes de las consolas
   (`surfaceContainerHigh`, #2C2F2A): TV `tv_card_info_background`, móvil `LemuroidGameGridCard`.
-  Tamaños: títulos de fila 18 sp en TV (como las pestañas) y `titleMedium` en móvil, siempre mayores que los nombres de los juegos.
+  Tamaños: títulos de fila 16 sp Medium en TV (`RowHeader` en `leanback-themes.xml`, como las pestañas) y `titleMedium` (16 sp Medium) en móvil, siempre mayores que los nombres de los juegos.
   Móvil: `mobile/feature/details/GameDetailsScreen.kt` (ruta `MainRoute.GAME_DETAILS`; bajo la captura solo el
   logo o nombre y `consola · compañía · país`, sin carátula). Es inmersiva: la captura sube hasta el borde superior,
   por detrás de la barra de estado, sin barra superior y con la flecha de volver y la lupa encima
@@ -355,6 +368,36 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   "Mostrar todo" que abre `mobile/feature/favorites/FavoritesScreen.kt` (ruta `MainRoute.FAVORITES`), igual que en la TV.
   Cómo volver a hacerla pestaña: `saved-code/favorites-tab/RESTORE.md`.
 
+- **Ajustes (móvil):** `mobile/feature/settings/general/SettingsScreen.kt`. La pantalla principal es una tarjeta por
+  sección (`SettingsSection`: ROMs, Pantalla, Sonido, Entrada, Otros) con su nombre y una flecha; cada una abre su
+  subpantalla (rutas `settings/roms`, `settings/display`… en `MainNavigationRoutes.kt`, `SettingsSectionScreen`).
+  Las opciones de lista que antes abrían un diálogo abren una subpantalla de elección
+  (`utils/android/settings/SettingsChoice.kt`: `SettingsChoiceHost`, ruta `settings/choice`; el título va en la barra
+  superior con `MainTopBar(titleOverride)`; la elección única se cierra sola a los 200 ms, la múltiple al volver); el
+  diálogo queda solo si no hay host. Las filas que abren otra pantalla llevan `SettingsOpenArrow`. Entre pantallas de
+  Ajustes no hay fundido (`NavHost` sin transición si las dos rutas empiezan por `settings/`) y sus destinos ocupan
+  todo el alto (`Box(fillMaxSize)` en `composable()`), porque el cambio de tamaño de `AnimatedContent` parecía
+  expandirse. "Directorio" abre la elección carpeta del dispositivo / carpeta de red con su descripción.
+- **Ajustes (TV):** `tv/settings/TVSettingsHome.kt` y `TVSettingsTabFragment.kt`. Dos paneles: a la izquierda las
+  secciones (píldora blanca con foco, verde suave la elegida), a la derecha una vista previa no enfocable de sus
+  opciones. OK o → abren la sección como pantalla que entra deslizándose (`NavHost` con `slideInHorizontally`,
+  280 ms, como la Play Store de TV), bajo la barra de pestañas. Las subpantallas (`TVSettingsSubScreen`) muestran una
+  flecha ← a la izquierda; ← (si el foco no puede ir más a la izquierda) o Atrás vuelven al nivel anterior
+  (`LocalSettingsBack`); ↑ nunca sale a la barra de pestañas dentro de un nivel, solo desde el panel izquierdo. Las
+  filas de las subpantallas son tarjetas (`LocalSettingsItemCards`) y con foco solo cambia el borde a blanco: sin
+  relleno gris ni ripple (`utils/android/NoFocusFill.kt`). → sobre una fila con flecha la abre (`onRightKey`). Las
+  elecciones de lista usan la misma `SettingsChoiceScreen` del móvil, con el foco en la opción elegida. En el
+  formulario SMB, `LocalBringIntoViewSpec` = `rememberEdgeBringIntoViewSpec()` (desplaza solo lo necesario, con 32 dp
+  de margen): el pivote de TV peleaba con el desplazamiento propio de los campos de texto y el formulario temblaba.
+- **Código nativo propio:** LibretroDroid se compila desde el submódulo `libretrodroid` (etiqueta 0.14.0, con Oboe y
+  libretro-common como submódulos; módulo `:libretrodroid` en `settings.gradle.kts`) con el NDK 29
+  (`deps.android.ndkVersion`, aplicado en `build.gradle.kts` a todos los módulos Android) en lugar del de JitPack,
+  hecho con NDK r26b. Su código usa `std::function` sin `#include <functional>`: se fuerza con
+  `cppFlags("-include functional")`. No pasa por ktlint. Su `build.gradle` lee `kotlin_version` de `extra` de la
+  raíz. La primera compilación tarda unos 10 minutos más. Compose trae `graphics-path` 1.0.1 (NDK r25c): se fija en
+  1.1.0 (r27, `deps.libs.androidx.compose.graphicsPath`). Para revisar una librería: `llvm-readelf -lW` (segmentos
+  LOAD con alineación `0x4000`) y `llvm-readelf -p .note.android.ident` (versión del NDK).
+
 ## Revisiones
 
 - Ronda 1 (2026-10-21): corregidos todos los hallazgos (código muerto de Ajustes y asignación de mandos de TV,
@@ -372,8 +415,9 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
 
 ## Pendientes conocidos
 
-- Aviso de 16 KB de Play: núcleos compilados con NDK antiguo, LibretroDroid y Compose.
-- Fallo de PPSSPP en Play (`std::terminate` en `retro_run`, al guardar o cargar partidas): actualizar el núcleo.
+- Confirmar con el próximo AAB que Play ya no avisa de los 16 KB (núcleos de `pr-1.0.2`, LibretroDroid y
+  `graphics-path` compilados con NDK nuevo) y que PPSSPP no se cierra al guardar o cargar partidas.
+- APIs obsoletas de borde a borde (aviso de Play): vienen de `androidx.activity` 1.7.2; se corrige actualizándolo.
 - Publicar el proyecto de Google Cloud antes de abrir Drive a todos (en estado Prueba solo entran los usuarios de prueba).
 - Actualización automática de cores en `PlayRetroCores`: acción de GitHub que descargue periódicamente del buildbot
   de libretro los cores que usa la app y los suba a una rama aparte (`updates`) para probarlos antes de pasarlos

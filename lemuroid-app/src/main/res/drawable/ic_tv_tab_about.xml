@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Like the mobile navigation bar: filled icon on the selected tab, outlined on the others. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_tv_tab_about_filled" android:state_selected="true" />
+    <item android:drawable="@drawable/ic_tv_tab_about_outlined" />
+</selector>

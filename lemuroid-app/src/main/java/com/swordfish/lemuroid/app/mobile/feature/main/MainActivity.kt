@@ -1,5 +1,15 @@
 package com.swordfish.lemuroid.app.mobile.feature.main
 
+import androidx.navigation.NavBackStackEntry
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.EnterTransition
+import androidx.compose.runtime.CompositionLocalProvider
+import com.swordfish.lemuroid.app.utils.android.settings.SettingsChoiceScreen
+import com.swordfish.lemuroid.app.utils.android.settings.SettingsChoiceHost
+import com.swordfish.lemuroid.app.utils.android.settings.LocalSettingsChoiceHost
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
@@ -44,7 +54,9 @@ import com.swordfish.lemuroid.app.mobile.feature.settings.bios.BiosSettingsViewM
 import com.swordfish.lemuroid.app.mobile.feature.settings.coreselection.CoreOptionsSettingsScreen
 import com.swordfish.lemuroid.app.mobile.feature.settings.coreselection.CoresSelectionScreen
 import com.swordfish.lemuroid.app.mobile.feature.settings.coreselection.CoresSelectionViewModel
+import com.swordfish.lemuroid.app.mobile.feature.settings.general.SettingsSection
 import com.swordfish.lemuroid.app.mobile.feature.settings.general.SettingsScreen
+import com.swordfish.lemuroid.app.mobile.feature.settings.general.SettingsSectionScreen
 import com.swordfish.lemuroid.app.mobile.feature.settings.general.SettingsViewModel
 import com.swordfish.lemuroid.app.mobile.feature.settings.inputdevices.InputDevicesSettingsScreen
 import com.swordfish.lemuroid.app.mobile.feature.settings.inputdevices.InputDevicesSettingsViewModel
@@ -164,6 +176,9 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                     ?: navBackStackEntry.value?.arguments?.getString("systemId")
                         ?.let { runCatching { GameSystem.findById(it).titleResId }.getOrNull() }
 
+            // The values of the options of the settings are shown on a screen of their own instead of a dialog.
+            val choiceHost = remember(navController) { SettingsChoiceHost { navController.navigateToRoute(MainRoute.SETTINGS_CHOICE) } }
+
             LaunchedEffect(currentRoute) {
                 mainViewModel.changeRoute(currentRoute)
             }
@@ -213,6 +228,7 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                     MainTopBar(
                         currentRoute = currentRoute,
                         titleOverrideId = currentSystemTitleId,
+                        titleOverride = choiceHost.request?.title?.takeIf { currentRoute == MainRoute.SETTINGS_CHOICE },
                         navController = navController,
                         mainUIState = mainUIState,
                         onUpdateQueryString = { mainViewModel.changeQueryString(it) },
@@ -226,220 +242,242 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                 // Over the content, just above the bottom bar.
                 snackbarHost = { SaveSyncBanner() },
             ) { padding ->
-                NavHost(
-                    modifier = Modifier.fillMaxSize(),
-                    navController = navController,
-                    startDestination = MainRoute.HOME.route,
-                ) {
-                    composable(MainRoute.HOME) { entry ->
-                        HomeScreen(
-                            modifier = Modifier.padding(entry.stablePadding(padding, navBackStackEntry.value)),
-                            viewModel =
-                                viewModel(
-                                    factory =
-                                        HomeViewModel.Factory(
-                                            applicationContext,
-                                            retrogradeDb,
-                                            coresSelection,
-                                        ),
-                                ),
-                            onGameClick = onGameClick,
-                            onGameLongClick = onGameLongClick,
-                            onRecentGameClick = onRecentGameClick,
-                            onRecentGameLongClick = onRecentGameLongClick,
-                            onShowAllFavorites = { navController.navigateToRoute(MainRoute.FAVORITES) },
-                        )
-                    }
-                    composable(MainRoute.GAME_DETAILS) { entry ->
-                        val gameId = entry.arguments?.getInt("gameId") ?: return@composable
-                        GameDetailsScreen(
-                            modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
-                            viewModel =
-                                viewModel(
-                                    key = "game_details_$gameId",
-                                    factory =
-                                        GameDetailsViewModel.Factory(
-                                            gameId,
-                                            retrogradeDb,
-                                            descriptionProvider,
-                                        ),
-                                ),
-                            gameInteractor = gameInteractor,
-                            onBack = { navController.popBackStack() },
-                            onSearch = { navController.navigate(MainRoute.SEARCH.route) { launchSingleTop = true } },
-                            onOpenCoreOptions = { game -> navController.navigateToCoreOptions(game.systemId, game.id) },
-                            onOpenGame = { game -> navController.navigateToGameDetails(game) },
-                        )
-                    }
-                    composable(MainRoute.FAVORITES) { entry ->
-                        FavoritesScreen(
-                            modifier = Modifier.padding(entry.stablePadding(padding, navBackStackEntry.value)),
-                            viewModel = viewModel(factory = FavoritesViewModel.Factory(retrogradeDb)),
-                            onGameClick = onGameClick,
-                            onGameLongClick = onGameLongClick,
-                        )
-                    }
-                    composable(MainRoute.SEARCH) { entry ->
-                        SearchScreen(
-                            modifier = Modifier.padding(entry.stablePadding(padding, navBackStackEntry.value)),
-                            viewModel =
-                                viewModel(
-                                    factory = SearchViewModel.Factory(retrogradeDb),
-                                ),
-                            searchQuery = mainUIState.searchQuery,
-                            onGameClick = onGameClick,
-                            onGameLongClick = onGameLongClick,
-                            onGameFavoriteToggle = onGameFavoriteToggle,
-                            onResetSearchQuery = { mainViewModel.changeQueryString("") },
-                        )
-                    }
-                    composable(MainRoute.SYSTEMS) {
-                        MetaSystemsScreen(
-                            modifier = Modifier.padding(padding),
-                            navController = navController,
-                            viewModel =
-                                viewModel(
-                                    factory =
-                                        MetaSystemsViewModel.Factory(
-                                            retrogradeDb,
-                                            applicationContext,
-                                        ),
-                                ),
-                            gridMode = mainUIState.systemsGridMode,
-                        )
-                    }
-                    composable(MainRoute.SYSTEM_GAMES) { entry ->
-                        val metaSystemId = entry.arguments?.getString("metaSystemId")
-                        GamesScreen(
-                            modifier = Modifier.padding(entry.stablePadding(padding, navBackStackEntry.value)),
-                            viewModel =
-                                viewModel(
-                                    factory =
-                                        GamesViewModel.Factory(
-                                            retrogradeDb,
-                                            MetaSystemID.valueOf(metaSystemId!!),
-                                        ),
-                                ),
-                            gridMode = mainUIState.gamesGridMode,
-                            onGameClick = onGameClick,
-                            onGameLongClick = onGameLongClick,
-                            onGameFavoriteToggle = onGameFavoriteToggle,
-                        )
-                    }
-                    composable(MainRoute.SETTINGS) {
-                        SettingsScreen(
-                            modifier = Modifier.padding(padding),
-                            viewModel =
-                                viewModel(
-                                    factory =
-                                        SettingsViewModel.Factory(
-                                            applicationContext,
-                                            settingsInteractor,
-                                            saveSyncManager,
-                                            FlowSharedPreferences(
-                                                SharedPreferencesHelper.getLegacySharedPreferences(
-                                                    applicationContext,
-                                                ),
-                                            ),
-                                        ),
-                                ),
-                            navController = navController,
-                        )
-                    }
-                    composable(MainRoute.SETTINGS_BIOS) {
-                        BiosScreen(
-                            modifier = Modifier.padding(padding),
-                            viewModel =
-                                viewModel(
-                                    factory = BiosSettingsViewModel.Factory(biosManager),
-                                ),
-                        )
-                    }
-                    composable(MainRoute.SETTINGS_CORES_SELECTION) {
-                        CoresSelectionScreen(
-                            modifier = Modifier.padding(padding),
-                            viewModel =
-                                viewModel(
-                                    factory =
-                                        CoresSelectionViewModel.Factory(
-                                            applicationContext,
-                                            coresSelection,
-                                        ),
-                                ),
-                            navController = navController,
-                        )
-                    }
-                    composable(MainRoute.SETTINGS_CORE_OPTIONS) { entry ->
-                        // Opened from "Configure core" of a game: its options can also be saved only for it.
-                        val gameId = entry.arguments?.getInt("gameId", -1) ?: -1
-                        val game by produceState<Game?>(null, gameId) {
-                            value = if (gameId >= 0) retrogradeDb.gameDao().selectById(gameId) else null
+                CompositionLocalProvider(LocalSettingsChoiceHost provides choiceHost) {
+                    NavHost(
+                        modifier = Modifier.fillMaxSize(),
+                        navController = navController,
+                        startDestination = MainRoute.HOME.route,
+                        // Between the settings and their sub-menus the screens change without fading.
+                        enterTransition = {
+                            if (isSettingsChange(initialState, targetState)) EnterTransition.None else fadeIn(tween(FADE_MS))
+                        },
+                        exitTransition = {
+                            if (isSettingsChange(initialState, targetState)) ExitTransition.None else fadeOut(tween(FADE_MS))
+                        },
+                    ) {
+                        composable(MainRoute.SETTINGS_CHOICE) {
+                            SettingsChoiceScreen(
+                                modifier = Modifier.padding(padding),
+                                host = choiceHost,
+                                onClose = { navController.popBackStack() },
+                            )
                         }
-                        if (gameId >= 0 && game == null) return@composable
-                        CoreOptionsSettingsScreen(
-                            modifier = Modifier.padding(padding),
-                            viewModel =
-                                viewModel(
-                                    factory =
-                                        CoresSelectionViewModel.Factory(
-                                            applicationContext,
-                                            coresSelection,
-                                        ),
+                        composable(MainRoute.HOME) { entry ->
+                            HomeScreen(
+                                modifier = Modifier.padding(entry.stablePadding(padding, navBackStackEntry.value)),
+                                viewModel =
+                                    viewModel(
+                                        factory =
+                                            HomeViewModel.Factory(
+                                                applicationContext,
+                                                retrogradeDb,
+                                                coresSelection,
+                                            ),
+                                    ),
+                                onGameClick = onGameClick,
+                                onGameLongClick = onGameLongClick,
+                                onRecentGameClick = onRecentGameClick,
+                                onRecentGameLongClick = onRecentGameLongClick,
+                                onShowAllFavorites = { navController.navigateToRoute(MainRoute.FAVORITES) },
+                            )
+                        }
+                        composable(MainRoute.GAME_DETAILS) { entry ->
+                            val gameId = entry.arguments?.getInt("gameId") ?: return@composable
+                            GameDetailsScreen(
+                                modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
+                                viewModel =
+                                    viewModel(
+                                        key = "game_details_$gameId",
+                                        factory =
+                                            GameDetailsViewModel.Factory(
+                                                gameId,
+                                                retrogradeDb,
+                                                descriptionProvider,
+                                            ),
+                                    ),
+                                gameInteractor = gameInteractor,
+                                onBack = { navController.popBackStack() },
+                                onSearch = { navController.navigate(MainRoute.SEARCH.route) { launchSingleTop = true } },
+                                onOpenCoreOptions = { game -> navController.navigateToCoreOptions(game.systemId, game.id) },
+                                onOpenGame = { game -> navController.navigateToGameDetails(game) },
+                            )
+                        }
+                        composable(MainRoute.FAVORITES) { entry ->
+                            FavoritesScreen(
+                                modifier = Modifier.padding(entry.stablePadding(padding, navBackStackEntry.value)),
+                                viewModel = viewModel(factory = FavoritesViewModel.Factory(retrogradeDb)),
+                                onGameClick = onGameClick,
+                                onGameLongClick = onGameLongClick,
+                            )
+                        }
+                        composable(MainRoute.SEARCH) { entry ->
+                            SearchScreen(
+                                modifier = Modifier.padding(entry.stablePadding(padding, navBackStackEntry.value)),
+                                viewModel =
+                                    viewModel(
+                                        factory = SearchViewModel.Factory(retrogradeDb),
+                                    ),
+                                searchQuery = mainUIState.searchQuery,
+                                onGameClick = onGameClick,
+                                onGameLongClick = onGameLongClick,
+                                onGameFavoriteToggle = onGameFavoriteToggle,
+                                onResetSearchQuery = { mainViewModel.changeQueryString("") },
+                            )
+                        }
+                        composable(MainRoute.SYSTEMS) {
+                            MetaSystemsScreen(
+                                modifier = Modifier.padding(padding),
+                                navController = navController,
+                                viewModel =
+                                    viewModel(
+                                        factory =
+                                            MetaSystemsViewModel.Factory(
+                                                retrogradeDb,
+                                                applicationContext,
+                                            ),
+                                    ),
+                                gridMode = mainUIState.systemsGridMode,
+                            )
+                        }
+                        composable(MainRoute.SYSTEM_GAMES) { entry ->
+                            val metaSystemId = entry.arguments?.getString("metaSystemId")
+                            GamesScreen(
+                                modifier = Modifier.padding(entry.stablePadding(padding, navBackStackEntry.value)),
+                                viewModel =
+                                    viewModel(
+                                        factory =
+                                            GamesViewModel.Factory(
+                                                retrogradeDb,
+                                                MetaSystemID.valueOf(metaSystemId!!),
+                                            ),
+                                    ),
+                                gridMode = mainUIState.gamesGridMode,
+                                onGameClick = onGameClick,
+                                onGameLongClick = onGameLongClick,
+                                onGameFavoriteToggle = onGameFavoriteToggle,
+                            )
+                        }
+                        val settingsViewModelFactory =
+                            SettingsViewModel.Factory(
+                                applicationContext,
+                                settingsInteractor,
+                                saveSyncManager,
+                                FlowSharedPreferences(
+                                    SharedPreferencesHelper.getLegacySharedPreferences(applicationContext),
                                 ),
-                            systemId = entry.arguments?.getString("systemId")!!,
-                            game = game,
-                        )
-                    }
-                    composable(MainRoute.SETTINGS_INPUT_DEVICES) {
-                        InputDevicesSettingsScreen(
-                            modifier = Modifier.padding(padding),
-                            viewModel =
-                                viewModel(
-                                    factory =
-                                        InputDevicesSettingsViewModel.Factory(
-                                            applicationContext,
-                                            inputDeviceManager,
-                                        ),
-                                ),
-                        )
-                    }
-                    composable(MainRoute.ABOUT) {
-                        // Same information as the TV "About" tab.
-                        AboutContent(
-                            modifier =
-                                Modifier
-                                    .padding(padding)
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                        )
-                    }
-                    composable(MainRoute.SETTINGS_SMB) {
-                        SmbSettingsScreen(
-                            modifier = Modifier.padding(padding),
-                            viewModel = viewModel(factory = SmbSettingsViewModel.Factory(applicationContext)),
-                            onClose = { navController.popBackStack() },
-                        )
-                    }
-                    composable(MainRoute.SETTINGS_SMB_SYNC) {
-                        SmbSettingsScreen(
-                            modifier = Modifier.padding(padding),
-                            viewModel = viewModel(factory = SmbSettingsViewModel.syncFolderFactory(applicationContext)),
-                            onClose = { navController.popBackStack() },
-                        )
-                    }
-                    composable(MainRoute.SETTINGS_SAVE_SYNC) {
-                        SaveSyncSettingsScreen(
-                            modifier = Modifier.padding(padding),
-                            viewModel =
-                                viewModel(
-                                    factory =
-                                        SaveSyncSettingsViewModel.Factory(
-                                            application,
-                                            saveSyncManager,
-                                        ),
-                                ),
-                            onConfigureNetworkFolder = { navController.navigateToRoute(MainRoute.SETTINGS_SMB_SYNC) },
-                        )
+                            )
+                        composable(MainRoute.SETTINGS) {
+                            SettingsScreen(
+                                modifier = Modifier.padding(padding),
+                                viewModel = viewModel(factory = settingsViewModelFactory),
+                                navController = navController,
+                            )
+                        }
+                        for (section in SettingsSection.entries) {
+                            composable(section.route) {
+                                SettingsSectionScreen(
+                                    modifier = Modifier.padding(padding),
+                                    viewModel = viewModel(factory = settingsViewModelFactory),
+                                    navController = navController,
+                                    section = section,
+                                )
+                            }
+                        }
+                        composable(MainRoute.SETTINGS_BIOS) {
+                            BiosScreen(
+                                modifier = Modifier.padding(padding),
+                                viewModel =
+                                    viewModel(
+                                        factory = BiosSettingsViewModel.Factory(biosManager),
+                                    ),
+                            )
+                        }
+                        composable(MainRoute.SETTINGS_CORES_SELECTION) {
+                            CoresSelectionScreen(
+                                modifier = Modifier.padding(padding),
+                                viewModel =
+                                    viewModel(
+                                        factory =
+                                            CoresSelectionViewModel.Factory(
+                                                applicationContext,
+                                                coresSelection,
+                                            ),
+                                    ),
+                                navController = navController,
+                            )
+                        }
+                        composable(MainRoute.SETTINGS_CORE_OPTIONS) { entry ->
+                            // Opened from "Configure core" of a game: its options can also be saved only for it.
+                            val gameId = entry.arguments?.getInt("gameId", -1) ?: -1
+                            val game by produceState<Game?>(null, gameId) {
+                                value = if (gameId >= 0) retrogradeDb.gameDao().selectById(gameId) else null
+                            }
+                            if (gameId >= 0 && game == null) return@composable
+                            CoreOptionsSettingsScreen(
+                                modifier = Modifier.padding(padding),
+                                viewModel =
+                                    viewModel(
+                                        factory =
+                                            CoresSelectionViewModel.Factory(
+                                                applicationContext,
+                                                coresSelection,
+                                            ),
+                                    ),
+                                systemId = entry.arguments?.getString("systemId")!!,
+                                game = game,
+                            )
+                        }
+                        composable(MainRoute.SETTINGS_INPUT_DEVICES) {
+                            InputDevicesSettingsScreen(
+                                modifier = Modifier.padding(padding),
+                                viewModel =
+                                    viewModel(
+                                        factory =
+                                            InputDevicesSettingsViewModel.Factory(
+                                                applicationContext,
+                                                inputDeviceManager,
+                                            ),
+                                    ),
+                            )
+                        }
+                        composable(MainRoute.ABOUT) {
+                            // Same information as the TV "About" tab.
+                            AboutContent(
+                                modifier =
+                                    Modifier
+                                        .padding(padding)
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                            )
+                        }
+                        composable(MainRoute.SETTINGS_SMB) {
+                            SmbSettingsScreen(
+                                modifier = Modifier.padding(padding),
+                                viewModel = viewModel(factory = SmbSettingsViewModel.Factory(applicationContext)),
+                                onClose = { navController.popBackStack() },
+                            )
+                        }
+                        composable(MainRoute.SETTINGS_SMB_SYNC) {
+                            SmbSettingsScreen(
+                                modifier = Modifier.padding(padding),
+                                viewModel = viewModel(factory = SmbSettingsViewModel.syncFolderFactory(applicationContext)),
+                                onClose = { navController.popBackStack() },
+                            )
+                        }
+                        composable(MainRoute.SETTINGS_SAVE_SYNC) {
+                            SaveSyncSettingsScreen(
+                                modifier = Modifier.padding(padding),
+                                viewModel =
+                                    viewModel(
+                                        factory =
+                                            SaveSyncSettingsViewModel.Factory(
+                                                application,
+                                                saveSyncManager,
+                                            ),
+                                    ),
+                                onConfigureNetworkFolder = { navController.navigateToRoute(MainRoute.SETTINGS_SMB_SYNC) },
+                            )
+                        }
                     }
                 }
             }
@@ -515,3 +553,12 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
         }
     }
 }
+
+/** Whether both screens are settings screens (the main one or a sub-menu). */
+private fun isSettingsChange(
+    initial: NavBackStackEntry,
+    target: NavBackStackEntry,
+): Boolean = initial.destination.route?.startsWith("settings/") == true && target.destination.route?.startsWith("settings/") == true
+
+// The default fade of the navigation.
+private const val FADE_MS = 700

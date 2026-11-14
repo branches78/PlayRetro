@@ -1,5 +1,6 @@
 package com.swordfish.lemuroid.app.mobile.feature.settings.coreselection
 
+import com.swordfish.lemuroid.app.utils.android.settings.SettingsOpenArrow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ fun CoresSelectionScreen(
                 LemuroidSettingsMenuLink(
                     title = { Text(text = stringResource(system.titleResId)) },
                     subtitle = { Text(text = summary) },
+                    action = { SettingsOpenArrow() },
                     onClick = { navController.navigateToCoreOptions(system.id.dbname) },
                 )
             }

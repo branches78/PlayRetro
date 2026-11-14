@@ -6,11 +6,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,7 +28,9 @@ import com.swordfish.lemuroid.app.mobile.feature.settings.smb.LibrarySourceDialo
 import com.swordfish.lemuroid.app.mobile.feature.settings.smb.SmbSettingsScreen
 import com.swordfish.lemuroid.app.mobile.feature.settings.smb.SmbSettingsViewModel
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
+import com.swordfish.lemuroid.app.tv.settings.rememberEdgeBringIntoViewSpec
 import com.swordfish.lemuroid.app.tv.shared.TVHelper
+import com.swordfish.lemuroid.app.utils.android.NoFocusFill
 import com.swordfish.lemuroid.app.utils.android.settings.SettingsFocusDestination
 import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
 
@@ -61,16 +67,37 @@ class LibrarySourceActivity : ComponentActivity() {
                         val sideMargin = if (isTV) dimensionResource(R.dimen.tv_content_side_margin) else 0.dp
                         Box(modifier = Modifier.padding(horizontal = sideMargin)) {
                             SettingsFocusDestination {
-                                SmbSettingsScreen(
-                                    viewModel = viewModel(factory = SmbSettingsViewModel.Factory(applicationContext)),
-                                    isTV = isTV,
-                                    onClose = { finish() },
-                                )
+                                TVFormBehavior(isTV) {
+                                    SmbSettingsScreen(
+                                        viewModel = viewModel(factory = SmbSettingsViewModel.Factory(applicationContext)),
+                                        isTV = isTV,
+                                        onClose = { finish() },
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * On TV, the same as the form in the TV settings: no grey fill on the focused row (only the white border), and
+     * text fields scrolled into view just enough, with a margin, so they don't fight the TV scrolling and shake.
+     */
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    private fun TVFormBehavior(
+        isTV: Boolean,
+        content: @Composable () -> Unit,
+    ) {
+        if (!isTV) {
+            content()
+            return
+        }
+        NoFocusFill {
+            CompositionLocalProvider(LocalBringIntoViewSpec provides rememberEdgeBringIntoViewSpec(), content = content)
         }
     }
 

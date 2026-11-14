@@ -12,9 +12,9 @@ plugins {
 
 android {
     defaultConfig {
-        versionCode = 7
+        versionCode = 8
         // App version is independent from CORES_VERSION in CoreUpdaterImpl (LemuroidCores tag).
-        versionName = "1.0.1"
+        versionName = "1.1.0"
         applicationId = "com.playretro.tv"
     }
     flavorDimensions += listOf("opensource", "cores")
@@ -203,6 +203,7 @@ dependencies {
 
     implementation(platform(deps.libs.androidx.compose.composeBom))
     implementation(deps.libs.androidx.compose.material3)
+    implementation(deps.libs.androidx.compose.graphicsPath)
     implementation(deps.libs.androidx.compose.constraintLayout)
     debugImplementation(deps.libs.androidx.compose.tooling)
     implementation(deps.libs.androidx.compose.toolingPreview)
@@ -218,7 +219,7 @@ dependencies {
     implementation(deps.libs.composeSettings.diskStorage)
     implementation(deps.libs.composeSettings.memoryStorage)
 
-    implementation(deps.libs.libretrodroid)
+    implementation(project(deps.libs.libretrodroid))
 
     // Uncomment this when using a local aar file.
     // implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))

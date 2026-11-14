@@ -36,20 +36,30 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <androidx.leanback.widget.SearchOrbView
+            <!-- Round buttons as tall as the tabs, with an icon of the same size (colors in TVMainTabsFragment). -->
+            <ImageView
                 android:id="@+id/tv_search_orb"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clipChildren="false" />
+                android:layout_width="@dimen/tv_tab_height"
+                android:layout_height="@dimen/tv_tab_height"
+                android:background="@drawable/tv_top_bar_button"
+                android:clickable="true"
+                android:contentDescription="@string/title_search"
+                android:focusable="true"
+                android:padding="@dimen/tv_top_bar_button_padding"
+                android:src="@drawable/ic_tv_search" />
 
             <!-- Syncs the saves now; only shown when the sync is configured and has something to do. -->
-            <androidx.leanback.widget.SearchOrbView
+            <ImageView
                 android:id="@+id/tv_sync_orb"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/tv_tab_height"
+                android:layout_height="@dimen/tv_tab_height"
                 android:layout_marginStart="8dp"
-                android:clipChildren="false"
+                android:background="@drawable/tv_top_bar_button"
+                android:clickable="true"
                 android:contentDescription="@string/settings_save_sync_refresh"
+                android:focusable="true"
+                android:padding="@dimen/tv_top_bar_button_padding"
+                android:src="@drawable/ic_tv_sync_orb"
                 android:visibility="gone" />
 
         </LinearLayout>
@@ -75,24 +85,29 @@
                 <TextView
                     android:id="@+id/tv_tab_home"
                     style="@style/GameStationTVTab"
+                    android:drawableStart="@drawable/ic_tv_tab_home"
                     android:text="@string/title_home" />
 
                 <TextView
                     android:id="@+id/tv_tab_systems"
                     style="@style/GameStationTVTab"
+                    android:drawableStart="@drawable/ic_tv_tab_systems"
                     android:text="@string/title_consoles" />
 
                 <TextView
                     android:id="@+id/tv_tab_settings"
                     style="@style/GameStationTVTab"
+                    android:drawableStart="@drawable/ic_tv_tab_settings"
                     android:text="@string/title_settings" />
 
                 <TextView
                     android:id="@+id/tv_tab_about"
                     style="@style/GameStationTVTab"
+                    android:drawableStart="@drawable/ic_tv_tab_about"
                     android:text="@string/title_about" />
 
             </LinearLayout>
+
 
         </FrameLayout>
 

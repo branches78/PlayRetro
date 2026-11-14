@@ -1,5 +1,8 @@
 package com.swordfish.lemuroid.app.mobile.feature.main
 
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,7 +32,16 @@ fun NavGraphBuilder.composable(
     route: MainRoute,
     content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit,
 ) {
-    this.composable(route = route.route, arguments = route.arguments, content = content)
+    if (route.root != MainRoute.SETTINGS) {
+        this.composable(route = route.route, arguments = route.arguments, content = content)
+        return
+    }
+    // The settings screens take the whole height: otherwise, as they are as tall as their options, the navigation
+    // animates the change of size and a screen looks like it expands from the previous one.
+    this.composable(route = route.route, arguments = route.arguments) { entry ->
+        val scope = this
+        Box(modifier = Modifier.fillMaxSize()) { scope.content(entry) }
+    }
 }
 
 fun NavController.navigateToRoute(route: MainRoute) {
@@ -123,6 +135,38 @@ enum class MainRoute(
     SETTINGS(
         route = "settings/home",
         titleId = R.string.title_settings,
+    ),
+    // Sections of the settings on mobile: the main screen has a card for each one, which opens its options.
+    SETTINGS_ROMS(
+        route = "settings/roms",
+        titleId = R.string.roms,
+        parent = SETTINGS,
+    ),
+    SETTINGS_DISPLAY(
+        route = "settings/display",
+        titleId = R.string.settings_category_display,
+        parent = SETTINGS,
+    ),
+    SETTINGS_SOUND(
+        route = "settings/sound",
+        titleId = R.string.settings_category_sound,
+        parent = SETTINGS,
+    ),
+    SETTINGS_INPUT(
+        route = "settings/input",
+        titleId = R.string.settings_category_input,
+        parent = SETTINGS,
+    ),
+    SETTINGS_MISC(
+        route = "settings/misc",
+        titleId = R.string.settings_category_misc,
+        parent = SETTINGS,
+    ),
+    // The values of an option, instead of a dialog (see SettingsChoiceHost): the top bar shows the option.
+    SETTINGS_CHOICE(
+        route = "settings/choice",
+        titleId = R.string.title_settings,
+        parent = SETTINGS,
     ),
     SETTINGS_BIOS(
         route = "settings/bios",

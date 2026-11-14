@@ -52,6 +52,8 @@ fun MainTopBar(
     currentRoute: MainRoute,
     // Optional title shown instead of the route title (e.g. the system name inside a system).
     titleOverrideId: Int?,
+    // Title drawn instead of a text (e.g. the name of the option whose values are shown).
+    titleOverride: (@Composable () -> Unit)? = null,
     navController: NavHostController,
     onUpdateQueryString: (String) -> Unit,
     onToggleGamesViewMode: () -> Unit,
@@ -61,6 +63,7 @@ fun MainTopBar(
     LemuroidTopAppBar(
         route = currentRoute,
         titleOverrideId = titleOverrideId,
+        titleOverride = titleOverride,
         navController = navController,
         mainUIState = mainUIState,
         onUpdateQueryString = onUpdateQueryString,
@@ -74,6 +77,7 @@ fun MainTopBar(
 fun LemuroidTopAppBar(
     route: MainRoute,
     titleOverrideId: Int?,
+    titleOverride: (@Composable () -> Unit)? = null,
     navController: NavController,
     mainUIState: MainViewModel.UiState,
     onUpdateQueryString: (String) -> Unit,
@@ -94,6 +98,8 @@ fun LemuroidTopAppBar(
             } else if (!route.hasBackButton) {
                 // Top-level tabs show the logo of the app instead of the tab name.
                 PlayRetroLogo(height = TOP_BAR_LOGO_HEIGHT)
+            } else if (titleOverride != null) {
+                titleOverride()
             } else {
                 Text(text = stringResource(titleOverrideId ?: route.titleId))
             }

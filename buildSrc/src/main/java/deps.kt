@@ -5,6 +5,9 @@ object deps {
         const val compileSdkVersion = 36
         const val minSdkVersion     = 29 // Android 10
         const val buildToolsVersion = "36.0.0"
+
+        // NDK for the native code built in the project (LibretroDroid): r28+ gives 16 KB page aligned libraries.
+        const val ndkVersion        = "29.0.14206865"
     }
 
     object versions {
@@ -100,6 +103,10 @@ object deps {
                 const val unit = "androidx.compose.ui:ui-unit-android"
                 const val ui = "androidx.compose.ui:ui"
 
+                // Compose UI brings graphics-path 1.0.1, whose native library was built with NDK r25c; 1.1.0 is
+                // built with NDK r27 (Play 16 KB page size check).
+                const val graphicsPath = "androidx.graphics:graphics-path:1.1.0"
+
                 object accompanist {
                     const val navigationMaterial = "com.google.accompanist:accompanist-navigation-material:${versions.accompanist}"
                     const val drawablePainter = "com.google.accompanist:accompanist-drawablepainter:${versions.accompanist}"
@@ -167,8 +174,9 @@ object deps {
         const val composeHtmlText          = "de.charlex.compose.material3:material3-html-text:2.0.0-beta01"
         const val collectionsImmutable     = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8"
         const val padkit                   = "io.github.swordfish90:padkit:${versions.padkit}"
-        const val libretrodroid            = "com.github.Swordfish90:LibretroDroid:${versions.libretrodroid}"
-//        const val libretrodroid            = "com.swordfish:libretrodroid:unspecified"
+        // Built from the libretrodroid submodule (tag versions.libretrodroid) instead of JitPack, whose library
+        // was built with an old NDK (Play 16 KB page size check).
+        const val libretrodroid            = ":libretrodroid"
     }
 
     object plugins {

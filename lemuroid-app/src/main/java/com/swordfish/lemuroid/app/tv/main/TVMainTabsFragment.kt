@@ -1,8 +1,8 @@
 package com.swordfish.lemuroid.app.tv.main
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
+import androidx.core.animation.doOnEnd
 import android.animation.ValueAnimator
+import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.FocusFinder
@@ -12,6 +12,7 @@ import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
@@ -19,7 +20,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.leanback.widget.BrowseFrameLayout
-import androidx.leanback.widget.SearchOrbView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -85,9 +85,9 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
             if (pillAnimator?.isRunning != true) movePill(animate = false)
         }
 
-        view.findViewById<SearchOrbView>(R.id.tv_search_orb).apply {
+        view.findViewById<ImageView>(R.id.tv_search_orb).apply {
             setupOrbColors(this)
-            setOnOrbClickedListener { findNavController().navigate(R.id.navigation_search) }
+            setOnClickListener { findNavController().navigate(R.id.navigation_search) }
         }
 
         setupSyncOrb(view.findViewById(R.id.tv_sync_orb))
@@ -144,9 +144,8 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
      * Same look as the search orb, with a cloud. Only shown when the sync is configured and has something to do, and
      * not while it runs (the banner shows it then).
      */
-    private fun setupSyncOrb(syncOrb: SearchOrbView) {
+    private fun setupSyncOrb(syncOrb: ImageView) {
         setupOrbColors(syncOrb)
-        syncOrb.orbIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_tv_sync_orb)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -158,7 +157,7 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
                     }
             }
         }
-        syncOrb.setOnOrbClickedListener {
+        syncOrb.setOnClickListener {
             if (!syncInProgress) SaveSyncWork.enqueueManualWork(requireContext().applicationContext)
         }
 
@@ -174,21 +173,16 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
 
     /**
      * The bright green of the logo with a dark icon, and white with a dark icon when focused, like the tabs.
-     * Both colors of a state are the same, so the orb doesn't pulse between them while it has the focus.
      */
-    private fun setupOrbColors(orb: SearchOrbView) {
+    private fun setupOrbColors(orb: ImageView) {
         val context = requireContext()
         val green = ContextCompat.getColor(context, R.color.playretro_brand_green)
         val greenIcon = ContextCompat.getColor(context, R.color.md_theme_dark_background)
         val focused = ContextCompat.getColor(context, R.color.tv_tab_focused_background)
         val focusedIcon = ContextCompat.getColor(context, R.color.tv_tab_focused_text)
         val setColors = { hasFocus: Boolean ->
-            orb.orbColors =
-                if (hasFocus) {
-                    SearchOrbView.Colors(focused, focused, focusedIcon)
-                } else {
-                    SearchOrbView.Colors(green, green, greenIcon)
-                }
+            orb.backgroundTintList = ColorStateList.valueOf(if (hasFocus) focused else green)
+            orb.imageTintList = ColorStateList.valueOf(if (hasFocus) focusedIcon else greenIcon)
         }
         setColors(orb.hasFocus())
         orb.setOnFocusChangeListener { _, hasFocus -> setColors(hasFocus) }
@@ -427,14 +421,13 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
     }
 
     private fun updateTabsState(animate: Boolean = true) {
-        tabs.forEachIndexed { index, tab -> tab.isSelected = index == selectedTab }
         movePill(animate)
     }
 
     private var tabPill: View? = null
     private var pillAnimator: ValueAnimator? = null
 
-    /** Tab the pill is under, or null while it slides from one tab to another. */
+    /** Tab the pill is over, or null while it slides from one tab to another. */
     private var pillTab: Int? = null
 
     /** Slides the pill to the selected tab (or puts it there right away, e.g. on start). */
@@ -466,23 +459,22 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
                 interpolator = DecelerateInterpolator()
                 addUpdateListener {
                     val fraction = it.animatedValue as Float
-                    setPillBounds(pill, fromX + (toX - fromX) * fraction, (fromWidth + (toWidth - fromWidth) * fraction).toInt())
+                    val x = fromX + (toX - fromX) * fraction
+                    val width = (fromWidth + (toWidth - fromWidth) * fraction).toInt()
+                    setPillBounds(pill, x, width)
+                    // The tab takes the colors over the pill at once, as soon as the pill covers its label: earlier
+                    // the label would turn dark out of the pill, later it would be white on the white pill.
+                    if (pillTab == null && coversLabel(x, width, target)) {
+                        pillTab = targetTab
+                        updateTabColors()
+                    }
                 }
-                addListener(
-                    object : AnimatorListenerAdapter() {
-                        private var cancelled = false
-
-                        override fun onAnimationCancel(animation: Animator) {
-                            cancelled = true
-                        }
-
-                        override fun onAnimationEnd(animation: Animator) {
-                            if (cancelled) return
-                            pillTab = targetTab
-                            updateTabColors()
-                        }
-                    },
-                )
+                doOnEnd {
+                    if (pillTab == null) {
+                        pillTab = targetTab
+                        updateTabColors()
+                    }
+                }
                 start()
             }
     }
@@ -504,9 +496,16 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
         }
     }
 
+    /** Whether the pill at [x] with [width] covers the icon and the text of [tab]. */
+    private fun coversLabel(
+        x: Float,
+        width: Int,
+        tab: View,
+    ): Boolean = x <= tab.left + tab.paddingStart && x + width >= tab.right - tab.paddingEnd
+
     /**
      * Like Google TV: while the tabs bar has the focus the pill is white with dark text, otherwise it is green.
-     * The text only turns dark once the pill is under it.
+     * The text only turns dark once the pill is over it.
      */
     private fun updateTabColors() {
         val context = context ?: return
@@ -521,7 +520,13 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
                     tabsFocused -> R.color.tv_tab_focused_text
                     else -> R.color.tv_tab_selected_text
                 }
-            (tab as? TextView)?.setTextColor(ContextCompat.getColor(context, textColor))
+            val color = ContextCompat.getColor(context, textColor)
+            // The filled icon too only shows once the pill is over the tab.
+            tab.isSelected = index == pillTab
+            (tab as? TextView)?.apply {
+                setTextColor(color)
+                compoundDrawableTintList = ColorStateList.valueOf(color)
+            }
         }
     }
 

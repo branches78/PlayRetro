@@ -24,6 +24,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version deps.versions.kotlin apply false
 }
 
+// Read by the LibretroDroid module's own build script.
+extra["kotlin_version"] = deps.versions.kotlin
+
 allprojects {
     repositories {
         mavenLocal()
@@ -53,11 +56,15 @@ subprojects {
     afterEvaluate {
         if (hasProperty("android")) {
             // BaseExtension is common parent for application, library and test modules
-            apply(plugin = "org.jlleitschuh.gradle.ktlint")
+            // LibretroDroid is third party code built from its submodule: it doesn't follow our style.
+            if (project.name != "libretrodroid") {
+                apply(plugin = "org.jlleitschuh.gradle.ktlint")
+            }
 
             extensions.configure(BaseExtension::class.java) {
                 compileSdkVersion(deps.android.compileSdkVersion)
                 buildToolsVersion(deps.android.buildToolsVersion)
+                ndkVersion = deps.android.ndkVersion
                 defaultConfig {
                     minSdkVersion(deps.android.minSdkVersion)
                     targetSdkVersion(deps.android.targetSdkVersion)
@@ -65,6 +72,11 @@ subprojects {
                     // Core modules are only bundled in the Play version, which is ARM only (see its flavor).
                     if (project.name.startsWith("lemuroid_core_")) {
                         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+                    }
+                    // LibretroDroid 0.14.0 uses std::function without including <functional>, which the libc++
+                    // of newer NDKs no longer brings through other headers.
+                    if (project.name == "libretrodroid") {
+                        externalNativeBuild { cmake { cppFlags("-include functional") } }
                     }
                 }
                 lintOptions {

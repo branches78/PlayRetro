@@ -16,10 +16,13 @@ include(
     ":lemuroid-app-ext-free",
     ":lemuroid-app-ext-play",
     ":bundled-cores",
-    ":baselineprofile"
+    ":baselineprofile",
+    ":libretrodroid"
 )
 
 project(":bundled-cores").projectDir = File("lemuroid-cores/bundled-cores")
+// LibretroDroid, built from the submodule with the project's NDK (see deps.android.ndkVersion).
+project(":libretrodroid").projectDir = File("libretrodroid/libretrodroid")
 
 fun usePlayDynamicFeatures(): Boolean {
     val task = gradle.startParameter.taskRequests.toString()

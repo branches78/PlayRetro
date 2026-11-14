@@ -5,10 +5,24 @@
     <dimen name="tv_top_bar_horizontal_padding">48dp</dimen>
     <!-- Logo of the app on the right of the tabs bar. -->
     <dimen name="tv_app_logo_height">24dp</dimen>
+    <!-- Tabs with the pill indicator of the Android TV guidelines (32dp tall, 18dp icon on the left 12dp from the
+         edge and 6dp from the label, 16dp after the label, label 14sp medium), scaled up by 16/14 for a 16sp label,
+         the size of the home row titles. The search and sync buttons on the left are as tall as the tabs, with an
+         icon of the same size. -->
+    <dimen name="tv_tab_height">36dp</dimen>
+    <dimen name="tv_tab_padding_start">14dp</dimen>
+    <dimen name="tv_tab_padding_end">18dp</dimen>
+    <dimen name="tv_tab_icon_size">20dp</dimen>
+    <dimen name="tv_tab_icon_padding">7dp</dimen>
+    <dimen name="tv_tab_text_size">16sp</dimen>
+    <dimen name="tv_tab_spacing">9dp</dimen>
+    <dimen name="tv_tab_corner_radius">18dp</dimen>
+    <!-- Padding of the "Choose folder" button of the empty library (the old size of the tabs). -->
+    <dimen name="tv_outlined_button_corner_radius">20dp</dimen>
     <dimen name="tv_tab_horizontal_padding">20dp</dimen>
     <dimen name="tv_tab_vertical_padding">8dp</dimen>
-    <dimen name="tv_tab_spacing">8dp</dimen>
-    <dimen name="tv_tab_corner_radius">20dp</dimen>
+    <!-- (tv_tab_height - tv_tab_icon_size) / 2 -->
+    <dimen name="tv_top_bar_button_padding">8dp</dimen>
     <dimen name="tv_systems_grid_top_padding">24dp</dimen>
     <!-- Same corner radius as the mobile cards (Material 3 medium shape). -->
     <dimen name="tv_card_corner_radius">12dp</dimen>
@@ -102,17 +116,21 @@
 
     <style name="GameStationTVTab">
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_height">@dimen/tv_tab_height</item>
         <item name="android:layout_marginStart">@dimen/tv_tab_spacing</item>
         <item name="android:layout_marginEnd">@dimen/tv_tab_spacing</item>
-        <item name="android:paddingStart">@dimen/tv_tab_horizontal_padding</item>
-        <item name="android:paddingEnd">@dimen/tv_tab_horizontal_padding</item>
-        <item name="android:paddingTop">@dimen/tv_tab_vertical_padding</item>
-        <item name="android:paddingBottom">@dimen/tv_tab_vertical_padding</item>
+        <item name="android:paddingStart">@dimen/tv_tab_padding_start</item>
+        <item name="android:paddingEnd">@dimen/tv_tab_padding_end</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:drawablePadding">@dimen/tv_tab_icon_padding</item>
         <!-- No background: the pill behind the tabs slides to the selected one (TVMainTabsFragment), which also
-             sets the text color of the tab over it. -->
+             sets the text and icon color of the tab over it. -->
         <item name="android:textColor">@color/tv_tab_default_text</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:drawableTint">@color/tv_tab_default_text</item>
+        <item name="android:textSize">@dimen/tv_tab_text_size</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:singleLine">true</item>
         <item name="android:focusable">true</item>
         <item name="android:focusableInTouchMode">true</item>
         <item name="android:clickable">true</item>

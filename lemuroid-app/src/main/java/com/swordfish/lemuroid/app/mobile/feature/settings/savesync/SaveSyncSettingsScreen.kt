@@ -1,5 +1,6 @@
 package com.swordfish.lemuroid.app.mobile.feature.settings.savesync
 
+import com.swordfish.lemuroid.app.utils.android.settings.SettingsOpenArrow
 import android.content.Intent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
@@ -86,6 +87,7 @@ fun SaveSyncSettingsScreen(
                         )
                     },
                     subtitle = { Text(text = saveSyncState.configInfo) },
+                    action = { SettingsOpenArrow() },
                     // The network share form inside the settings: with a local library it only sets the folder of the sync.
                     onClick = onClick@{
                         if (isSyncInProgress) return@onClick

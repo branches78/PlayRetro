@@ -1,5 +1,6 @@
 package com.swordfish.lemuroid.app.utils.android.settings
 
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +69,12 @@ fun SettingsFocusDestination(
         }
     }
 }
+
+/**
+ * Goes back from the screen of the TV settings that is shown, for the items that use ← themselves (e.g. the text fields
+ * of a form) and give it back when there is nothing to their left. Null elsewhere.
+ */
+val LocalSettingsBack = staticCompositionLocalOf<(() -> Unit)?> { null }
 
 private const val ITEMS_TIMEOUT_MS = 1000L
 private const val ITEMS_SETTLE_MS = 250L

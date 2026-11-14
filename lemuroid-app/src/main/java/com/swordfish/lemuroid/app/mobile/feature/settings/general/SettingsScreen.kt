@@ -1,6 +1,7 @@
 package com.swordfish.lemuroid.app.mobile.feature.settings.general
 
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -32,89 +33,123 @@ import com.swordfish.lemuroid.app.utils.android.settings.LemuroidCardSettingsGro
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsList
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsMenuLink
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsPage
+import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsSection
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsSlider
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidSettingsSwitch
+import com.swordfish.lemuroid.app.utils.android.settings.LocalSettingsChoiceHost
+import com.swordfish.lemuroid.app.utils.android.settings.SettingsChoiceRequest
+import com.swordfish.lemuroid.app.utils.android.settings.SettingsOpenArrow
 import com.swordfish.lemuroid.app.utils.android.settings.booleanPreferenceState
 import com.swordfish.lemuroid.app.utils.android.settings.indexPreferenceState
 import com.swordfish.lemuroid.app.utils.android.settings.intPreferenceState
 import com.swordfish.lemuroid.app.utils.android.stringListResource
 import com.swordfish.lemuroid.lib.storage.smb.SmbConfigStore
 
+/** Sections of the settings: screens of their own on mobile, the list on the left of the TV settings. */
+enum class SettingsSection(
+    @StringRes val titleId: Int,
+    val route: MainRoute,
+) {
+    ROMS(R.string.roms, MainRoute.SETTINGS_ROMS),
+    DISPLAY(R.string.settings_category_display, MainRoute.SETTINGS_DISPLAY),
+    SOUND(R.string.settings_category_sound, MainRoute.SETTINGS_SOUND),
+    INPUT(R.string.settings_category_input, MainRoute.SETTINGS_INPUT),
+    MISC(R.string.settings_category_misc, MainRoute.SETTINGS_MISC),
+}
+
+/**
+ * Options of a [section], in a card without title. On TV ([isTV]) touch and phone only options are hidden and the TV
+ * folder picker is used.
+ */
+@Composable
+fun SettingsSectionContent(
+    section: SettingsSection,
+    viewModel: SettingsViewModel,
+    navController: NavController,
+    isTV: Boolean,
+) {
+    when (section) {
+        SettingsSection.ROMS -> RomsSettings(viewModel = viewModel, navController = navController, isTV = isTV)
+        SettingsSection.DISPLAY -> DisplaySettings(isTV = isTV)
+        SettingsSection.SOUND -> SoundSettings()
+        SettingsSection.INPUT -> InputSettings(navController = navController, isTV = isTV)
+        SettingsSection.MISC -> MiscSettings(viewModel = viewModel, navController = navController)
+    }
+}
+
+/**
+ * Main settings screen on mobile: a card for each section, with its name, that opens its options. The TV has its own
+ * (TVSettingsHome).
+ */
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel,
     navController: NavController,
-    // On TV, touch and phone only options are hidden and the TV folder picker is used.
-    isTV: Boolean = false,
 ) {
-    val context = LocalContext.current
-    val state =
-        viewModel.uiState
-            .collectAsState()
-            .value
-
-    val scanInProgress =
-        viewModel.directoryScanInProgress
-            .collectAsState(false)
-            .value
-
-    val indexingInProgress =
-        viewModel.indexingInProgress
-            .collectAsState(false)
-            .value
-
-    val cacheState = viewModel.cacheState
-
-    // "Directory" asks first whether the games come from a folder of the device or a network share.
-    var showSourceDialog by remember { mutableStateOf(false) }
-    val smbStore = remember { SmbConfigStore(context) }
-    if (showSourceDialog) {
-        LibrarySourceDialog(
-            currentSource = smbStore.librarySource,
-            smbLabel = smbStore.load()?.label?.takeIf { smbStore.librarySource == SmbConfigStore.LibrarySource.SMB },
-            onLocalFolder = {
-                showSourceDialog = false
-                if (isTV) TVHelper.launchFolderPicker(context) else viewModel.changeLocalStorageFolder()
-            },
-            onNetworkShare = {
-                showSourceDialog = false
-                navController.navigateToRoute(MainRoute.SETTINGS_SMB)
-            },
-            onDismiss = { showSourceDialog = false },
-        )
-    }
-
     LemuroidSettingsPage(modifier = modifier) {
-        RomsSettings(
-            state = state,
-            cacheState = cacheState,
-            onChangeFolder = { showSourceDialog = true },
-            indexingInProgress = indexingInProgress,
-            scanInProgress = scanInProgress,
-            navController = navController,
-        )
-        DisplaySettings(isTV = isTV)
-        SoundSettings()
-        InputSettings(navController = navController, isTV = isTV)
-        MiscSettings(
-            indexingInProgress = indexingInProgress,
-            navController = navController,
-            onResetAllSettings = { viewModel.resetAllSettings() },
-        )
+        SettingsSection.entries.forEach { section ->
+            LemuroidSettingsSection {
+                LemuroidSettingsMenuLink(
+                    title = { Text(text = stringResource(id = section.titleId)) },
+                    action = { SettingsOpenArrow() },
+                    onClick = { navController.navigateToRoute(section.route) },
+                )
+            }
+        }
+    }
+}
+
+/** Options of a section of the settings on mobile, opened from its card. */
+@Composable
+fun SettingsSectionScreen(
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel,
+    navController: NavController,
+    section: SettingsSection,
+) {
+    // The top bar shows the name of the section: the card has no title.
+    LemuroidSettingsPage(modifier = modifier) {
+        SettingsSectionContent(section, viewModel, navController, isTV = false)
+    }
+}
+
+/** The directory of the games and, while it is scanned (e.g. "Rescan"), the progress below it. */
+@Composable
+private fun DirectorySubtitle(currentDirectory: String) {
+    val scanProgress by rememberLibraryScanProgress()
+    Column {
+        Text(text = rememberDirectoryName(currentDirectory) ?: stringResource(R.string.not_configured))
+        scanProgress?.let {
+            LibraryScanProgress(progress = it, modifier = Modifier.padding(top = 8.dp))
+        }
+    }
+}
+
+/** Name of the network share when it is the source of the library, otherwise of the local folder; null without one. */
+@Composable
+private fun rememberDirectoryName(currentDirectory: String): String? {
+    val context = LocalContext.current
+    return remember(currentDirectory) {
+        val smbStore = SmbConfigStore(context)
+        val smbLabel = smbStore.load()?.label?.takeIf { smbStore.librarySource == SmbConfigStore.LibrarySource.SMB }
+        smbLabel ?: runCatching {
+            DocumentFile.fromTreeUri(context, Uri.parse(currentDirectory))?.name
+        }.getOrNull()
     }
 }
 
 @Composable
 private fun MiscSettings(
-    indexingInProgress: Boolean,
+    viewModel: SettingsViewModel,
     navController: NavController,
-    onResetAllSettings: () -> Unit,
 ) {
     val factoryResetDialogState = remember { mutableStateOf(false) }
+    val indexingInProgress = viewModel.indexingInProgress.collectAsState(false).value
+    val onResetAllSettings = { viewModel.resetAllSettings() }
 
     LemuroidCardSettingsGroup(
-        title = { Text(text = stringResource(id = R.string.settings_category_misc)) },
+        title = null,
     ) {
         DebugLanguageSetting()
         LemuroidSettingsMenuLink(
@@ -123,6 +158,7 @@ private fun MiscSettings(
                 Text(text = stringResource(id = R.string.settings_description_display_bios_info))
             },
             enabled = !indexingInProgress,
+            action = { SettingsOpenArrow() },
             onClick = { navController.navigateToRoute(MainRoute.SETTINGS_BIOS) },
         )
         // Always shown, even when every system has a single core.
@@ -131,6 +167,7 @@ private fun MiscSettings(
             subtitle = {
                 Text(text = stringResource(id = R.string.settings_description_open_cores_selection))
             },
+            action = { SettingsOpenArrow() },
             onClick = { navController.navigateToRoute(MainRoute.SETTINGS_CORES_SELECTION) },
         )
         LemuroidSettingsMenuLink(
@@ -151,13 +188,14 @@ private fun InputSettings(
     isTV: Boolean,
 ) {
     LemuroidCardSettingsGroup(
-        title = { Text(text = stringResource(id = R.string.settings_category_input)) },
+        title = null,
     ) {
         LemuroidSettingsMenuLink(
             title = { Text(text = stringResource(id = R.string.settings_title_gamepad_settings)) },
             subtitle = {
                 Text(text = stringResource(id = R.string.settings_description_gamepad_settings))
             },
+            action = { SettingsOpenArrow() },
             onClick = { navController.navigateToRoute(MainRoute.SETTINGS_INPUT_DEVICES) },
         )
         if (!isTV) {
@@ -204,9 +242,7 @@ private fun InputSettings(
 
 @Composable
 private fun SoundSettings() {
-    LemuroidCardSettingsGroup(
-        title = { Text(text = stringResource(id = R.string.settings_category_sound)) },
-    ) {
+    LemuroidCardSettingsGroup {
         LemuroidSettingsSwitch(
             state = booleanPreferenceState(R.string.pref_key_low_latency_audio, false),
             title = { Text(text = stringResource(id = R.string.settings_title_low_latency_audio)) },
@@ -216,12 +252,14 @@ private fun SoundSettings() {
 }
 
 @Composable
-private fun DisplaySettings(isTV: Boolean) {
+private fun DisplaySettings(
+    isTV: Boolean,
+) {
     val hdMode = booleanPreferenceState(R.string.pref_key_hd_mode, false)
     val immersiveMode = booleanPreferenceState(R.string.pref_key_enable_immersive_mode, false)
 
     LemuroidCardSettingsGroup(
-        title = { Text(text = stringResource(id = R.string.settings_category_display)) },
+        title = null,
     ) {
         LemuroidSettingsList(
             enabled = !hdMode.value,
@@ -331,44 +369,76 @@ private fun FactoryResetDialog(
 
 @Composable
 private fun RomsSettings(
-    state: SettingsViewModel.State,
-    cacheState: SettingsViewModel.CacheState?,
-    onChangeFolder: () -> Unit,
-    indexingInProgress: Boolean,
-    scanInProgress: Boolean,
+    viewModel: SettingsViewModel,
     navController: NavController,
+    isTV: Boolean,
 ) {
     val context = LocalContext.current
+    val state = viewModel.uiState.collectAsState().value
+    val scanInProgress = viewModel.directoryScanInProgress.collectAsState(false).value
+    val indexingInProgress = viewModel.indexingInProgress.collectAsState(false).value
+    val cacheState = viewModel.cacheState
 
-    val currentDirectory = state.currentDirectory
-    val emptyDirectory = stringResource(R.string.not_configured)
+    // "Directory" asks first whether the games come from a folder of the device or a network share.
+    var showSourceDialog by remember { mutableStateOf(false) }
+    if (showSourceDialog) {
+        val smbStore = remember { SmbConfigStore(context) }
+        LibrarySourceDialog(
+            currentSource = smbStore.librarySource,
+            smbLabel = smbStore.load()?.label?.takeIf { smbStore.librarySource == SmbConfigStore.LibrarySource.SMB },
+            onLocalFolder = {
+                showSourceDialog = false
+                if (isTV) TVHelper.launchFolderPicker(context) else viewModel.changeLocalStorageFolder()
+            },
+            onNetworkShare = {
+                showSourceDialog = false
+                navController.navigateToRoute(MainRoute.SETTINGS_SMB)
+            },
+            onDismiss = { showSourceDialog = false },
+        )
+    }
 
-    // The network share when it is the source of the library, otherwise the local folder; null without a directory.
-    val configuredDirectoryName =
-        remember(state.currentDirectory) {
-            val smbStore = SmbConfigStore(context)
-            val smbLabel = smbStore.load()?.label?.takeIf { smbStore.librarySource == SmbConfigStore.LibrarySource.SMB }
-            smbLabel ?: runCatching {
-                DocumentFile.fromTreeUri(context, Uri.parse(currentDirectory))?.name
-            }.getOrNull()
-        }
+    val configuredDirectoryName = rememberDirectoryName(state.currentDirectory)
     val hasDirectory = configuredDirectoryName != null
-    val currentDirectoryName = configuredDirectoryName ?: emptyDirectory
 
-    LemuroidCardSettingsGroup(title = { Text(text = stringResource(id = R.string.roms)) }) {
-        val scanProgress by rememberLibraryScanProgress()
+    // On mobile the two sources are a screen of their own instead of the dialog.
+    val choiceHost = LocalSettingsChoiceHost.current
+    val sourceItems =
+        listOf(stringResource(R.string.library_source_local), stringResource(R.string.library_source_smb))
+    val smbSubtitle =
+        if (configuredDirectoryName != null && SmbConfigStore(context).librarySource == SmbConfigStore.LibrarySource.SMB) {
+            stringResource(R.string.library_source_smb_in_use, configuredDirectoryName)
+        } else {
+            stringResource(R.string.library_source_smb_description)
+        }
+    val sourceSubtitles = listOf(stringResource(R.string.library_source_local_description), smbSubtitle)
+    val openArrow: @Composable () -> Unit = { SettingsOpenArrow() }
+    val openSourceChoice = {
+        val currentSource = SmbConfigStore(context).librarySource
+        choiceHost?.open(
+            SettingsChoiceRequest(
+                title = { Text(text = stringResource(R.string.library_source_title)) },
+                subtitle = { Text(text = stringResource(R.string.library_source_description)) },
+                items = sourceItems,
+                itemSubtitles = sourceSubtitles,
+                isSelected = { (it == 1) == (currentSource == SmbConfigStore.LibrarySource.SMB) },
+                onClick = { index ->
+                    if (index == 0) {
+                        if (isTV) TVHelper.launchFolderPicker(context) else viewModel.changeLocalStorageFolder()
+                    } else {
+                        navController.navigateToRoute(MainRoute.SETTINGS_SMB)
+                    }
+                },
+            ),
+        )
+    }
+
+    LemuroidCardSettingsGroup {
         LemuroidSettingsMenuLink(
             title = { Text(text = stringResource(id = R.string.directory)) },
-            subtitle = {
-                Column {
-                    Text(text = currentDirectoryName)
-                    // While the directory is scanned (e.g. "Rescan"), its progress is shown below the folder.
-                    scanProgress?.let {
-                        LibraryScanProgress(progress = it, modifier = Modifier.padding(top = 8.dp))
-                    }
-                }
-            },
-            onClick = { onChangeFolder() },
+            subtitle = { DirectorySubtitle(state.currentDirectory) },
+            action = openArrow.takeIf { choiceHost != null },
+            onClick = { if (choiceHost != null) openSourceChoice() else showSourceDialog = true },
             enabled = !indexingInProgress,
         )
         // A single row that changes between "Rescan" and "Stop": with two different rows the focused one would be
@@ -423,6 +493,7 @@ private fun RomsSettings(
                 subtitle = {
                     Text(text = stringResource(id = R.string.settings_description_save_sync))
                 },
+                action = { SettingsOpenArrow() },
                 onClick = { navController.navigateToRoute(MainRoute.SETTINGS_SAVE_SYNC) },
                 enabled = hasDirectory,
             )

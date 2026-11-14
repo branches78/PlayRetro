@@ -64,13 +64,33 @@ fun LemuroidSettingsList(
             else -> subtitle
         }
 
+    // On mobile the values are shown on a screen of their own, with an arrow on the option.
+    val choiceHost = LocalSettingsChoiceHost.current
+    val openArrow: @Composable () -> Unit = { SettingsOpenArrow() }
     LemuroidSettingsMenuLink(
         enabled = enabled,
         icon = icon,
         title = title,
         subtitle = safeSubtitle,
-        action = action,
-        onClick = { showDialog = true },
+        action = action ?: openArrow.takeIf { choiceHost != null },
+        onClick = {
+            if (choiceHost == null) {
+                showDialog = true
+                return@LemuroidSettingsMenuLink
+            }
+            choiceHost.open(
+                SettingsChoiceRequest(
+                    title = title,
+                    subtitle = subtitle,
+                    items = items,
+                    isSelected = { state.value == it },
+                    onClick = { index ->
+                        state.value = index
+                        onItemSelected?.invoke(index, items[index])
+                    },
+                ),
+            )
+        },
     )
 
     if (!showDialog) return

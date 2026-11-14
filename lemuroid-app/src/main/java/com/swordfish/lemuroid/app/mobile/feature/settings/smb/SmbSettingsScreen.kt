@@ -1,5 +1,10 @@
 package com.swordfish.lemuroid.app.mobile.feature.settings.smb
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.border
+import com.swordfish.lemuroid.app.utils.android.settings.LocalSettingsBack
 import android.view.View
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -64,6 +69,8 @@ fun SmbSettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SmbSettingsViewModel,
     isTV: Boolean = false,
+    // Inside the TV settings the tabs bar is shown above instead.
+    showTitle: Boolean = isTV,
     onClose: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -80,10 +87,12 @@ fun SmbSettingsScreen(
             modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(16.dp)
+                // On TV the buttons at the end don't stay against the bottom of the screen.
+                .padding(bottom = if (isTV) TV_BOTTOM_PADDING else 0.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (isTV) {
+        if (showTitle) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.smb_title),
@@ -113,16 +122,33 @@ fun SmbSettingsScreen(
             isTV = isTV,
             keyboardType = KeyboardType.Uri,
         )
+        // The whole row toggles the option, but the focus border only goes around the checkbox.
+        var authenticationFocused by remember { mutableStateOf(false) }
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .focusBorder()
+                    .onFocusChanged { authenticationFocused = it.hasFocus }
                     .clickable { viewModel.update(config.copy(useAuthentication = !config.useAuthentication)) },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Checkbox(checked = config.useAuthentication, onCheckedChange = null)
-            Text(text = stringResource(R.string.smb_use_authentication), color = textColor)
+            Box(
+                modifier =
+                    Modifier
+                        .border(
+                            width = 2.dp,
+                            color = if (authenticationFocused) Color.White else Color.Transparent,
+                            shape = RoundedCornerShape(8.dp),
+                        )
+                        .padding(4.dp),
+            ) {
+                Checkbox(checked = config.useAuthentication, onCheckedChange = null)
+            }
+            Text(
+                text = stringResource(R.string.smb_use_authentication),
+                color = textColor,
+                modifier = Modifier.padding(start = 8.dp),
+            )
         }
         if (config.useAuthentication) {
             SmbTextField(
@@ -206,14 +232,15 @@ private fun SmbTextField(
 ) {
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
-    val view = LocalView.current
+    val settingsBack = LocalSettingsBack.current
     var editing by remember { mutableStateOf(!isTV) }
 
     LaunchedEffect(editing) {
         if (isTV && editing) keyboard?.show()
     }
 
-    SettingsFocusItem(enabled = true) {
+    // The outline of the field already shows the focus.
+    SettingsFocusItem(enabled = true, focusBorder = false) {
         OutlinedTextField(
             modifier =
                 Modifier
@@ -227,11 +254,16 @@ private fun SmbTextField(
                                 if (event.type == KeyEventType.KeyUp) editing = true
                                 true
                             }
-                            // The text field moves the focus itself with the D-pad, but never out of the form: ↑ on the
-                            // first field goes on to the views around it, the selected tab of the TV top bar.
+                            // The text field keeps the D-pad for its cursor: the focus is moved explicitly. ↑ on the first
+                            // field stays there (the screens of the TV settings never go up to the tabs bar).
                             isTV && !editing && event.key == Key.DirectionUp -> {
-                                if (event.type == KeyEventType.KeyDown && !focusManager.moveFocus(FocusDirection.Up)) {
-                                    view.focusSearch(View.FOCUS_UP)?.requestFocus()
+                                if (event.type == KeyEventType.KeyDown) focusManager.moveFocus(FocusDirection.Up)
+                                true
+                            }
+                            // ← with nothing to the left goes back, like on the other screens of the TV settings.
+                            isTV && !editing && event.key == Key.DirectionLeft -> {
+                                if (event.type == KeyEventType.KeyDown && !focusManager.moveFocus(FocusDirection.Left)) {
+                                    settingsBack?.invoke()
                                 }
                                 true
                             }
@@ -292,3 +324,5 @@ private fun TestResultText(result: SmbSettingsViewModel.TestResult?) {
         minLines = 1,
     )
 }
+
+private val TV_BOTTOM_PADDING = 32.dp
