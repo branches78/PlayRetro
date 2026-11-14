@@ -97,3 +97,10 @@
 -dontwarn org.bouncycastle.**
 -dontwarn org.slf4j.**
 -dontwarn javax.el.**
+
+## Material Components
+# EdgeToEdgeUtils.applyEdgeToEdge calls Window.setStatusBarColor/setNavigationBarColor, deprecated in Android 15 (Play
+# warning). Only the Material date picker reaches it and the app never shows one: dropping the calls lets R8 remove it.
+-assumenosideeffects class com.google.android.material.internal.EdgeToEdgeUtils {
+    void applyEdgeToEdge(...);
+}

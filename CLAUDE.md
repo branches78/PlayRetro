@@ -57,7 +57,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   graphic 1024×500). **Icono del lanzador:** mando negro con botones blancos sobre verde #00C64E
   (`lemuroid_launcher_foreground.xml`, `lemuroid_launcher_background`, PNG de `mipmap-*` y canal de TV), el de la
   primera versión del fork.
-- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.0` (`versionCode` 8; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
+- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.0` (`versionCode` 9; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
   Antes era `com.gamestation.tv`: es una app distinta para Android, así que la antigua hay que desinstalarla aparte
   y sus datos (partidas, ajustes, biblioteca) no pasan a la nueva.
 - Variante que se compila: **freeDynamicDebug** (sin librerías de Google; los cores se descargan al usarlos).
@@ -417,7 +417,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
 
 - Confirmar con el próximo AAB que Play ya no avisa de los 16 KB (núcleos de `pr-1.0.2`, LibretroDroid y
   `graphics-path` compilados con NDK nuevo) y que PPSSPP no se cierra al guardar o cargar partidas.
-- APIs obsoletas de borde a borde (aviso de Play): vienen de `androidx.activity` 1.7.2; se corrige actualizándolo.
+- APIs obsoletas de borde a borde (aviso de Play): venían de `EdgeToEdgeUtils` de Material (solo lo usa su selector de fechas, que la app no muestra); `-assumenosideeffects` en `proguard-rules.pro` lo quita del AAB (vc9). Confirmar en Play que el aviso desapareció.
 - Publicar el proyecto de Google Cloud antes de abrir Drive a todos (en estado Prueba solo entran los usuarios de prueba).
 - Actualización automática de cores en `PlayRetroCores`: acción de GitHub que descargue periódicamente del buildbot
   de libretro los cores que usa la app y los suba a una rama aparte (`updates`) para probarlos antes de pasarlos
