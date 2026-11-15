@@ -413,11 +413,13 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   el propio de un juego, descargas de cores de una en una (`Mutex` en `CoreUpdaterImpl`), progreso que no retrocede,
   "Cargando tus juegos" guardado fuera de la pantalla (`EmptyLibraryLoading`) y código muerto.
 
+- Avisos de Play resueltos (2026-11-14): 16 KB desde la vc8 y APIs obsoletas de borde a borde desde la vc9
+  (regla `-assumenosideeffects` de `EdgeToEdgeUtils` en `proguard-rules.pro`). La sugerencia de pantalla en pantalla
+  (PiP) no aplica a un emulador: se ignora.
+
 ## Pendientes conocidos
 
-- Confirmar con el próximo AAB que Play ya no avisa de los 16 KB (núcleos de `pr-1.0.2`, LibretroDroid y
-  `graphics-path` compilados con NDK nuevo) y que PPSSPP no se cierra al guardar o cargar partidas.
-- APIs obsoletas de borde a borde (aviso de Play): venían de `EdgeToEdgeUtils` de Material (solo lo usa su selector de fechas, que la app no muestra); `-assumenosideeffects` en `proguard-rules.pro` lo quita del AAB (vc9). Confirmar en Play que el aviso desapareció.
+- Confirmar con el uso que PPSSPP ya no se cierra al guardar o cargar partidas (núcleo de `pr-1.0.2`).
 - Publicar el proyecto de Google Cloud antes de abrir Drive a todos (en estado Prueba solo entran los usuarios de prueba).
 - Actualización automática de cores en `PlayRetroCores`: acción de GitHub que descargue periódicamente del buildbot
   de libretro los cores que usa la app y los suba a una rama aparte (`updates`) para probarlos antes de pasarlos
