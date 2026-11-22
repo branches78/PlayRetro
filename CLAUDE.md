@@ -92,7 +92,11 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   dispositivo (o inglés), buscando el juego en Wikidata por título y consola (`shared/details/GameDescriptionProvider.kt`,
   caché en las preferencias `game_descriptions`; si el título con dos puntos no da resultados, p. ej. "Pokemon: Red
   Version", se busca otra vez sin ellos; se aceptan videojuegos y recopilaciones, Q7889 y Q16070115, p. ej.
-  "Street Fighter Collection"). Si `thumbnails.libretro.com` no responde (en noviembre de 2026 dio 404 para
+  "Street Fighter Collection"). Se elige el resultado con página en el idioma o en inglés (la versión de una consola
+  suele ser un elemento sin página), preferido el de la consola; si no aparece por nombre, búsqueda de texto entre los
+  juegos de la consola (`haswbstatement:P400`) con el mismo nombre o hasta 2 palabras más ("Disney's Aladdin"; nombres
+  `mul` como "Contra") y, al final, la parte antes de los dos puntos, solo si es de la consola ("Galaga"). Se quita
+  "Rev PRG1" fuera de paréntesis. Las consultas van de una en una (`Mutex`) y un 429 de Wikidata se reintenta. Si `thumbnails.libretro.com` no responde (en noviembre de 2026 dio 404 para
   todo), `ThumbnailFallbackInterceptor` pide la misma imagen a la copia de GitHub
   (`raw.githubusercontent.com/libretro-thumbnails/<Sistema_con_guiones_bajos>/master/...`) y recuerda la que funcionó
   (preferencias `thumbnail_fallbacks_v3`). Los juegos de varios discos (`.m3u`) se identifican sin "(Disc N)",
