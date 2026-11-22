@@ -15,6 +15,9 @@ import java.util.concurrent.TimeUnit
  * (e.g. it has "Circus Charlie (Japan).png" but not "Circus Charlie (Japan) (En).png").
  * When a box art is missing, a few name variants are tried before giving up.
  *
+ * The server can also be down (every cover answers 404). Each name is then also requested from the GitHub
+ * repositories the server is built from, which hold the same files.
+ *
  * Results are remembered on the device: the variant that worked is used directly next time,
  * and covers that don't exist at all are not requested again for a few days.
  */
@@ -53,9 +56,12 @@ class ThumbnailFallbackInterceptor(context: Context) : Interceptor {
         }
 
         var allMissing = isMissing(result)
-        for (alternative in alternativeUrls(url)) {
+        for (alternative in candidateUrls(url)) {
+            if (libretroUnavailable && alternative.contains(THUMBNAILS_HOST)) continue
             val alternativeResult = chain.proceed(chain.request.newBuilder().data(alternative).build())
             if (alternativeResult is SuccessResult) {
+                // The same name worked on GitHub: the server is down, skip it for the next covers of this session.
+                if (alternative == githubUrl(url)) libretroUnavailable = true
                 preferences.edit { putString(url, PREFIX_REDIRECT + alternative) }
                 return alternativeResult
             }
@@ -72,6 +78,29 @@ class ThumbnailFallbackInterceptor(context: Context) : Interceptor {
     private fun isMissing(result: ImageResult): Boolean {
         val throwable = (result as? ErrorResult)?.throwable
         return throwable is HttpException && throwable.response.code == HTTP_NOT_FOUND
+    }
+
+    /** The same name on GitHub first, then each name variant on the server and on GitHub. */
+    private fun candidateUrls(url: String): List<String> {
+        return buildList {
+            githubUrl(url)?.let { add(it) }
+            alternativeUrls(url).forEach { alternative ->
+                add(alternative)
+                githubUrl(alternative)?.let { add(it) }
+            }
+        }
+    }
+
+    /**
+     * "https://thumbnails.libretro.com/Nintendo - Game Boy/Named_Boxarts/Game.png" ->
+     * "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy/master/Named_Boxarts/Game.png"
+     */
+    private fun githubUrl(url: String): String? {
+        val path = url.substringAfter("$THUMBNAILS_HOST/", "")
+        val system = path.substringBefore("/")
+        val file = path.substringAfter("/", "")
+        if (system.isEmpty() || file.isEmpty()) return null
+        return "$GITHUB_BASE_URL/${system.replace(' ', '_')}/master/$file"
     }
 
     private fun alternativeUrls(url: String): List<String> {
@@ -100,18 +129,23 @@ class ThumbnailFallbackInterceptor(context: Context) : Interceptor {
     }
 
     companion object {
-        private const val PREFERENCES_NAME = "thumbnail_fallbacks"
+        // Renamed when the GitHub mirror was added, so covers remembered as missing while the server was down are retried.
+        private const val PREFERENCES_NAME = "thumbnail_fallbacks_v2"
         private const val PREFIX_REDIRECT = "redirect:"
         private const val PREFIX_MISSING = "missing:"
         private val MISSING_RETRY_MS = TimeUnit.DAYS.toMillis(7)
         private const val HTTP_NOT_FOUND = 404
 
         private const val THUMBNAILS_HOST = "thumbnails.libretro.com"
+        private const val GITHUB_BASE_URL = "https://raw.githubusercontent.com/libretro-thumbnails"
         private const val EXTENSION = ".png"
         private const val MAX_ALTERNATIVES = 6
         private const val MAX_ENTRIES = 5000
 
         private val LANGUAGE_GROUP = Regex("\\s*\\((?:[A-Z][a-z](?:[,+][A-Z][a-z])*)\\)")
         private val FALLBACK_REGIONS = listOf("USA", "World", "Europe", "Japan")
+
+        @Volatile
+        private var libretroUnavailable = false
     }
 }

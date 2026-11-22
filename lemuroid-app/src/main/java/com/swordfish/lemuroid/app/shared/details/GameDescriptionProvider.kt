@@ -1,6 +1,7 @@
 package com.swordfish.lemuroid.app.shared.details
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.swordfish.lemuroid.lib.library.SystemID
 import com.swordfish.lemuroid.lib.library.db.entity.Game
@@ -28,6 +29,7 @@ class GameDescriptionProvider(context: Context, private val okHttpClient: OkHttp
         context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).also {
             // Entries are never removed one by one, so the whole list is reset if it grows too much.
             if (it.all.size > MAX_ENTRIES) it.edit { clear() }
+            forgetMissingOnce(it)
         }
 
     /** Description already known on the device, without going to the network. */
@@ -59,7 +61,12 @@ class GameDescriptionProvider(context: Context, private val okHttpClient: OkHttp
 
     private fun fetchDescription(game: Game): String? {
         val language = deviceLanguage()
-        val entity = findGameEntity(searchTitle(game.title), game.systemId) ?: return null
+        val title = searchTitle(game.title)
+        // Wikidata finds nothing for some titles with a colon ("Pokemon: Red Version"), but does without it.
+        val entity =
+            findGameEntity(title, game.systemId)
+                ?: title.takeIf { ":" in it }?.let { findGameEntity(it.replace(":", ""), game.systemId) }
+                ?: return null
         val sitelinks = entity.optJSONObject("sitelinks") ?: return null
 
         val (pageLanguage, pageTitle) =
@@ -148,6 +155,21 @@ class GameDescriptionProvider(context: Context, private val okHttpClient: OkHttp
         }
     }
 
+    /**
+     * Games remembered without a description before the search without colons existed are retried once,
+     * instead of waiting for [MISSING_RETRY_MS].
+     */
+    private fun forgetMissingOnce(preferences: SharedPreferences) {
+        if (preferences.getBoolean(KEY_MISSING_RESET, false)) return
+        preferences.edit {
+            preferences.all
+                .filter { (_, value) -> (value as? String)?.startsWith(PREFIX_MISSING) == true }
+                .keys
+                .forEach { remove(it) }
+            putBoolean(KEY_MISSING_RESET, true)
+        }
+    }
+
     private fun cacheKey(game: Game) = "${deviceLanguage()}|${game.systemId}|${game.title}"
 
     private fun deviceLanguage(): String {
@@ -161,6 +183,7 @@ class GameDescriptionProvider(context: Context, private val okHttpClient: OkHttp
 
         private const val PREFERENCES_NAME = "game_descriptions"
         private const val PREFIX_MISSING = "missing:"
+        private const val KEY_MISSING_RESET = "missing_reset_colon_search"
         private val MISSING_RETRY_MS = TimeUnit.DAYS.toMillis(30)
         private const val MAX_ENTRIES = 5000
         private const val HTTP_NOT_FOUND = 404
