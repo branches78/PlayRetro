@@ -113,6 +113,13 @@ class ThumbnailFallbackInterceptor(context: Context) : Interceptor {
 
         val names =
             buildList {
+                // Games of several discs have their covers with the first disc: "Game (USA) (Rev 1)" ->
+                // "Game (USA) (Disc 1) (Rev 1)" and "Game (USA) (Disc 1)".
+                if (firstGroup != null && !DISC_GROUP.containsMatchIn(name)) {
+                    val afterFirstGroup = name.substringAfter(firstGroup)
+                    add("$title $firstGroup $FIRST_DISC$afterFirstGroup")
+                    add("$title $firstGroup $FIRST_DISC")
+                }
                 // Without language tags: "Circus Charlie (Japan) (En)" -> "Circus Charlie (Japan)".
                 add(name.replace(LANGUAGE_GROUP, "").trim())
                 // Only title and region: "Game (USA) (Rev 1)" -> "Game (USA)".
@@ -129,8 +136,9 @@ class ThumbnailFallbackInterceptor(context: Context) : Interceptor {
     }
 
     companion object {
-        // Renamed when the GitHub mirror was added, so covers remembered as missing while the server was down are retried.
-        private const val PREFERENCES_NAME = "thumbnail_fallbacks_v2"
+        // Renamed when new alternatives are added (GitHub mirror, first disc), so covers remembered as missing are
+        // retried.
+        private const val PREFERENCES_NAME = "thumbnail_fallbacks_v3"
         private const val PREFIX_REDIRECT = "redirect:"
         private const val PREFIX_MISSING = "missing:"
         private val MISSING_RETRY_MS = TimeUnit.DAYS.toMillis(7)
@@ -139,11 +147,13 @@ class ThumbnailFallbackInterceptor(context: Context) : Interceptor {
         private const val THUMBNAILS_HOST = "thumbnails.libretro.com"
         private const val GITHUB_BASE_URL = "https://raw.githubusercontent.com/libretro-thumbnails"
         private const val EXTENSION = ".png"
-        private const val MAX_ALTERNATIVES = 6
+        private const val MAX_ALTERNATIVES = 8
         private const val MAX_ENTRIES = 5000
 
         private val LANGUAGE_GROUP = Regex("\\s*\\((?:[A-Z][a-z](?:[,+][A-Z][a-z])*)\\)")
         private val FALLBACK_REGIONS = listOf("USA", "World", "Europe", "Japan")
+        private val DISC_GROUP = Regex("\\(Disc \\d+\\)")
+        private const val FIRST_DISC = "(Disc 1)"
 
         @Volatile
         private var libretroUnavailable = false

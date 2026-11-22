@@ -40,7 +40,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   - Compilar con `JAVA_HOME=C:\Users\Ricardo\.jdks\jbr-21.0.11` (el JDK de Android Studio es Java 25, demasiado nuevo
     para Gradle 8.10.2): `./gradlew --no-daemon :lemuroid-app:assembleFreeDynamicDebug`
   - SDK en `D:\Aplicaciones\AndroidSDK` (`local.properties`, no se sube al repositorio).
-  - Tras cada compilación autorizada, instalar **solo en la TV** (BuzzTV, `192.168.18.56:5555`) con
+  - Tras cada compilación autorizada, instalar **solo en la TV** (BuzzTV, `192.168.1.6:5555`) con
     `adb install -r`, **sin abrir la app**. En el teléfono la instala el usuario.
 
 ## Datos del proyecto
@@ -91,10 +91,12 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   servidor de carátulas, si no `Named_Titles` y si no la carátula difuminada. Descripción: Wikipedia en el idioma del
   dispositivo (o inglés), buscando el juego en Wikidata por título y consola (`shared/details/GameDescriptionProvider.kt`,
   caché en las preferencias `game_descriptions`; si el título con dos puntos no da resultados, p. ej. "Pokemon: Red
-  Version", se busca otra vez sin ellos). Si `thumbnails.libretro.com` no responde (en noviembre de 2026 dio 404 para
+  Version", se busca otra vez sin ellos; se aceptan videojuegos y recopilaciones, Q7889 y Q16070115, p. ej.
+  "Street Fighter Collection"). Si `thumbnails.libretro.com` no responde (en noviembre de 2026 dio 404 para
   todo), `ThumbnailFallbackInterceptor` pide la misma imagen a la copia de GitHub
   (`raw.githubusercontent.com/libretro-thumbnails/<Sistema_con_guiones_bajos>/master/...`) y recuerda la que funcionó
-  (preferencias `thumbnail_fallbacks_v2`). Captura y descripción esperan 300 ms con el foco quieto. Al bajar a
+  (preferencias `thumbnail_fallbacks_v3`). Los juegos de varios discos (`.m3u`) se identifican sin "(Disc N)",
+  pero sus carátulas lo llevan: también se prueba con "(Disc 1)" tras la región. Captura y descripción esperan 300 ms con el foco quieto. Al bajar a
   otras filas, los textos y la captura se ocultan. Medidas de la guía de Android TV (pantalla de 960×540 dp): captura 16:9 de 758×426 dp arriba a la derecha, recortada a su vista
   y con bordes difuminados (degradados suavizados a la izquierda, abajo y arriba, con un tramo opaco en el borde). Muchas
   capturas (p. ej. de N64) traen franjas negras a los lados: se recortan al cargarlas
@@ -313,6 +315,13 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   muestran "Cargando tus juegos" con barra y porcentaje en lugar del cuadro de la carpeta (`TVEmptyLibraryCard.kt`,
   `HomeLibraryLoading` en `HomeScreen.kt`); al re-escanear, la barra sale bajo "Directorio" en Ajustes
   (`LibraryScanProgress.kt`). Ya no hay línea de progreso en el móvil ni círculo de carga en la TV.
+- **Re-escaneo sin leer de nuevo:** los juegos ya conocidos solo se vuelven a leer si cambió su tamaño o fecha
+  (`LemuroidLibrary.updateGames`). Los archivos que no son un juego (pistas sueltas, BIOS…) se recuerdan con su tamaño,
+  fecha y CRC en `filesDir/unrecognized-files.json` (`UnrecognizedFilesStore`, se reinicia con cada versión de la app):
+  si no cambiaron no se leen otra vez. La comprobación de BIOS usa el CRC ya leído (`parsedFiles`) y solo abre el
+  archivo para copiarlo; los de más de 4 MB no se comprueban (`BiosManager.MAX_BIOS_SIZE`). Antes, las 9 pistas de un
+  juego con el `.cue` roto se leían enteras dos veces por la red en cada escaneo (unos 3 minutos). Un `.cue` que nombra
+  archivos que no existen se descarta (`StorageFilesMerger.removeInvalidBinCuePairs`): sus pistas quedan sueltas.
 - **Ficha del juego:** al elegir un juego se abre su ficha en lugar de jugarlo (ajuste "Mostrar ficha del juego",
   `pref_key_show_game_details`, activado por defecto, en Ajustes → Juegos; `GameInteractor.showDetailsOnClick`).
   Continuar jugando siempre juega directamente. La pulsación larga abre siempre el menú de opciones, en todas partes

@@ -119,7 +119,9 @@ class GameDescriptionProvider(context: Context, private val okHttpClient: OkHttp
         val entities = getJson(entitiesUrl)?.optJSONObject("entities") ?: return null
         val games =
             ids.mapNotNull { entities.optJSONObject(it) }
-                .filter { VIDEO_GAME in claimIds(it, PROPERTY_INSTANCE_OF) }
+                .filter { entity ->
+                    claimIds(entity, PROPERTY_INSTANCE_OF).any { it in VIDEO_GAME_TYPES }
+                }
 
         val platform = PLATFORMS[systemId]
         return games.firstOrNull { platform != null && platform in claimIds(it, PROPERTY_PLATFORM) }
@@ -183,7 +185,8 @@ class GameDescriptionProvider(context: Context, private val okHttpClient: OkHttp
 
         private const val PREFERENCES_NAME = "game_descriptions"
         private const val PREFIX_MISSING = "missing:"
-        private const val KEY_MISSING_RESET = "missing_reset_colon_search"
+        // Changed when the search finds more games, so games remembered without a description are retried once.
+        private const val KEY_MISSING_RESET = "missing_reset_compilations"
         private val MISSING_RETRY_MS = TimeUnit.DAYS.toMillis(30)
         private const val MAX_ENTRIES = 5000
         private const val HTTP_NOT_FOUND = 404
@@ -194,7 +197,8 @@ class GameDescriptionProvider(context: Context, private val okHttpClient: OkHttp
         private val WIKIDATA_API = "https://www.wikidata.org/w/api.php".toHttpUrl()
         private const val PROPERTY_INSTANCE_OF = "P31"
         private const val PROPERTY_PLATFORM = "P400"
-        private const val VIDEO_GAME = "Q7889"
+        // Video game, and video game compilation (e.g. "Street Fighter Collection").
+        private val VIDEO_GAME_TYPES = setOf("Q7889", "Q16070115")
 
         /** Wikidata items of the consoles, to tell apart games with the same name on different systems. */
         private val PLATFORMS =
