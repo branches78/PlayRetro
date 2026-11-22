@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
+import java.util.concurrent.ConcurrentHashMap
 
 class LemuroidLibrary(
     private val retrogradedb: RetrogradeDatabase,
@@ -63,6 +64,7 @@ class LemuroidLibrary(
     private val directoriesManager: DirectoriesManager,
     private val coresSelection: CoresSelection,
     private val coreVariablesManager: CoreVariablesManager,
+    private val unrecognizedFiles: UnrecognizedFilesStore,
 ) {
     /** Progress of an indexing: [processed] of [total] files. [total] is null while the files are being listed. */
     data class IndexProgress(val processed: Int, val total: Int?)
@@ -74,6 +76,7 @@ class LemuroidLibrary(
         // after a stop or an error (e.g. a folder that can't be read) the ones not reached yet would be lost.
         var completed = false
         try {
+            unrecognizedFiles.startScan()
             indexProviders(startedAtMs, onProgress)
             completed = true
         } catch (e: CancellationException) {
@@ -85,6 +88,8 @@ class LemuroidLibrary(
             if (completed) {
                 cleanUp(startedAtMs)
             }
+            unrecognizedFiles.finishScan(completed)
+            parsedFiles.clear()
         }
 
         val executionTime = System.currentTimeMillis() - startedAtMs
@@ -158,10 +163,18 @@ class LemuroidLibrary(
 
         // New files are read to identify them, which is slow over the network: the progress moves with each one
         // instead of waiting for the whole batch (a library smaller than a batch went from 0% to 100% at the end).
+        // Files that were not a game in the last scan and did not change since are not read again.
         val newFiles = entries.filterIsInstance<ScanEntry.File>()
         val newEntries =
-            newFiles.map {
-                buildEntryFromMetadata(it.file, provider, gameMetadata, startedAtMs).also { onBatchProcessed(1) }
+            newFiles.map { entry ->
+                val unchangedUnknown = entry.file.allFiles().all { unrecognizedFiles.find(it) != null }
+                val result =
+                    if (unchangedUnknown) {
+                        entry
+                    } else {
+                        buildEntryFromMetadata(entry.file, provider, gameMetadata, startedAtMs)
+                    }
+                result.also { onBatchProcessed(1) }
             }
 
         handleNewEntries(newEntries, startedAtMs, provider)
@@ -437,18 +450,24 @@ class LemuroidLibrary(
         retrogradedb.dataFileDao().insert(dataFiles)
     }
 
+    /**
+     * Files that are not a game: they are remembered (see [UnrecognizedFilesStore]) and checked against the known BIOS
+     * with the CRC read when they were identified, so they are not read again; a BIOS is only opened to copy it.
+     */
     private fun handleUnknownFiles(
         provider: StorageProvider,
         files: List<BaseStorageFile>,
         startedAtMs: Long,
     ) {
         files.forEach { baseStorageFile ->
-            val storageFile = safeStorageFile(provider, baseStorageFile)
-            val inputStream = storageFile?.uri?.let { provider.getInputStream(it) }
+            val storageFile =
+                unrecognizedFiles.find(baseStorageFile)
+                    ?: safeStorageFile(provider, baseStorageFile)
+                        ?.also { unrecognizedFiles.remember(baseStorageFile, it) }
+                    ?: return@forEach
 
-            if (storageFile != null && inputStream != null) {
-                biosManager.tryAddBiosAfter(storageFile, inputStream, startedAtMs)
-            }
+            if (baseStorageFile.size > BiosManager.MAX_BIOS_SIZE) return@forEach
+            biosManager.tryAddBiosAfter(storageFile, { provider.getInputStream(storageFile.uri) }, startedAtMs)
         }
     }
 
@@ -470,12 +489,19 @@ class LemuroidLibrary(
         return buildScanEntry(groupedStorageFile, game)
     }
 
+    // Files read in this scan: a file that is not a game is read to identify it and then checked as a BIOS, and
+    // reading it twice took seconds for each one over a network folder.
+    private val parsedFiles = ConcurrentHashMap<String, StorageFile>()
+
     private fun safeStorageFile(
         provider: StorageProvider,
         baseStorageFile: BaseStorageFile,
     ): StorageFile? {
+        val key = baseStorageFile.uri.toString()
+        parsedFiles[key]?.let { return it }
         return runCatching { provider.getStorageFile(baseStorageFile) }
             .getOrNull()
+            ?.also { parsedFiles[key] = it }
     }
 
     private fun cleanUp(startedAtMs: Long) {

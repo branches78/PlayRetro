@@ -70,9 +70,10 @@ class BiosManager(private val directoriesManager: DirectoriesManager) {
             getBiosInfo()
         }
 
+    /** [openStream] is only called to copy a BIOS that is not on the device yet. */
     fun tryAddBiosAfter(
         storageFile: StorageFile,
-        inputStream: InputStream,
+        openStream: () -> InputStream?,
         timestampMs: Long,
     ): Boolean {
         val bios = findByCRC(storageFile) ?: findByName(storageFile) ?: return false
@@ -84,6 +85,7 @@ class BiosManager(private val directoriesManager: DirectoriesManager) {
             Timber.d("Bios file already present. Updated last modification date.")
         } else {
             Timber.d("Bios file not available. Copying new file.")
+            val inputStream = openStream() ?: return false
             inputStream.writeToFile(biosFile)
         }
         return true
@@ -102,6 +104,9 @@ class BiosManager(private val directoriesManager: DirectoriesManager) {
     data class BiosInfo(val detected: List<Bios>, val notDetected: List<Bios>)
 
     companion object {
+        /** Larger than any supported BIOS (the largest are 512 KB): bigger files are not checked. */
+        const val MAX_BIOS_SIZE = 4L * 1024 * 1024
+
         /** Extensions of the known BIOS files, so a scan can skip the files that can't be one. */
         val BIOS_EXTENSIONS: Set<String> by lazy {
             SUPPORTED_BIOS

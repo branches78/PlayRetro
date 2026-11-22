@@ -50,6 +50,7 @@ import com.swordfish.lemuroid.lib.game.GameLoader
 import com.swordfish.lemuroid.lib.injection.PerActivity
 import com.swordfish.lemuroid.lib.injection.PerApp
 import com.swordfish.lemuroid.lib.library.LemuroidLibrary
+import com.swordfish.lemuroid.lib.library.UnrecognizedFilesStore
 import com.swordfish.lemuroid.lib.library.covers.CustomCoverManager
 import com.swordfish.lemuroid.lib.library.db.RetrogradeDatabase
 import com.swordfish.lemuroid.lib.library.db.dao.GameSearchDao
@@ -194,6 +195,7 @@ abstract class LemuroidApplicationModule {
             directoriesManager: DirectoriesManager,
             coresSelection: CoresSelection,
             coreVariablesManager: CoreVariablesManager,
+            context: Context,
         ) = LemuroidLibrary(
             db,
             storageProviderRegistry,
@@ -203,6 +205,7 @@ abstract class LemuroidApplicationModule {
             directoriesManager,
             coresSelection,
             coreVariablesManager,
+            UnrecognizedFilesStore(context),
         )
 
         @Provides
