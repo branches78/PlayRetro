@@ -57,7 +57,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   graphic 1024×500). **Icono del lanzador:** mando negro con botones blancos sobre verde #00C64E
   (`lemuroid_launcher_foreground.xml`, `lemuroid_launcher_background`, PNG de `mipmap-*` y canal de TV), el de la
   primera versión del fork.
-- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.0` (`versionCode` 9; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
+- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.1` (`versionCode` 10; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
   Antes era `com.gamestation.tv`: es una app distinta para Android, así que la antigua hay que desinstalarla aparte
   y sus datos (partidas, ajustes, biblioteca) no pasan a la nueva.
 - Variante que se compila: **freeDynamicDebug** (sin librerías de Google; los cores se descargan al usarlos).
@@ -90,7 +90,11 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   `TVMainTabsFragment`, `setHomeBackdrop`; la barra se vuelve transparente mientras se ve). Captura: `Named_Snaps` del
   servidor de carátulas, si no `Named_Titles` y si no la carátula difuminada. Descripción: Wikipedia en el idioma del
   dispositivo (o inglés), buscando el juego en Wikidata por título y consola (`shared/details/GameDescriptionProvider.kt`,
-  caché en las preferencias `game_descriptions`). Captura y descripción esperan 300 ms con el foco quieto. Al bajar a
+  caché en las preferencias `game_descriptions`; si el título con dos puntos no da resultados, p. ej. "Pokemon: Red
+  Version", se busca otra vez sin ellos). Si `thumbnails.libretro.com` no responde (en noviembre de 2026 dio 404 para
+  todo), `ThumbnailFallbackInterceptor` pide la misma imagen a la copia de GitHub
+  (`raw.githubusercontent.com/libretro-thumbnails/<Sistema_con_guiones_bajos>/master/...`) y recuerda la que funcionó
+  (preferencias `thumbnail_fallbacks_v2`). Captura y descripción esperan 300 ms con el foco quieto. Al bajar a
   otras filas, los textos y la captura se ocultan. Medidas de la guía de Android TV (pantalla de 960×540 dp): captura 16:9 de 758×426 dp arriba a la derecha, recortada a su vista
   y con bordes difuminados (degradados suavizados a la izquierda, abajo y arriba, con un tramo opaco en el borde). Muchas
   capturas (p. ej. de N64) traen franjas negras a los lados: se recortan al cargarlas
@@ -128,7 +132,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   hacer scroll (`TVTabGrids.addTitle`). La pestaña se llama "Consolas" también en el móvil (`title_consoles`). En el móvil, Consolas tiene el mismo botón de lista/cuadrícula que los juegos de una consola, con su propio modo guardado (`systems_grid_mode`, `MainViewModel`), y la cuadrícula es de 3 por fila (`MetaSystemScreen.kt`).
   El foco no sale del contenido de una pestaña con ←, → o ↓ (antes ← en la primera tarjeta saltaba a la lupa);
   con ↑ va a la pestaña seleccionada (`TVMainTabsFragment.onFocusSearch`). Las rejillas de TV no oscurecen las tarjetas sin foco (`VerticalGridPresenter(..., useFocusDimmer = false)`); Ajustes de TV reutilizan las
-  pantallas Compose del móvil (`tv/settings/TVSettingsTabFragment.kt`, ver "Ajustes (TV)" más abajo; `SettingsViewModel` da sus valores reales desde el primer cuadro, sin estados vacíos, para que la pestaña no salte al entrar deslizándose). Armarla costaba ~300 ms, más que el deslizamiento (280 ms), así que aparecía de golpe: `TVMainTabsFragment` la crea una sola vez cuando el foco lleva 2 s quieto (cada movimiento reinicia la espera, para que la pausa de armarla no caiga sobre un cambio de pestaña) en su propio contenedor (`tv_settings_content`, invisible y no `gone` para que también quede medida) y solo la muestra u oculta con las mismas animaciones (si se elige antes de estar armada, el selector se mueve primero y se arma cuando terminó y el texto oscuro de la pestaña ya se dibujó —`awaitFrame`—, apareciendo con un fundido); al ocultarse vuelve a la lista principal (`showMainScreen`); al abrir una sub-opción el foco va a su primera
+  pantallas Compose del móvil (`tv/settings/TVSettingsTabFragment.kt`, ver "Ajustes (TV)" más abajo; `SettingsViewModel` da sus valores reales desde el primer cuadro, sin estados vacíos, para que la pestaña no salte al entrar deslizándose). Armarla costaba ~300 ms, más que el deslizamiento (280 ms), así que aparecía de golpe: `TVMainTabsFragment` la crea una sola vez cuando el foco lleva 2 s quieto (cada movimiento reinicia la espera, para que la pausa de armarla no caiga sobre un cambio de pestaña) en su propio contenedor (`tv_settings_content`, invisible y no `gone` para que también quede medida) y solo la muestra u oculta con las mismas animaciones (si se elige antes de estar armada, el selector se mueve primero y se arma cuando terminó y el texto oscuro de la pestaña ya se dibujó —`awaitFrame`—, y aparece sin fundido); al ocultarse vuelve a la lista principal (`showMainScreen`); al abrir una sub-opción el foco va a su primera
   opción y al volver con Atrás a la que la abrió (`TVSettingsDestination` + `SettingsFocusMemory.kt`, que registra las
   filas de `Components.kt`; la primera es la que está más arriba en pantalla; como pantallas como Dispositivos externos
   cargan sus opciones en segundo plano, durante 3 s el foco sigue a la de más arriba mientras el usuario no lo mueva); estilo de tarjetas en `tv/shared/TVCardStyle.kt`.
@@ -316,8 +320,8 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   (`GameContextMenuContent(onOpenDetails)`; en TV la pasa cada pantalla a `GamePresenter(onOpenDetails)`). Datos compartidos en `shared/details/`
   (`GameDetailsViewModel`: juego observado con `GameDao.observeById`, descripción de Wikipedia y "Más de
   [consola]"; `GameActionsHost`: las mismas acciones del menú, con el diálogo de nombre y el selector de carátula).
-  TV: `tv/details/TVGameDetailsFragment.kt` (destino `navigation_game_details` del grafo de TV, se abre y cierra con
-  fundido `res/anim/tv_details_fade_*`), captura con `TVBackdropView`, Jugar/Reanudar en píldora con nombre y el resto
+  TV: `tv/details/TVGameDetailsFragment.kt` (destino `navigation_game_details` del grafo de TV, se abre y cierra
+  sin animación; el cambio entre pestañas sí conserva su deslizamiento), captura con `TVBackdropView`, Jugar/Reanudar en píldora con nombre y el resto
   como iconos redondos cuyo nombre sale debajo al enfocarlos (la fila se desplaza hasta el enfocado si no cabe), Jugar/Continuar enfocado al abrir y al volver a la fila de botones desde la descripción o desde "Más de…" (`focusProperties { enter }` + `focusGroup`), "Configurar núcleo" abre el diálogo de opciones
   (`TVGameContextMenu.show(..., startWithCoreOptions = true)`). La ficha se muestra entera cuando están los datos
   locales (`State.isReady`); la descripción ocupa las líneas que necesita (hasta 4) y no se dibuja si no hay, así que lo
@@ -353,7 +357,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   nunca lo tienen) se ve el título en texto.
 - **Menú de partida (L3 + R3):** el mismo en el móvil y en la TV (`mobile/feature/gamemenu/GameMenuActivity.kt`;
   la TV ya no usa el menú de Leanback): ventana modal centrada sobre el juego (`CenteredMenu`, hasta 520 dp de ancho y
-  560 dp de alto, fijo para que no crezca al aparecer; tocar fuera la cierra; se abre y cierra con fundido), con el juego
+  560 dp de alto, fijo para que no crezca al aparecer; tocar fuera la cierra; se abre y cierra con fundido; sus subpantallas cambian sin fundido), con el juego
   y `consola · núcleo` centrados arriba y sin botón de cerrar (solo la flecha en las subpantallas). Atrás vuelve o
   cierra con una pulsación (`dispatchKeyEvent`: Compose la usaba antes para sacar el foco de cada grupo). Orden: Salir del juego,
   Reiniciar, Guardar, Cargar, Silenciar audio, Avance rápido, Editar controles y Sensor de inclinación (no en la TV),
@@ -374,8 +378,9 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   Las opciones de lista que antes abrían un diálogo abren una subpantalla de elección
   (`utils/android/settings/SettingsChoice.kt`: `SettingsChoiceHost`, ruta `settings/choice`; el título va en la barra
   superior con `MainTopBar(titleOverride)`; la elección única se cierra sola a los 200 ms, la múltiple al volver); el
-  diálogo queda solo si no hay host. Las filas que abren otra pantalla llevan `SettingsOpenArrow`. Entre pantallas de
-  Ajustes no hay fundido (`NavHost` sin transición si las dos rutas empiezan por `settings/`) y sus destinos ocupan
+  diálogo queda solo si no hay host. Las filas que abren otra pantalla llevan `SettingsOpenArrow`. En el móvil
+  ninguna pantalla cambia con fundido (pestañas, ficha, búsqueda y Ajustes: `NavHost` de `MainActivity` sin transición;
+  los resultados de la búsqueda tampoco se funden) y los destinos de Ajustes ocupan
   todo el alto (`Box(fillMaxSize)` en `composable()`), porque el cambio de tamaño de `AnimatedContent` parecía
   expandirse. "Directorio" abre la elección carpeta del dispositivo / carpeta de red con su descripción.
 - **Ajustes (TV):** `tv/settings/TVSettingsHome.kt` y `TVSettingsTabFragment.kt`. Dos paneles: a la izquierda las

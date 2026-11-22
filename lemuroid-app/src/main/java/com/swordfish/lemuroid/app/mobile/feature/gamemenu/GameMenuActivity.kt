@@ -9,10 +9,9 @@ import android.view.KeyEvent
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -178,7 +177,7 @@ class GameMenuActivity : RetrogradeComponentActivity() {
                     },
                     windowInsets = WindowInsets(0.dp),
                     navigationIcon = {
-                        AnimatedVisibility(visible = currentRoute.canGoBack(), enter = fadeIn(), exit = fadeOut()) {
+                        if (currentRoute.canGoBack()) {
                             IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
@@ -194,8 +193,9 @@ class GameMenuActivity : RetrogradeComponentActivity() {
                     modifier = Modifier.weight(1f, fill = false),
                     navController = navController,
                     startDestination = GameMenuRoute.HOME.route,
-                    enterTransition = { fadeIn() },
-                    exitTransition = { fadeOut() },
+                    // The screens change at once, without fading.
+                    enterTransition = { EnterTransition.None },
+                    exitTransition = { ExitTransition.None },
                 ) {
                     // Each screen focuses its first item when it opens, and the one that opened another screen when
                     // coming back, so the menu can be used with a remote or a gamepad.

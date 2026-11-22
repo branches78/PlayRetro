@@ -85,7 +85,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LemuroidGameImage
@@ -198,21 +197,12 @@ class TVGameDetailsFragment : Fragment() {
             if (gameInteractor.showDetailsOnClick()) open(fragment, game) else gameInteractor.onGamePlay(game)
         }
 
-        /** Opens the details of [game] over the current screen with a crossfade, like on mobile; back returns to it. */
+        /** Opens the details of [game] over the current screen at once, without fading; back returns to it. */
         fun open(
             fragment: Fragment,
             game: Game,
         ) {
-            val options =
-                navOptions {
-                    anim {
-                        enter = R.anim.tv_details_fade_in
-                        exit = R.anim.tv_details_fade_out
-                        popEnter = R.anim.tv_details_fade_in
-                        popExit = R.anim.tv_details_fade_out
-                    }
-                }
-            fragment.findNavController().navigate(R.id.navigation_game_details, bundleOf(ARG_GAME_ID to game.id), options)
+            fragment.findNavController().navigate(R.id.navigation_game_details, bundleOf(ARG_GAME_ID to game.id))
         }
     }
 

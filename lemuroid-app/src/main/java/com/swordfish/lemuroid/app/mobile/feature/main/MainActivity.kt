@@ -1,9 +1,5 @@
 package com.swordfish.lemuroid.app.mobile.feature.main
 
-import androidx.navigation.NavBackStackEntry
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.EnterTransition
 import androidx.compose.runtime.CompositionLocalProvider
@@ -247,13 +243,9 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
                         modifier = Modifier.fillMaxSize(),
                         navController = navController,
                         startDestination = MainRoute.HOME.route,
-                        // Between the settings and their sub-menus the screens change without fading.
-                        enterTransition = {
-                            if (isSettingsChange(initialState, targetState)) EnterTransition.None else fadeIn(tween(FADE_MS))
-                        },
-                        exitTransition = {
-                            if (isSettingsChange(initialState, targetState)) ExitTransition.None else fadeOut(tween(FADE_MS))
-                        },
+                        // Tabs and screens change at once, without fading.
+                        enterTransition = { EnterTransition.None },
+                        exitTransition = { ExitTransition.None },
                     ) {
                         composable(MainRoute.SETTINGS_CHOICE) {
                             SettingsChoiceScreen(
@@ -553,12 +545,3 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
         }
     }
 }
-
-/** Whether both screens are settings screens (the main one or a sub-menu). */
-private fun isSettingsChange(
-    initial: NavBackStackEntry,
-    target: NavBackStackEntry,
-): Boolean = initial.destination.route?.startsWith("settings/") == true && target.destination.route?.startsWith("settings/") == true
-
-// The default fade of the navigation.
-private const val FADE_MS = 700

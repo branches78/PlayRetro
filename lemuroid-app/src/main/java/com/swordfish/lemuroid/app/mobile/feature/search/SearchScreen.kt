@@ -1,8 +1,8 @@
 package com.swordfish.lemuroid.app.mobile.feature.search
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
@@ -60,7 +60,8 @@ fun SearchScreen(
     AnimatedContent(
         targetState = searchState.value,
         label = "SearchContent",
-        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        // The results replace the suggestion at once, without fading.
+        transitionSpec = { EnterTransition.None togetherWith ExitTransition.None },
     ) { state ->
         when {
             state == SearchViewModel.UIState.Idle -> {

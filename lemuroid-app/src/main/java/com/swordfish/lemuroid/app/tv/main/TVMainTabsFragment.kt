@@ -345,12 +345,10 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
      * The settings are built once, before their tab is selected, and then only shown and hidden: built when
      * their tab was selected, they froze the screen for longer than the slide of the tab, so they appeared at once.
      */
-    private fun addSettings(fadeIn: Boolean = false) {
+    private fun addSettings() {
         if (settingsAdded || childFragmentManager.isStateSaved) return
         settingsAdded = true
-        val transaction = childFragmentManager.beginTransaction()
-        if (fadeIn) transaction.setCustomAnimations(R.anim.tv_details_fade_in, 0)
-        transaction
+        childFragmentManager.beginTransaction()
             .add(R.id.tv_settings_content, TVSettingsTabFragment())
             .commit()
     }
@@ -364,7 +362,7 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
         setSettingsShown(true)
         if (!settingsAdded) {
             // Selected right after opening the screen: building them now would hold the pill on the previous tab, so
-            // they are built once it has reached this one, and fade in.
+            // they are built once it has reached this one.
             if (settingsBuildJob?.isActive != true) {
                 settingsPreloadJob?.cancel()
                 settingsBuildJob =
@@ -374,7 +372,7 @@ class TVMainTabsFragment : Fragment(R.layout.fragment_tv_main_tabs) {
                         // tab is drawn, otherwise the tab stayed a blank white pill until they were built.
                         while (pillAnimator?.isRunning == true) awaitFrame()
                         repeat(2) { awaitFrame() }
-                        addSettings(fadeIn = selectedTab == TAB_SETTINGS)
+                        addSettings()
                     }
             }
             return
