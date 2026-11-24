@@ -256,4 +256,13 @@
     <string name="settings_title_language">Lingua</string>
     <string name="settings_language_device">Lingua del dispositivo</string>
     <string name="not_configured">Non configurato</string>
+    <string name="settings_title_send_report">Invia segnalazione</string>
+    <string name="settings_description_send_report">Condividi un log di diagnostica per aiutare a risolvere i problemi</string>
+    <string name="send_report_dialog_message">Invia la seguente segnalazione allo sviluppatore per aiutare a risolvere il problema</string>
+    <string name="send_report_send">Invia</string>
+    <string name="send_report_export">Esporta log</string>
+    <string name="send_report_exported">Segnalazione salvata in %1$s</string>
+    <string name="send_report_export_error">Impossibile salvare la segnalazione</string>
+    <string name="send_report_no_app">Nessuna app per condividere la segnalazione</string>
+    <string name="send_report_limit">Puoi inviare fino a 2 segnalazioni ogni 48 ore. Potrai inviarne un\'altra il %1$s</string>
 </resources>

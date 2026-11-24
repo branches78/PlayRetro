@@ -240,4 +240,13 @@
     <string name="settings_title_language">語言</string>
     <string name="settings_language_device">裝置語言</string>
     <string name="not_configured">未設定</string>
+    <string name="settings_title_send_report">傳送報告</string>
+    <string name="settings_description_send_report">分享診斷記錄以協助解決問題</string>
+    <string name="send_report_dialog_message">請將以下報告傳送給開發者，以協助解決問題</string>
+    <string name="send_report_send">傳送</string>
+    <string name="send_report_export">匯出記錄</string>
+    <string name="send_report_exported">報告已儲存至 %1$s</string>
+    <string name="send_report_export_error">無法儲存報告</string>
+    <string name="send_report_no_app">沒有可分享報告的應用程式</string>
+    <string name="send_report_limit">每 48 小時最多可傳送 2 份報告。可在 %1$s 再次傳送</string>
 </resources>

@@ -254,4 +254,13 @@
     <string name="settings_title_language">اللغة</string>
     <string name="settings_language_device">لغة الجهاز</string>
     <string name="not_configured">لم يتم تكوينه</string>
+    <string name="settings_title_send_report">إرسال تقرير</string>
+    <string name="settings_description_send_report">شارك سجل تشخيص للمساعدة في حل المشكلات</string>
+    <string name="send_report_dialog_message">أرسل التقرير التالي إلى المطوّر للمساعدة في حل المشكلة</string>
+    <string name="send_report_send">إرسال</string>
+    <string name="send_report_export">تصدير السجل</string>
+    <string name="send_report_exported">تم حفظ التقرير في %1$s</string>
+    <string name="send_report_export_error">تعذّر حفظ التقرير</string>
+    <string name="send_report_no_app">لا يوجد تطبيق لمشاركة التقرير</string>
+    <string name="send_report_limit">يمكنك إرسال تقريرين كحد أقصى كل 48 ساعة. يمكنك إرسال تقرير آخر في %1$s</string>
 </resources>

@@ -131,4 +131,13 @@
     <string name="settings_title_language">Nyelv</string>
     <string name="settings_language_device">Az eszköz nyelve</string>
     <string name="not_configured">Nincs beállítva</string>
+    <string name="settings_title_send_report">Jelentés küldése</string>
+    <string name="settings_description_send_report">Diagnosztikai napló megosztása a hibák javításához</string>
+    <string name="send_report_dialog_message">Küldd el a következő jelentést a fejlesztőnek a hiba javításához</string>
+    <string name="send_report_send">Küldés</string>
+    <string name="send_report_export">Napló exportálása</string>
+    <string name="send_report_exported">Jelentés mentve ide: %1$s</string>
+    <string name="send_report_export_error">Nem sikerült menteni a jelentést</string>
+    <string name="send_report_no_app">Nincs alkalmazás a jelentés megosztásához</string>
+    <string name="send_report_limit">48 óránként legfeljebb 2 jelentést küldhetsz. A következőt ekkor küldheted: %1$s</string>
 </resources>

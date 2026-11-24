@@ -239,4 +239,13 @@
     <string name="settings_title_language">Ngôn ngữ</string>
     <string name="settings_language_device">Ngôn ngữ của thiết bị</string>
     <string name="not_configured">Chưa được thiết lập</string>
+    <string name="settings_title_send_report">Gửi báo cáo</string>
+    <string name="settings_description_send_report">Chia sẻ nhật ký chẩn đoán để giúp khắc phục sự cố</string>
+    <string name="send_report_dialog_message">Gửi báo cáo sau cho nhà phát triển để giúp khắc phục sự cố</string>
+    <string name="send_report_send">Gửi</string>
+    <string name="send_report_export">Xuất nhật ký</string>
+    <string name="send_report_exported">Đã lưu báo cáo vào %1$s</string>
+    <string name="send_report_export_error">Không thể lưu báo cáo</string>
+    <string name="send_report_no_app">Không có ứng dụng nào để chia sẻ báo cáo</string>
+    <string name="send_report_limit">Bạn có thể gửi tối đa 2 báo cáo mỗi 48 giờ. Bạn có thể gửi báo cáo tiếp theo vào %1$s</string>
 </resources>

@@ -243,4 +243,13 @@
     <string name="settings_title_language">Limbă</string>
     <string name="settings_language_device">Limba dispozitivului</string>
     <string name="not_configured">Neconfigurat</string>
+    <string name="settings_title_send_report">Trimite raport</string>
+    <string name="settings_description_send_report">Partajează un jurnal de diagnosticare pentru a ajuta la rezolvarea problemelor</string>
+    <string name="send_report_dialog_message">Trimite raportul următor dezvoltatorului pentru a ajuta la rezolvarea problemei</string>
+    <string name="send_report_send">Trimite</string>
+    <string name="send_report_export">Exportă jurnalul</string>
+    <string name="send_report_exported">Raport salvat în %1$s</string>
+    <string name="send_report_export_error">Raportul nu a putut fi salvat</string>
+    <string name="send_report_no_app">Nicio aplicație pentru partajarea raportului</string>
+    <string name="send_report_limit">Poți trimite cel mult 2 rapoarte la fiecare 48 de ore. Poți trimite altul pe %1$s</string>
 </resources>

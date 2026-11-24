@@ -255,4 +255,13 @@
     <string name="settings_title_language">语言</string>
     <string name="settings_language_device">设备语言</string>
     <string name="not_configured">未配置</string>
+    <string name="settings_title_send_report">发送报告</string>
+    <string name="settings_description_send_report">分享诊断日志以帮助解决问题</string>
+    <string name="send_report_dialog_message">请将以下报告发送给开发者，以帮助解决问题</string>
+    <string name="send_report_send">发送</string>
+    <string name="send_report_export">导出日志</string>
+    <string name="send_report_exported">报告已保存到 %1$s</string>
+    <string name="send_report_export_error">无法保存报告</string>
+    <string name="send_report_no_app">没有可用于分享报告的应用</string>
+    <string name="send_report_limit">每 48 小时最多可发送 2 份报告。可在 %1$s 再次发送</string>
 </resources>

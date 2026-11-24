@@ -207,4 +207,13 @@
     <string name="settings_title_language">שפה</string>
     <string name="settings_language_device">שפת המכשיר</string>
     <string name="not_configured">לא מוגדר</string>
+    <string name="settings_title_send_report">שליחת דוח</string>
+    <string name="settings_description_send_report">שתפו יומן אבחון כדי לעזור לפתור בעיות</string>
+    <string name="send_report_dialog_message">שלחו את הדוח הבא למפתח כדי לעזור לפתור את הבעיה</string>
+    <string name="send_report_send">שליחה</string>
+    <string name="send_report_export">ייצוא יומן</string>
+    <string name="send_report_exported">הדוח נשמר ב-%1$s</string>
+    <string name="send_report_export_error">לא ניתן היה לשמור את הדוח</string>
+    <string name="send_report_no_app">אין אפליקציה לשיתוף הדוח</string>
+    <string name="send_report_limit">אפשר לשלוח עד 2 דוחות כל 48 שעות. אפשר יהיה לשלוח דוח נוסף ב-%1$s</string>
 </resources>

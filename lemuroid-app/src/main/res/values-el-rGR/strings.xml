@@ -255,4 +255,13 @@
     <string name="settings_title_language">Γλώσσα</string>
     <string name="settings_language_device">Γλώσσα συσκευής</string>
     <string name="not_configured">Δεν έχει ρυθμιστεί</string>
+    <string name="settings_title_send_report">Αποστολή αναφοράς</string>
+    <string name="settings_description_send_report">Κοινοποιήστε ένα αρχείο διάγνωσης για να βοηθήσετε στην επίλυση προβλημάτων</string>
+    <string name="send_report_dialog_message">Στείλτε την παρακάτω αναφορά στον προγραμματιστή για να βοηθήσετε στην επίλυση του προβλήματος</string>
+    <string name="send_report_send">Αποστολή</string>
+    <string name="send_report_export">Εξαγωγή αρχείου</string>
+    <string name="send_report_exported">Η αναφορά αποθηκεύτηκε στο %1$s</string>
+    <string name="send_report_export_error">Δεν ήταν δυνατή η αποθήκευση της αναφοράς</string>
+    <string name="send_report_no_app">Δεν υπάρχει εφαρμογή για κοινοποίηση της αναφοράς</string>
+    <string name="send_report_limit">Μπορείτε να στείλετε έως 2 αναφορές κάθε 48 ώρες. Μπορείτε να στείλετε άλλη στις %1$s</string>
 </resources>

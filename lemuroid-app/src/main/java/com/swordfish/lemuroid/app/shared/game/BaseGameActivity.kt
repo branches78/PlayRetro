@@ -23,6 +23,7 @@ import com.swordfish.lemuroid.app.shared.coreoptions.CoreOptionsScope
 import com.swordfish.lemuroid.app.shared.coreoptions.LemuroidCoreOption
 import com.swordfish.lemuroid.app.shared.game.viewmodel.GameViewModelSideEffects
 import com.swordfish.lemuroid.app.shared.input.InputDeviceManager
+import com.swordfish.lemuroid.app.shared.report.DiagnosticReport
 import com.swordfish.lemuroid.app.shared.rumble.RumbleManager
 import com.swordfish.lemuroid.app.shared.settings.ControllerConfigsManager
 import com.swordfish.lemuroid.app.tv.game.TVGameActivity
@@ -350,6 +351,7 @@ abstract class BaseGameActivity : ImmersiveActivity() {
 
     private fun performUnexpectedErrorFinish(exception: Throwable) {
         Timber.e(exception, "Handling java exception in BaseGameActivity")
+        DiagnosticReport.saveGameLog(applicationContext)
         val resultIntent =
             Intent().apply {
                 putExtra(PLAY_GAME_RESULT_ERROR, exception.message)
@@ -360,6 +362,8 @@ abstract class BaseGameActivity : ImmersiveActivity() {
     }
 
     private fun performErrorFinish(message: String) {
+        Timber.e("Game finished with error: $message")
+        DiagnosticReport.saveGameLog(applicationContext)
         val resultIntent =
             Intent().apply {
                 putExtra(PLAY_GAME_RESULT_ERROR, message)

@@ -254,4 +254,13 @@
     <string name="settings_title_language">Jazyk</string>
     <string name="settings_language_device">Jazyk zařízení</string>
     <string name="not_configured">Není konfigurováno</string>
+    <string name="settings_title_send_report">Odeslat hlášení</string>
+    <string name="settings_description_send_report">Sdílejte diagnostický záznam a pomozte vyřešit problémy</string>
+    <string name="send_report_dialog_message">Pošlete následující hlášení vývojáři, aby pomohlo vyřešit problém</string>
+    <string name="send_report_send">Odeslat</string>
+    <string name="send_report_export">Exportovat záznam</string>
+    <string name="send_report_exported">Hlášení uloženo do %1$s</string>
+    <string name="send_report_export_error">Hlášení se nepodařilo uložit</string>
+    <string name="send_report_no_app">Žádná aplikace nemůže hlášení sdílet</string>
+    <string name="send_report_limit">Každých 48 hodin můžete odeslat nejvýše 2 hlášení. Další můžete odeslat %1$s</string>
 </resources>

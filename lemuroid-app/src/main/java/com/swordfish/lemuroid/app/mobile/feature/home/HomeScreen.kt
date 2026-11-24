@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -273,11 +274,14 @@ private fun HomeRowGames(
 ) {
     val listState = rememberLazyListState()
 
-    // Lazy rows keep the previous first item in place when a game is added at the start (e.g. the game just
-    // played), which leaves the new first cover cut on the left. Go back to the start unless the user scrolled.
+    // When the first game changes (e.g. the game just played moves to the start of "Continue playing") the row goes
+    // back to the start, even if it was scrolled to the end: lazy rows keep the previous item in place. Compared with
+    // the last first game seen, saved with the screen, so coming back from another screen keeps the position.
     val firstGameId = games.firstOrNull()?.id
+    var lastFirstGameId by rememberSaveable { mutableStateOf(firstGameId) }
     LaunchedEffect(firstGameId) {
-        if (listState.firstVisibleItemIndex <= 1) {
+        if (firstGameId != lastFirstGameId) {
+            lastFirstGameId = firstGameId
             listState.scrollToItem(0)
         }
     }

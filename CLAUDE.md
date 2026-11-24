@@ -57,7 +57,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   graphic 1024×500). **Icono del lanzador:** mando negro con botones blancos sobre verde #00C64E
   (`lemuroid_launcher_foreground.xml`, `lemuroid_launcher_background`, PNG de `mipmap-*` y canal de TV), el de la
   primera versión del fork.
-- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.1` (`versionCode` 10; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
+- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.2` (`versionCode` 12; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
   Antes era `com.gamestation.tv`: es una app distinta para Android, así que la antigua hay que desinstalarla aparte
   y sus datos (partidas, ajustes, biblioteca) no pasan a la nueva.
 - Variante que se compila: **freeDynamicDebug** (sin librerías de Google; los cores se descargan al usarlos).
@@ -310,7 +310,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   (USA).sfc" → "Top Gear.sfc"), se reconoce al identificarlo: misma consola, mismo título y mismo tamaño
   (`findRenamedGame`); se conserva la fila y se renombran en el dispositivo su partida `.srm`, sus estados y sus
   capturas (`renameLocalFiles`, sin sustituir nada). En `D:\Juegos` (la carpeta compartida
-  `\\192.168.18.254\juegos`, este PC) los juegos de N64,
+  `\\192.168.1.254\juegos`, este PC) los juegos de N64,
   NES y SNES están en una carpeta por juego, con sus partidas y estados.
 - **Progreso del escaneo:** `LemuroidLibrary.indexLibrary` lista primero todos los archivos y después los procesa,
   avisando del progreso (`IndexProgress`, por cada archivo nuevo identificado, no solo por lote de 200); después `LibraryIndexWork` descarga los cores de los sistemas encontrados

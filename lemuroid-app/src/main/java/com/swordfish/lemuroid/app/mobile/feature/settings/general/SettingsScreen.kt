@@ -1,6 +1,8 @@
 package com.swordfish.lemuroid.app.mobile.feature.settings.general
 
 import android.net.Uri
+import android.text.format.DateUtils
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -27,6 +29,7 @@ import com.swordfish.lemuroid.app.mobile.shared.compose.ui.LibraryScanProgress
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.rememberLibraryScanProgress
 import com.swordfish.lemuroid.app.shared.GameInteractor
 import com.swordfish.lemuroid.app.shared.library.LibraryIndexScheduler
+import com.swordfish.lemuroid.app.shared.report.DiagnosticReport
 import com.swordfish.lemuroid.app.tv.shared.TVHelper
 import com.swordfish.lemuroid.app.utils.android.PlayRetroButton
 import com.swordfish.lemuroid.app.utils.android.settings.LemuroidCardSettingsGroup
@@ -73,7 +76,7 @@ fun SettingsSectionContent(
         SettingsSection.DISPLAY -> DisplaySettings(isTV = isTV)
         SettingsSection.SOUND -> SoundSettings()
         SettingsSection.INPUT -> InputSettings(navController = navController, isTV = isTV)
-        SettingsSection.MISC -> MiscSettings(viewModel = viewModel, navController = navController)
+        SettingsSection.MISC -> MiscSettings(viewModel = viewModel, navController = navController, isTV = isTV)
     }
 }
 
@@ -143,8 +146,11 @@ private fun rememberDirectoryName(currentDirectory: String): String? {
 private fun MiscSettings(
     viewModel: SettingsViewModel,
     navController: NavController,
+    isTV: Boolean,
 ) {
     val factoryResetDialogState = remember { mutableStateOf(false) }
+    var showSendReportDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val indexingInProgress = viewModel.indexingInProgress.collectAsState(false).value
     val onResetAllSettings = { viewModel.resetAllSettings() }
 
@@ -175,10 +181,32 @@ private fun MiscSettings(
             subtitle = { Text(text = stringResource(id = R.string.settings_description_reset_settings)) },
             onClick = { factoryResetDialogState.value = true },
         )
+        LemuroidSettingsMenuLink(
+            title = { Text(text = stringResource(id = R.string.settings_title_send_report)) },
+            subtitle = { Text(text = stringResource(id = R.string.settings_description_send_report)) },
+            onClick = {
+                val nextAvailable = DiagnosticReport.nextAvailableTime(context)
+                if (nextAvailable == null) {
+                    showSendReportDialog = true
+                } else {
+                    val time =
+                        DateUtils.formatDateTime(
+                            context,
+                            nextAvailable,
+                            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME,
+                        )
+                    Toast.makeText(context, context.getString(R.string.send_report_limit, time), Toast.LENGTH_LONG)
+                        .show()
+                }
+            },
+        )
     }
 
     if (factoryResetDialogState.value) {
         FactoryResetDialog(factoryResetDialogState, onResetAllSettings)
+    }
+    if (showSendReportDialog) {
+        SendReportDialog(isTV = isTV, onDismiss = { showSendReportDialog = false })
     }
 }
 

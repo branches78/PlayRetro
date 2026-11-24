@@ -1,6 +1,6 @@
 # PlayRetro – Privacy Policy
 
-*Last updated: November 2, 2026* · [Español](#playretro--política-de-privacidad)
+*Last updated: November 24, 2026* · [Español](#playretro--política-de-privacidad)
 
 PlayRetro is a retro game emulator for Android phones, tablets and Android TV. This policy explains what data the app
 uses and where it goes.
@@ -8,7 +8,8 @@ uses and where it goes.
 ## Summary
 
 - PlayRetro has no accounts, no ads, no analytics and no tracking.
-- The developer does not run any server and does not collect, receive, sell or share your personal data.
+- The developer does not run any server and does not collect, sell or share your personal data. The app never sends
+  anything to the developer by itself: the developer only receives a diagnostic report if you choose to send one.
 - Your games, saves, favorites and settings stay on your device, or in the network folder or Google Drive account that
   you choose to use.
 
@@ -38,6 +39,20 @@ PlayRetro connects to these services only to show information about your games o
 
 Like any internet request, these services receive your IP address. Their own privacy policies apply.
 
+## Diagnostic reports
+
+"Send report" in Settings → Miscellaneous creates a report to help the developer fix problems, like a game that
+doesn't start. It is only created and sent when you choose to.
+
+- **Content:** device model, Android version, app version, installed emulation cores and the log of the app. The log
+  can include names of games, file paths and network addresses (for example the address of your network folder).
+- **You see it first:** the whole report is shown before it leaves the device, and you can cancel.
+- **How it is sent:** PlayRetro does not send it itself. On a phone you choose the app to share it with (for example
+  your mail app, which starts a message to playretro-app@outlook.com); on a TV it is saved in the folder you pick.
+- **Use:** the developer only uses it to find and fix the problem, does not share it with anyone and deletes it when it
+  is no longer needed. You can ask for it to be deleted at any time by writing to playretro-app@outlook.com.
+- Up to 2 reports can be sent every 48 hours.
+
 ## Permissions
 
 - **Microphone**: only for Nintendo DS games that use it. The audio goes to the game and is not recorded or sent
@@ -65,7 +80,7 @@ playretro-app@outlook.com
 
 # PlayRetro – Política de privacidad
 
-*Última actualización: 2 de noviembre de 2026* · [English](#playretro--privacy-policy)
+*Última actualización: 24 de noviembre de 2026* · [English](#playretro--privacy-policy)
 
 PlayRetro es un emulador de juegos retro para teléfonos, tabletas y Android TV con Android. Esta política explica qué
 datos usa la app y adónde van.
@@ -73,7 +88,8 @@ datos usa la app y adónde van.
 ## Resumen
 
 - PlayRetro no tiene cuentas, ni anuncios, ni análisis de uso, ni seguimiento.
-- El desarrollador no tiene servidores y no recoge, recibe, vende ni comparte tus datos personales.
+- El desarrollador no tiene servidores y no recoge, vende ni comparte tus datos personales. La app nunca envía nada al
+  desarrollador por su cuenta: el desarrollador solo recibe un reporte de diagnóstico si tú decides enviarlo.
 - Tus juegos, partidas, favoritos y ajustes se quedan en tu dispositivo, o en la carpeta de red o la cuenta de Google
   Drive que tú decidas usar.
 
@@ -104,6 +120,22 @@ PlayRetro se conecta a estos servicios solo para mostrar información de tus jue
 
 Como en cualquier petición por internet, estos servicios reciben tu dirección IP. Se aplican sus propias políticas de
 privacidad.
+
+## Reportes de diagnóstico
+
+"Enviar reporte", en Ajustes → Otros, crea un reporte para ayudar al desarrollador a resolver problemas, como un juego
+que no arranca. Solo se crea y se envía si tú lo decides.
+
+- **Contenido:** modelo del dispositivo, versión de Android, versión de la app, núcleos de emulación instalados y el
+  registro (log) de la app. El registro puede incluir nombres de juegos, rutas de archivos y direcciones de red (por
+  ejemplo, la dirección de tu carpeta de red).
+- **Lo ves antes:** el reporte completo se muestra antes de salir del dispositivo, y puedes cancelar.
+- **Cómo se envía:** PlayRetro no lo envía por su cuenta. En el teléfono eliges la app con la que compartirlo (por
+  ejemplo, tu app de correo, que crea un mensaje para playretro-app@outlook.com); en la TV se guarda en la carpeta que
+  elijas.
+- **Uso:** el desarrollador solo lo usa para encontrar y resolver el problema, no lo comparte con nadie y lo borra
+  cuando ya no lo necesita. Puedes pedir que se borre en cualquier momento escribiendo a playretro-app@outlook.com.
+- Se pueden enviar hasta 2 reportes cada 48 horas.
 
 ## Permisos
 

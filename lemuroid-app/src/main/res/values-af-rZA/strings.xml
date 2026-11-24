@@ -68,4 +68,13 @@
     <string name="settings_language_device">Toesteltaal</string>
     <string name="not_configured">Nie opgestel nie</string>
     <string name="roms">Speletjies</string>
+    <string name="settings_title_send_report">Stuur verslag</string>
+    <string name="settings_description_send_report">Deel \'n diagnostiese log om probleme te help oplos</string>
+    <string name="send_report_dialog_message">Stuur die volgende verslag aan die ontwikkelaar om die probleem te help oplos</string>
+    <string name="send_report_send">Stuur</string>
+    <string name="send_report_export">Voer log uit</string>
+    <string name="send_report_exported">Verslag gestoor in %1$s</string>
+    <string name="send_report_export_error">Die verslag kon nie gestoor word nie</string>
+    <string name="send_report_no_app">Daar is geen app om die verslag te deel nie</string>
+    <string name="send_report_limit">Jy kan tot 2 verslae elke 48 uur stuur. Jy kan nog een stuur op %1$s</string>
 </resources>

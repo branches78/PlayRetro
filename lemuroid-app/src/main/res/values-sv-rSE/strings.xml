@@ -256,4 +256,13 @@
     <string name="settings_title_language">Språk</string>
     <string name="settings_language_device">Enhetens språk</string>
     <string name="not_configured">Inte konfigurerad</string>
+    <string name="settings_title_send_report">Skicka rapport</string>
+    <string name="settings_description_send_report">Dela en diagnoslogg för att hjälpa till att lösa problem</string>
+    <string name="send_report_dialog_message">Skicka följande rapport till utvecklaren för att hjälpa till att lösa problemet</string>
+    <string name="send_report_send">Skicka</string>
+    <string name="send_report_export">Exportera logg</string>
+    <string name="send_report_exported">Rapporten sparades i %1$s</string>
+    <string name="send_report_export_error">Rapporten kunde inte sparas</string>
+    <string name="send_report_no_app">Det finns ingen app för att dela rapporten</string>
+    <string name="send_report_limit">Du kan skicka upp till 2 rapporter var 48:e timme. Du kan skicka en ny %1$s</string>
 </resources>

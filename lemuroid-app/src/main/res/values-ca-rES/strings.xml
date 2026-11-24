@@ -168,4 +168,13 @@
     <string name="settings_title_language">Idioma</string>
     <string name="settings_language_device">Idioma del dispositiu</string>
     <string name="not_configured">No configurat</string>
+    <string name="settings_title_send_report">Envia un informe</string>
+    <string name="settings_description_send_report">Comparteix un registre de diagnòstic per ajudar a resoldre problemes</string>
+    <string name="send_report_dialog_message">Envia l\'informe següent al desenvolupador per ajudar a resoldre el problema</string>
+    <string name="send_report_send">Envia</string>
+    <string name="send_report_export">Exporta el registre</string>
+    <string name="send_report_exported">Informe desat a %1$s</string>
+    <string name="send_report_export_error">No s\'ha pogut desar l\'informe</string>
+    <string name="send_report_no_app">No hi ha cap aplicació per compartir l\'informe</string>
+    <string name="send_report_limit">Pots enviar fins a 2 informes cada 48 hores. Podràs enviar-ne un altre el %1$s</string>
 </resources>

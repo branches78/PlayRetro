@@ -257,4 +257,13 @@
     <string name="settings_title_language">Taal</string>
     <string name="settings_language_device">Taal van het apparaat</string>
     <string name="not_configured">Niet geconfigureerd</string>
+    <string name="settings_title_send_report">Rapport versturen</string>
+    <string name="settings_description_send_report">Deel een diagnoselog om problemen op te lossen</string>
+    <string name="send_report_dialog_message">Stuur het volgende rapport naar de ontwikkelaar om het probleem op te lossen</string>
+    <string name="send_report_send">Versturen</string>
+    <string name="send_report_export">Log exporteren</string>
+    <string name="send_report_exported">Rapport opgeslagen in %1$s</string>
+    <string name="send_report_export_error">Het rapport kon niet worden opgeslagen</string>
+    <string name="send_report_no_app">Er is geen app om het rapport te delen</string>
+    <string name="send_report_limit">Je kunt elke 48 uur maximaal 2 rapporten versturen. Je kunt er weer een versturen op %1$s</string>
 </resources>

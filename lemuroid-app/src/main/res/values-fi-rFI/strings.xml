@@ -249,4 +249,13 @@
     <string name="settings_title_language">Kieli</string>
     <string name="settings_language_device">Laitteen kieli</string>
     <string name="not_configured">Ei määritetty</string>
+    <string name="settings_title_send_report">Lähetä raportti</string>
+    <string name="settings_description_send_report">Jaa diagnostiikkaloki ongelmien ratkaisemiseksi</string>
+    <string name="send_report_dialog_message">Lähetä seuraava raportti kehittäjälle ongelman ratkaisemiseksi</string>
+    <string name="send_report_send">Lähetä</string>
+    <string name="send_report_export">Vie loki</string>
+    <string name="send_report_exported">Raportti tallennettu kohteeseen %1$s</string>
+    <string name="send_report_export_error">Raporttia ei voitu tallentaa</string>
+    <string name="send_report_no_app">Raportin jakamiseen ei ole sovellusta</string>
+    <string name="send_report_limit">Voit lähettää enintään 2 raporttia 48 tunnin aikana. Voit lähettää seuraavan %1$s</string>
 </resources>

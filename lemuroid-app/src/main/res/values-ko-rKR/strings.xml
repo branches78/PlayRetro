@@ -257,4 +257,13 @@
     <string name="settings_title_language">언어</string>
     <string name="settings_language_device">기기 언어</string>
     <string name="not_configured">설정 안 됨</string>
+    <string name="settings_title_send_report">보고서 보내기</string>
+    <string name="settings_description_send_report">문제 해결에 도움이 되도록 진단 로그를 공유합니다</string>
+    <string name="send_report_dialog_message">문제 해결을 위해 다음 보고서를 개발자에게 보내 주세요</string>
+    <string name="send_report_send">보내기</string>
+    <string name="send_report_export">로그 내보내기</string>
+    <string name="send_report_exported">보고서를 %1$s에 저장했습니다</string>
+    <string name="send_report_export_error">보고서를 저장할 수 없습니다</string>
+    <string name="send_report_no_app">보고서를 공유할 앱이 없습니다</string>
+    <string name="send_report_limit">보고서는 48시간마다 최대 2개까지 보낼 수 있습니다. 다음 보고서는 %1$s에 보낼 수 있습니다</string>
 </resources>

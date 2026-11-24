@@ -255,4 +255,13 @@
     <string name="settings_title_language">Język</string>
     <string name="settings_language_device">Język urządzenia</string>
     <string name="not_configured">Nie skonfigurowano</string>
+    <string name="settings_title_send_report">Wyślij raport</string>
+    <string name="settings_description_send_report">Udostępnij dziennik diagnostyczny, aby pomóc rozwiązać problemy</string>
+    <string name="send_report_dialog_message">Wyślij poniższy raport do twórcy, aby pomóc rozwiązać problem</string>
+    <string name="send_report_send">Wyślij</string>
+    <string name="send_report_export">Eksportuj dziennik</string>
+    <string name="send_report_exported">Raport zapisano w %1$s</string>
+    <string name="send_report_export_error">Nie udało się zapisać raportu</string>
+    <string name="send_report_no_app">Brak aplikacji do udostępnienia raportu</string>
+    <string name="send_report_limit">Możesz wysłać maksymalnie 2 raporty co 48 godzin. Kolejny możesz wysłać %1$s</string>
 </resources>

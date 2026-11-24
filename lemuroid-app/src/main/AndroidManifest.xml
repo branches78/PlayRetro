@@ -150,6 +150,17 @@
             android:authorities="${applicationId}.channelposters"
             android:exported="true" />
 
+        <!-- Diagnostic report shared from Settings > Miscellaneous (DiagnosticReport). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.reports"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/report_paths" />
+        </provider>
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

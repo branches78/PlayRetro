@@ -264,4 +264,13 @@
     <string name="settings_title_language">Idioma</string>
     <string name="settings_language_device">Idioma del dispositivo</string>
     <string name="not_configured">Sin configurar</string>
+    <string name="settings_title_send_report">Enviar reporte</string>
+    <string name="settings_description_send_report">Comparte un registro de diagnóstico para ayudar a resolver problemas</string>
+    <string name="send_report_dialog_message">Envía el siguiente reporte al desarrollador para ayudar a resolver el problema</string>
+    <string name="send_report_send">Enviar</string>
+    <string name="send_report_export">Exportar log</string>
+    <string name="send_report_exported">Reporte guardado en %1$s</string>
+    <string name="send_report_export_error">No se pudo guardar el reporte</string>
+    <string name="send_report_no_app">No hay ninguna app para compartir el reporte</string>
+    <string name="send_report_limit">Puedes enviar hasta 2 reportes cada 48 horas. Podrás enviar otro el %1$s</string>
 </resources>

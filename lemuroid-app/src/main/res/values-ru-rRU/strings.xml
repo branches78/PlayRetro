@@ -257,4 +257,13 @@
     <string name="settings_title_language">Язык</string>
     <string name="settings_language_device">Язык устройства</string>
     <string name="not_configured">Не настроено</string>
+    <string name="settings_title_send_report">Отправить отчёт</string>
+    <string name="settings_description_send_report">Поделитесь журналом диагностики, чтобы помочь решить проблемы</string>
+    <string name="send_report_dialog_message">Отправьте следующий отчёт разработчику, чтобы помочь решить проблему</string>
+    <string name="send_report_send">Отправить</string>
+    <string name="send_report_export">Экспорт журнала</string>
+    <string name="send_report_exported">Отчёт сохранён в %1$s</string>
+    <string name="send_report_export_error">Не удалось сохранить отчёт</string>
+    <string name="send_report_no_app">Нет приложения, чтобы поделиться отчётом</string>
+    <string name="send_report_limit">Можно отправить не более 2 отчётов за 48 часов. Следующий можно будет отправить %1$s</string>
 </resources>

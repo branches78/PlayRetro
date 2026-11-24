@@ -255,4 +255,13 @@
     <string name="settings_title_language">Мова</string>
     <string name="settings_language_device">Мова пристрою</string>
     <string name="not_configured">Не налаштовано</string>
+    <string name="settings_title_send_report">Надіслати звіт</string>
+    <string name="settings_description_send_report">Поділіться журналом діагностики, щоб допомогти розв\'язати проблеми</string>
+    <string name="send_report_dialog_message">Надішліть цей звіт розробнику, щоб допомогти розв\'язати проблему</string>
+    <string name="send_report_send">Надіслати</string>
+    <string name="send_report_export">Експорт журналу</string>
+    <string name="send_report_exported">Звіт збережено в %1$s</string>
+    <string name="send_report_export_error">Не вдалося зберегти звіт</string>
+    <string name="send_report_no_app">Немає застосунку, щоб поділитися звітом</string>
+    <string name="send_report_limit">Можна надіслати не більше 2 звітів за 48 годин. Наступний можна буде надіслати %1$s</string>
 </resources>

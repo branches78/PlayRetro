@@ -256,4 +256,13 @@
     <string name="settings_title_language">言語</string>
     <string name="settings_language_device">端末の言語</string>
     <string name="not_configured">未設定</string>
+    <string name="settings_title_send_report">レポートを送信</string>
+    <string name="settings_description_send_report">問題の解決に役立つ診断ログを共有します</string>
+    <string name="send_report_dialog_message">問題の解決のため、次のレポートを開発者に送信してください</string>
+    <string name="send_report_send">送信</string>
+    <string name="send_report_export">ログをエクスポート</string>
+    <string name="send_report_exported">レポートを %1$s に保存しました</string>
+    <string name="send_report_export_error">レポートを保存できませんでした</string>
+    <string name="send_report_no_app">レポートを共有できるアプリがありません</string>
+    <string name="send_report_limit">レポートは 48 時間ごとに 2 件まで送信できます。次は %1$s に送信できます</string>
 </resources>

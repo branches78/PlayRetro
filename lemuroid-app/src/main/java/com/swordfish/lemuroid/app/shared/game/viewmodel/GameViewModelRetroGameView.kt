@@ -134,6 +134,7 @@ class GameViewModelRetroGameView(
         loadingStatesFlow
             .flowOn(Dispatchers.IO)
             .catch {
+                Timber.e(it, "Game loading failed")
                 val message =
                     if (it is GameLoaderException) {
                         getErrorMessage(it.error)

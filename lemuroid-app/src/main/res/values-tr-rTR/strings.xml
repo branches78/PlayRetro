@@ -256,4 +256,13 @@ $SYSTEMS.
     <string name="settings_title_language">Dil</string>
     <string name="settings_language_device">Cihaz dili</string>
     <string name="not_configured">Ayarlanmamış</string>
+    <string name="settings_title_send_report">Rapor gönder</string>
+    <string name="settings_description_send_report">Sorunların çözülmesine yardımcı olmak için bir tanılama günlüğü paylaşın</string>
+    <string name="send_report_dialog_message">Sorunun çözülmesine yardımcı olmak için aşağıdaki raporu geliştiriciye gönderin</string>
+    <string name="send_report_send">Gönder</string>
+    <string name="send_report_export">Günlüğü dışa aktar</string>
+    <string name="send_report_exported">Rapor %1$s konumuna kaydedildi</string>
+    <string name="send_report_export_error">Rapor kaydedilemedi</string>
+    <string name="send_report_no_app">Raporu paylaşacak uygulama yok</string>
+    <string name="send_report_limit">48 saatte en fazla 2 rapor gönderebilirsiniz. Bir sonrakini %1$s tarihinde gönderebilirsiniz</string>
 </resources>

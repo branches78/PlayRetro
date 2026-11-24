@@ -255,4 +255,13 @@
     <string name="settings_title_language">Språk</string>
     <string name="settings_language_device">Enhetens språk</string>
     <string name="not_configured">Ikke konfigurert</string>
+    <string name="settings_title_send_report">Send rapport</string>
+    <string name="settings_description_send_report">Del en diagnoselogg for å hjelpe med å løse problemer</string>
+    <string name="send_report_dialog_message">Send følgende rapport til utvikleren for å hjelpe med å løse problemet</string>
+    <string name="send_report_send">Send</string>
+    <string name="send_report_export">Eksporter logg</string>
+    <string name="send_report_exported">Rapporten er lagret i %1$s</string>
+    <string name="send_report_export_error">Kunne ikke lagre rapporten</string>
+    <string name="send_report_no_app">Det finnes ingen app for å dele rapporten</string>
+    <string name="send_report_limit">Du kan sende opptil 2 rapporter hver 48. time. Du kan sende en ny %1$s</string>
 </resources>
