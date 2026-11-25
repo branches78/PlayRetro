@@ -264,4 +264,5 @@
     <string name="send_report_export_error">Não foi possível salvar o relatório</string>
     <string name="send_report_no_app">Nenhum app para compartilhar o relatório</string>
     <string name="send_report_limit">Você pode enviar até 2 relatórios a cada 48 horas. Poderá enviar outro em %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Não foi possível instalar o núcleo de emulação porque o PlayRetro não foi instalado pelo Google Play neste dispositivo. Desinstale o PlayRetro e instale-o novamente pela Google Play Store.</string>
 </resources>

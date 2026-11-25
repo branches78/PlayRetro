@@ -264,4 +264,5 @@
     <string name="send_report_export_error">Извештај није могао да се сачува</string>
     <string name="send_report_no_app">Нема апликације за дељење извештаја</string>
     <string name="send_report_limit">Можеш послати највише 2 извештаја на сваких 48 сати. Следећи можеш послати %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Језгро за емулацију није могло да се инсталира јер PlayRetro на овом уређају није инсталиран са Google Play-а. Деинсталирај PlayRetro и поново га инсталирај из Google Play продавнице.</string>
 </resources>

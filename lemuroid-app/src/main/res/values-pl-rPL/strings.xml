@@ -264,4 +264,5 @@
     <string name="send_report_export_error">Nie udało się zapisać raportu</string>
     <string name="send_report_no_app">Brak aplikacji do udostępnienia raportu</string>
     <string name="send_report_limit">Możesz wysłać maksymalnie 2 raporty co 48 godzin. Kolejny możesz wysłać %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Nie udało się zainstalować rdzenia emulacji, ponieważ PlayRetro nie zostało zainstalowane z Google Play na tym urządzeniu. Odinstaluj PlayRetro i zainstaluj je ponownie ze Sklepu Google Play.</string>
 </resources>

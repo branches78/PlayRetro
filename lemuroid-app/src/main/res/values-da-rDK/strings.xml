@@ -264,4 +264,5 @@
     <string name="send_report_export_error">Rapporten kunne ikke gemmes</string>
     <string name="send_report_no_app">Der er ingen app til at dele rapporten</string>
     <string name="send_report_limit">Du kan sende op til 2 rapporter hver 48. time. Du kan sende en ny %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Emuleringskernen kunne ikke installeres, fordi PlayRetro ikke blev installeret fra Google Play på denne enhed. Afinstaller PlayRetro, og installer den igen fra Google Play Butik.</string>
 </resources>

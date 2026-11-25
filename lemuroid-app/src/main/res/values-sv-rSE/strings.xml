@@ -265,4 +265,5 @@
     <string name="send_report_export_error">Rapporten kunde inte sparas</string>
     <string name="send_report_no_app">Det finns ingen app för att dela rapporten</string>
     <string name="send_report_limit">Du kan skicka upp till 2 rapporter var 48:e timme. Du kan skicka en ny %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Emuleringskärnan kunde inte installeras eftersom PlayRetro inte installerades från Google Play på den här enheten. Avinstallera PlayRetro och installera den igen från Google Play Butik.</string>
 </resources>

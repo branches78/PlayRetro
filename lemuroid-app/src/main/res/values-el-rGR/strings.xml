@@ -264,4 +264,5 @@
     <string name="send_report_export_error">Δεν ήταν δυνατή η αποθήκευση της αναφοράς</string>
     <string name="send_report_no_app">Δεν υπάρχει εφαρμογή για κοινοποίηση της αναφοράς</string>
     <string name="send_report_limit">Μπορείτε να στείλετε έως 2 αναφορές κάθε 48 ώρες. Μπορείτε να στείλετε άλλη στις %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Δεν ήταν δυνατή η εγκατάσταση του πυρήνα εξομοίωσης επειδή το PlayRetro δεν εγκαταστάθηκε από το Google Play σε αυτή τη συσκευή. Απεγκαταστήστε το PlayRetro και εγκαταστήστε το ξανά από το Google Play Store.</string>
 </resources>

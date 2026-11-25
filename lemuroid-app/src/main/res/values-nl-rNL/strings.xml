@@ -266,4 +266,5 @@
     <string name="send_report_export_error">Het rapport kon niet worden opgeslagen</string>
     <string name="send_report_no_app">Er is geen app om het rapport te delen</string>
     <string name="send_report_limit">Je kunt elke 48 uur maximaal 2 rapporten versturen. Je kunt er weer een versturen op %1$s</string>
+    <string name="game_loader_error_app_not_from_play">De emulatiekern kon niet worden geïnstalleerd omdat PlayRetro op dit apparaat niet via Google Play is geïnstalleerd. Verwijder PlayRetro en installeer het opnieuw via de Google Play Store.</string>
 </resources>

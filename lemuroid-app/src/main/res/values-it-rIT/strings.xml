@@ -265,4 +265,5 @@
     <string name="send_report_export_error">Impossibile salvare la segnalazione</string>
     <string name="send_report_no_app">Nessuna app per condividere la segnalazione</string>
     <string name="send_report_limit">Puoi inviare fino a 2 segnalazioni ogni 48 ore. Potrai inviarne un\'altra il %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Impossibile installare il core di emulazione perché PlayRetro non è stato installato da Google Play su questo dispositivo. Disinstalla PlayRetro e installalo di nuovo dal Google Play Store.</string>
 </resources>

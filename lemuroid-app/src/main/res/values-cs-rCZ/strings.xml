@@ -263,4 +263,5 @@
     <string name="send_report_export_error">Hlášení se nepodařilo uložit</string>
     <string name="send_report_no_app">Žádná aplikace nemůže hlášení sdílet</string>
     <string name="send_report_limit">Každých 48 hodin můžete odeslat nejvýše 2 hlášení. Další můžete odeslat %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Emulační jádro se nepodařilo nainstalovat, protože PlayRetro nebylo v tomto zařízení nainstalováno z Google Play. Odinstalujte PlayRetro a nainstalujte ho znovu z Obchodu Google Play.</string>
 </resources>

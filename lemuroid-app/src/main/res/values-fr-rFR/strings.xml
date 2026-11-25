@@ -264,4 +264,5 @@
     <string name="send_report_export_error">Impossible d\'enregistrer le rapport</string>
     <string name="send_report_no_app">Aucune application pour partager le rapport</string>
     <string name="send_report_limit">Vous pouvez envoyer jusqu\'à 2 rapports toutes les 48 heures. Vous pourrez en envoyer un autre le %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Le cœur d\'émulation n\'a pas pu être installé, car PlayRetro n\'a pas été installé depuis Google Play sur cet appareil. Désinstallez PlayRetro et réinstallez-le depuis le Google Play Store.</string>
 </resources>

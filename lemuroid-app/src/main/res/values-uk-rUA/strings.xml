@@ -264,4 +264,5 @@
     <string name="send_report_export_error">Не вдалося зберегти звіт</string>
     <string name="send_report_no_app">Немає застосунку, щоб поділитися звітом</string>
     <string name="send_report_limit">Можна надіслати не більше 2 звітів за 48 годин. Наступний можна буде надіслати %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Не вдалося встановити ядро емуляції, бо PlayRetro на цьому пристрої встановлено не з Google Play. Видаліть PlayRetro й установіть його знову з Google Play Маркету.</string>
 </resources>

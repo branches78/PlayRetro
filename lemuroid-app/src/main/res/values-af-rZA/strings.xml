@@ -77,4 +77,5 @@
     <string name="send_report_export_error">Die verslag kon nie gestoor word nie</string>
     <string name="send_report_no_app">Daar is geen app om die verslag te deel nie</string>
     <string name="send_report_limit">Jy kan tot 2 verslae elke 48 uur stuur. Jy kan nog een stuur op %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Die emulasiekern kon nie geïnstalleer word nie omdat PlayRetro nie vanaf Google Play op hierdie toestel geïnstalleer is nie. Deïnstalleer PlayRetro en installeer dit weer vanaf die Google Play Store.</string>
 </resources>

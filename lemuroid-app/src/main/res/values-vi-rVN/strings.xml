@@ -248,4 +248,5 @@
     <string name="send_report_export_error">Không thể lưu báo cáo</string>
     <string name="send_report_no_app">Không có ứng dụng nào để chia sẻ báo cáo</string>
     <string name="send_report_limit">Bạn có thể gửi tối đa 2 báo cáo mỗi 48 giờ. Bạn có thể gửi báo cáo tiếp theo vào %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Không thể cài đặt lõi giả lập vì PlayRetro không được cài đặt từ Google Play trên thiết bị này. Hãy gỡ cài đặt PlayRetro và cài đặt lại từ Cửa hàng Google Play.</string>
 </resources>

@@ -266,4 +266,5 @@
     <string name="send_report_export_error">Не удалось сохранить отчёт</string>
     <string name="send_report_no_app">Нет приложения, чтобы поделиться отчётом</string>
     <string name="send_report_limit">Можно отправить не более 2 отчётов за 48 часов. Следующий можно будет отправить %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Не удалось установить ядро эмуляции, так как PlayRetro на этом устройстве установлен не из Google Play. Удалите PlayRetro и установите его снова из Google Play Маркета.</string>
 </resources>

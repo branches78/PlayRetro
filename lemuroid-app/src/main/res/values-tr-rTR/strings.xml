@@ -265,4 +265,5 @@ $SYSTEMS.
     <string name="send_report_export_error">Rapor kaydedilemedi</string>
     <string name="send_report_no_app">Raporu paylaşacak uygulama yok</string>
     <string name="send_report_limit">48 saatte en fazla 2 rapor gönderebilirsiniz. Bir sonrakini %1$s tarihinde gönderebilirsiniz</string>
+    <string name="game_loader_error_app_not_from_play">PlayRetro bu cihaza Google Play\'den yüklenmediği için emülasyon çekirdeği yüklenemedi. PlayRetro\'yu kaldırıp Google Play Store\'dan yeniden yükleyin.</string>
 </resources>

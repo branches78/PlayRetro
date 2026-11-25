@@ -17,6 +17,7 @@ import com.swordfish.lemuroid.app.shared.settings.HDModeQuality
 import com.swordfish.lemuroid.common.coroutines.MutableStateProperty
 import com.swordfish.lemuroid.common.coroutines.launchOnState
 import com.swordfish.lemuroid.common.view.disableTouchEvents
+import com.swordfish.lemuroid.lib.core.CoreInstallStatus
 import com.swordfish.lemuroid.lib.core.CoreOptionsCache
 import com.swordfish.lemuroid.lib.core.CoreVariable
 import com.swordfish.lemuroid.lib.core.CoreVariablesManager
@@ -409,7 +410,11 @@ class GameViewModelRetroGameView(
                     appContext.getString(R.string.game_loader_error_generic)
                 }
                 is GameLoaderError.LoadCore -> {
-                    appContext.getString(com.swordfish.lemuroid.ext.R.string.game_loader_error_load_core)
+                    if (CoreInstallStatus.isAppNotOwned(appContext)) {
+                        appContext.getString(R.string.game_loader_error_app_not_from_play)
+                    } else {
+                        appContext.getString(com.swordfish.lemuroid.ext.R.string.game_loader_error_load_core)
+                    }
                 }
                 is GameLoaderError.LoadGame -> {
                     appContext.getString(R.string.game_loader_error_load_game)

@@ -252,4 +252,5 @@
     <string name="send_report_export_error">Raportul nu a putut fi salvat</string>
     <string name="send_report_no_app">Nicio aplicație pentru partajarea raportului</string>
     <string name="send_report_limit">Poți trimite cel mult 2 rapoarte la fiecare 48 de ore. Poți trimite altul pe %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Nucleul de emulare nu a putut fi instalat deoarece PlayRetro nu a fost instalat din Google Play pe acest dispozitiv. Dezinstalează PlayRetro și instalează-l din nou din Magazinul Google Play.</string>
 </resources>

@@ -263,4 +263,5 @@
     <string name="send_report_export_error">تعذّر حفظ التقرير</string>
     <string name="send_report_no_app">لا يوجد تطبيق لمشاركة التقرير</string>
     <string name="send_report_limit">يمكنك إرسال تقريرين كحد أقصى كل 48 ساعة. يمكنك إرسال تقرير آخر في %1$s</string>
+    <string name="game_loader_error_app_not_from_play">تعذّر تثبيت نواة المحاكاة لأن PlayRetro لم يُثبَّت من Google Play على هذا الجهاز. أزِل تثبيت PlayRetro ثم ثبّته مرة أخرى من متجر Google Play.</string>
 </resources>

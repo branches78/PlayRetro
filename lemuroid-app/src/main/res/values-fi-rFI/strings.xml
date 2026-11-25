@@ -258,4 +258,5 @@
     <string name="send_report_export_error">Raporttia ei voitu tallentaa</string>
     <string name="send_report_no_app">Raportin jakamiseen ei ole sovellusta</string>
     <string name="send_report_limit">Voit lähettää enintään 2 raporttia 48 tunnin aikana. Voit lähettää seuraavan %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Emulointiydintä ei voitu asentaa, koska PlayRetroa ei asennettu Google Playsta tähän laitteeseen. Poista PlayRetro ja asenna se uudelleen Google Play Kaupasta.</string>
 </resources>

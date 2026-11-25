@@ -177,4 +177,5 @@
     <string name="send_report_export_error">No s\'ha pogut desar l\'informe</string>
     <string name="send_report_no_app">No hi ha cap aplicació per compartir l\'informe</string>
     <string name="send_report_limit">Pots enviar fins a 2 informes cada 48 hores. Podràs enviar-ne un altre el %1$s</string>
+    <string name="game_loader_error_app_not_from_play">No s\'ha pogut instal·lar el nucli d\'emulació perquè PlayRetro no s\'ha instal·lat des de Google Play en aquest dispositiu. Desinstal·la PlayRetro i torna a instal·lar-lo des de Google Play Store.</string>
 </resources>

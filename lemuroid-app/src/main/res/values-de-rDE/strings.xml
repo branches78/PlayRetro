@@ -264,4 +264,5 @@
     <string name="send_report_export_error">Der Bericht konnte nicht gespeichert werden</string>
     <string name="send_report_no_app">Keine App zum Teilen des Berichts vorhanden</string>
     <string name="send_report_limit">Du kannst alle 48 Stunden bis zu 2 Berichte senden. Den nächsten kannst du am %1$s senden</string>
+    <string name="game_loader_error_app_not_from_play">Der Emulationskern konnte nicht installiert werden, weil PlayRetro auf diesem Gerät nicht über Google Play installiert wurde. Deinstalliere PlayRetro und installiere es erneut aus dem Google Play Store.</string>
 </resources>

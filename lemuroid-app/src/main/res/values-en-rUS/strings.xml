@@ -78,4 +78,5 @@
     <string name="send_report_export_error">The report could not be saved</string>
     <string name="send_report_no_app">There is no app to share the report</string>
     <string name="send_report_limit">You can send up to 2 reports every 48 hours. You can send another one on %1$s</string>
+    <string name="game_loader_error_app_not_from_play">The emulation core could not be installed because PlayRetro was not installed from Google Play on this device. Uninstall PlayRetro and install it again from the Google Play Store.</string>
 </resources>

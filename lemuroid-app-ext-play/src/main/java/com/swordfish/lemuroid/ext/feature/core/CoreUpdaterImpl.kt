@@ -8,9 +8,12 @@ import com.google.android.play.core.ktx.requestInstall
 import com.google.android.play.core.ktx.requestProgressFlow
 import com.google.android.play.core.ktx.requestSessionStates
 import com.google.android.play.core.ktx.sessionId
+import com.google.android.play.core.splitinstall.SplitInstallException
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
+import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.swordfish.lemuroid.common.coroutines.retry
+import com.swordfish.lemuroid.lib.core.CoreInstallStatus
 import com.swordfish.lemuroid.lib.core.CoreUpdater
 import com.swordfish.lemuroid.lib.library.CoreID
 import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
@@ -53,7 +56,7 @@ class CoreUpdaterImpl(
         coreIDs: List<CoreID>,
         context: Context,
     ): Int? {
-        val installSession = requestCoresInstall(installManager, coreIDs) ?: return null
+        val installSession = requestCoresInstall(installManager, coreIDs, context) ?: return null
 
         try {
             waitForCompletion(installSession, installManager)
@@ -88,6 +91,7 @@ class CoreUpdaterImpl(
     private suspend fun requestCoresInstall(
         installManager: SplitInstallManager,
         coreIDs: List<CoreID>,
+        context: Context,
     ): Int? {
         val modulesToInstall =
             coreIDs
@@ -95,6 +99,7 @@ class CoreUpdaterImpl(
                 .filter { it !in installManager.installedModules }
 
         if (modulesToInstall.isEmpty()) {
+            CoreInstallStatus.setAppNotOwned(context, false)
             return null
         }
 
@@ -104,6 +109,12 @@ class CoreUpdaterImpl(
             retry(RETRY_ATTEMPTS, RETRY_DELAY) {
                 installManager.requestInstall(modulesToInstall)
             }
+
+        // Google Play only installs the modules of an app installed from Google Play: remembered so a game that can't
+        // load its core says how to fix it.
+        val errorCode = (result.exceptionOrNull() as? SplitInstallException)?.errorCode
+        if (errorCode != null) log("Request install failed with error code $errorCode")
+        CoreInstallStatus.setAppNotOwned(context, errorCode == SplitInstallErrorCode.APP_NOT_OWNED)
 
         return result.getOrNull()
     }

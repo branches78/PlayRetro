@@ -140,4 +140,5 @@
     <string name="send_report_export_error">Nem sikerült menteni a jelentést</string>
     <string name="send_report_no_app">Nincs alkalmazás a jelentés megosztásához</string>
     <string name="send_report_limit">48 óránként legfeljebb 2 jelentést küldhetsz. A következőt ekkor küldheted: %1$s</string>
+    <string name="game_loader_error_app_not_from_play">Az emulációs magot nem sikerült telepíteni, mert a PlayRetro nem a Google Playről lett telepítve erre az eszközre. Távolítsd el a PlayRetrót, és telepítsd újra a Google Play Áruházból.</string>
 </resources>

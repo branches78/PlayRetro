@@ -273,4 +273,5 @@
     <string name="send_report_export_error">No se pudo guardar el reporte</string>
     <string name="send_report_no_app">No hay ninguna app para compartir el reporte</string>
     <string name="send_report_limit">Puedes enviar hasta 2 reportes cada 48 horas. Podrás enviar otro el %1$s</string>
+    <string name="game_loader_error_app_not_from_play">No se pudo instalar el núcleo de emulación porque PlayRetro no se instaló desde Google Play en este dispositivo. Desinstala PlayRetro y vuelve a instalarlo desde la Google Play Store.</string>
 </resources>

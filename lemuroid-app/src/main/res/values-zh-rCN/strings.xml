@@ -264,4 +264,5 @@
     <string name="send_report_export_error">无法保存报告</string>
     <string name="send_report_no_app">没有可用于分享报告的应用</string>
     <string name="send_report_limit">每 48 小时最多可发送 2 份报告。可在 %1$s 再次发送</string>
+    <string name="game_loader_error_app_not_from_play">无法安装模拟核心，因为此设备上的 PlayRetro 不是从 Google Play 安装的。请卸载 PlayRetro，然后从 Google Play 商店重新安装。</string>
 </resources>

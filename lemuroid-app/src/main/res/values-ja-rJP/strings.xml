@@ -265,4 +265,5 @@
     <string name="send_report_export_error">レポートを保存できませんでした</string>
     <string name="send_report_no_app">レポートを共有できるアプリがありません</string>
     <string name="send_report_limit">レポートは 48 時間ごとに 2 件まで送信できます。次は %1$s に送信できます</string>
+    <string name="game_loader_error_app_not_from_play">このデバイスでは PlayRetro が Google Play からインストールされていないため、エミュレーション コアをインストールできませんでした。PlayRetro をアンインストールし、Google Play ストアから再度インストールしてください。</string>
 </resources>

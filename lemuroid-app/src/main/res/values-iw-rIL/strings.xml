@@ -216,4 +216,5 @@
     <string name="send_report_export_error">לא ניתן היה לשמור את הדוח</string>
     <string name="send_report_no_app">אין אפליקציה לשיתוף הדוח</string>
     <string name="send_report_limit">אפשר לשלוח עד 2 דוחות כל 48 שעות. אפשר יהיה לשלוח דוח נוסף ב-%1$s</string>
+    <string name="game_loader_error_app_not_from_play">לא ניתן היה להתקין את ליבת האמולציה כי PlayRetro לא הותקנה מ-Google Play במכשיר הזה. הסירו את PlayRetro והתקינו אותה שוב מחנות Google Play.</string>
 </resources>
