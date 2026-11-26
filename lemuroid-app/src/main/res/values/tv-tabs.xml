@@ -77,6 +77,8 @@
     <dimen name="tv_immersive_description_size">16sp</dimen>
     <!-- Tabs: the pill slides to the selected tab and the content slides in from that side. -->
     <integer name="tv_tab_animation_duration">280</integer>
+    <!-- Opening and closing the details of a game. -->
+    <integer name="tv_details_fade_duration">300</integer>
     <!-- Alphabet bar on the right of the games of a console, outside the content width: inside the 58dp side
          margin, 9dp from the screen edge and from the grid. -->
     <integer name="tv_alphabet_min_games">13</integer>

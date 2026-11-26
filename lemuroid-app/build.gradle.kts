@@ -12,7 +12,7 @@ plugins {
 
 android {
     defaultConfig {
-        versionCode = 13
+        versionCode = 14
         // App version is independent from CORES_VERSION in CoreUpdaterImpl (LemuroidCores tag).
         versionName = "1.1.3"
         applicationId = "com.playretro.tv"

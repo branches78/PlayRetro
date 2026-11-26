@@ -7,13 +7,12 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -21,6 +20,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,7 +34,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -42,9 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.swordfish.lemuroid.R
 import com.swordfish.lemuroid.app.mobile.feature.gamemenu.coreoptions.GameMenuCoreOptionsScreen
 import com.swordfish.lemuroid.app.mobile.feature.gamemenu.coreoptions.GameMenuCoreOptionsViewModel
@@ -155,14 +158,20 @@ class GameMenuActivity : RetrogradeComponentActivity() {
     @Composable
     private fun GameMenuScreen(gameMenuRequest: GameMenuRequest) {
         AppTheme {
-            val navController = rememberNavController()
-            val navBackStackEntry = navController.currentBackStackEntryAsState()
-            val currentDestination = navBackStackEntry.value?.destination
-
-            val currentRoute =
-                currentDestination?.route
-                    ?.let { GameMenuRoute.findByRoute(it) }
-                    ?: GameMenuRoute.HOME
+            // The screens of the menu change with a plain back stack instead of a NavHost: the NavHost drew its first
+            // screen some time after the window (the title showed alone for a moment) and, when changing screens, it
+            // drew the old and the new one on top of each other for a frame.
+            val backStack = rememberSaveable(saver = routesSaver) { mutableStateListOf(GameMenuRoute.HOME) }
+            val currentRoute = backStack.last()
+            val screensState = rememberSaveableStateHolder()
+            val navigate: (GameMenuRoute) -> Unit = { route -> backStack.add(route) }
+            val goBack = {
+                if (backStack.size > 1) {
+                    // A screen opened again starts from the top.
+                    screensState.removeState(backStack.removeAt(backStack.lastIndex).name)
+                }
+            }
+            BackHandler(enabled = backStack.size > 1) { goBack() }
 
             CenteredMenu {
                 // Centered title; no close button (back closes the menu, also a touch outside of it on mobile), only
@@ -178,7 +187,7 @@ class GameMenuActivity : RetrogradeComponentActivity() {
                     windowInsets = WindowInsets(0.dp),
                     navigationIcon = {
                         if (currentRoute.canGoBack()) {
-                            IconButton(onClick = { navController.popBackStack() }) {
+                            IconButton(onClick = goBack) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
                                     stringResource(R.string.back),
@@ -188,72 +197,65 @@ class GameMenuActivity : RetrogradeComponentActivity() {
                     },
                 )
                 Divider(modifier = Modifier.fillMaxWidth())
-                NavHost(
-                    // Not filled: the window is as tall as the screen shown, up to its maximum height.
-                    modifier = Modifier.weight(1f, fill = false),
-                    navController = navController,
-                    startDestination = GameMenuRoute.HOME.route,
-                    // The screens change at once, without fading.
-                    enterTransition = { EnterTransition.None },
-                    exitTransition = { ExitTransition.None },
+                Box(
+                    // Not filled: the window is as tall as the screen shown, up to its maximum height. The margin keeps
+                    // the border of the focused row inside the rounded corners of the window.
+                    modifier =
+                        Modifier
+                            .weight(1f, fill = false)
+                            .padding(start = MENU_CONTENT_MARGIN.dp, end = MENU_CONTENT_MARGIN.dp, bottom = MENU_CONTENT_MARGIN.dp),
                 ) {
                     // Each screen focuses its first item when it opens, and the one that opened another screen when
                     // coming back, so the menu can be used with a remote or a gamepad.
-                    composable(GameMenuRoute.HOME) {
-                        SettingsFocusDestination {
-                            GameMenuHomeScreen(navController, gameMenuRequest, isTV, ::onResult)
-                        }
-                    }
-                    composable(GameMenuRoute.SAVE) {
-                        SettingsFocusDestination {
-                            GameMenuStatesScreen(
-                                viewModel(
-                                    factory =
-                                        GameMenuStatesViewModel.Factory(
-                                            application,
-                                            gameMenuRequest,
-                                            statesManager,
-                                            false,
-                                            statesPreviewManager,
-                                        ),
-                                ),
-                                onStateClicked = {
-                                    onResult { putExtra(GameMenuContract.RESULT_SAVE, it) }
-                                },
-                            )
-                        }
-                    }
-                    composable(GameMenuRoute.LOAD) {
-                        SettingsFocusDestination {
-                            GameMenuStatesScreen(
-                                viewModel(
-                                    factory =
-                                        GameMenuStatesViewModel.Factory(
-                                            application,
-                                            gameMenuRequest,
-                                            statesManager,
-                                            true,
-                                            statesPreviewManager,
-                                        ),
-                                ),
-                                onStateClicked = {
-                                    onResult { putExtra(GameMenuContract.RESULT_LOAD, it) }
-                                },
-                            )
-                        }
-                    }
-                    composable(GameMenuRoute.OPTIONS) {
-                        SettingsFocusDestination {
-                            GameMenuCoreOptionsScreen(
-                                viewModel(
-                                    factory = GameMenuCoreOptionsViewModel.Factory(inputDeviceManager),
-                                ),
-                                gameMenuRequest,
-                            )
+                    key(currentRoute) {
+                        screensState.SaveableStateProvider(currentRoute.name) {
+                            SettingsFocusDestination {
+                                MenuScreen(currentRoute, gameMenuRequest, navigate)
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun MenuScreen(
+        route: GameMenuRoute,
+        gameMenuRequest: GameMenuRequest,
+        navigate: (GameMenuRoute) -> Unit,
+    ) {
+        when (route) {
+            GameMenuRoute.HOME -> GameMenuHomeScreen(navigate, gameMenuRequest, isTV, ::onResult)
+            GameMenuRoute.SAVE, GameMenuRoute.LOAD -> {
+                val load = route == GameMenuRoute.LOAD
+                GameMenuStatesScreen(
+                    viewModel(
+                        // Scoped to the activity: one for each screen.
+                        key = route.name,
+                        factory =
+                            GameMenuStatesViewModel.Factory(
+                                application,
+                                gameMenuRequest,
+                                statesManager,
+                                load,
+                                statesPreviewManager,
+                            ),
+                    ),
+                    onStateClicked = {
+                        val result = if (load) GameMenuContract.RESULT_LOAD else GameMenuContract.RESULT_SAVE
+                        onResult { putExtra(result, it) }
+                    },
+                )
+            }
+            GameMenuRoute.OPTIONS ->
+                GameMenuCoreOptionsScreen(
+                    viewModel(
+                        key = route.name,
+                        factory = GameMenuCoreOptionsViewModel.Factory(inputDeviceManager),
+                    ),
+                    gameMenuRequest,
+                )
         }
     }
 
@@ -282,8 +284,8 @@ class GameMenuActivity : RetrogradeComponentActivity() {
 
     /**
      * Modal window centered over the game, like the menu of a game on TV: rounded, as tall as its content (without an
-     * empty space at the bottom when a game has fewer options) up to a maximum height, changing size smoothly between
-     * screens. A touch outside closes it and the game goes on.
+     * empty space at the bottom when a game has fewer options) up to a maximum height. It opens at its size, without
+     * growing (animating the size made it unroll from the top). A touch outside closes it and the game goes on.
      */
     @Composable
     private fun CenteredMenu(content: @Composable ColumnScope.() -> Unit) {
@@ -304,7 +306,6 @@ class GameMenuActivity : RetrogradeComponentActivity() {
                         .widthIn(max = MENU_MAX_WIDTH.dp)
                         .fillMaxWidth(MENU_WIDTH_FRACTION)
                         .heightIn(max = minOf(maxHeight * MENU_HEIGHT_FRACTION, MENU_MAX_HEIGHT.dp))
-                        .animateContentSize()
                         // Touches inside the window don't close it.
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
@@ -341,11 +342,20 @@ class GameMenuActivity : RetrogradeComponentActivity() {
     }
 
     companion object {
+        private val routesSaver =
+            listSaver<SnapshotStateList<GameMenuRoute>, String>(
+                save = { routes -> routes.map { it.name } },
+                restore = { names -> mutableStateListOf(*names.map { GameMenuRoute.valueOf(it) }.toTypedArray()) },
+            )
+
         private const val MENU_MAX_WIDTH = 520
         private const val MENU_MAX_HEIGHT = 560
         private const val MENU_WIDTH_FRACTION = 0.92f
         private const val MENU_HEIGHT_FRACTION = 0.9f
         private const val MENU_CORNER_RADIUS = 20
+
+        // With the 12 dp corners of the focused row, its border follows the 20 dp corners of the window.
+        private const val MENU_CONTENT_MARGIN = 8
     }
 
     @dagger.Module

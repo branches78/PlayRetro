@@ -161,7 +161,8 @@ fun LemuroidSettingsGroup(
     title: @Composable (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Surface {
+    // Transparent: it is used inside the in-game menu, whose window has its own color.
+    Surface(color = Color.Transparent) {
         Column(
             modifier = modifier.fillMaxWidth(),
         ) {

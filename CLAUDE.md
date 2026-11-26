@@ -57,12 +57,12 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   graphic 1024×500). **Icono del lanzador:** mando negro con botones blancos sobre verde #00C64E
   (`lemuroid_launcher_foreground.xml`, `lemuroid_launcher_background`, PNG de `mipmap-*` y canal de TV), el de la
   primera versión del fork.
-- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.3` (`versionCode` 13; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
+- `applicationId`: `com.playretro.tv` (debug: `com.playretro.tv.debug`), versión `1.1.3` (`versionCode` 14; Play ya había usado el 1 en un borrador descartado). Los launchers muestran `launcher_name` (resValue por tipo de compilación: "PlayRetro Debug" en debug, "PlayRetro" en release) como nombre de la app y de `MainActivity` y `MainTVActivity` (el launcher de Google TV toma el de la app, no el de la actividad); el resto de la app usa `lemuroid_name`.
   Antes era `com.gamestation.tv`: es una app distinta para Android, así que la antigua hay que desinstalarla aparte
   y sus datos (partidas, ajustes, biblioteca) no pasan a la nueva.
 - Variante que se compila: **freeDynamicDebug** (sin librerías de Google; los cores se descargan al usarlos).
   La sincronización con Google Drive solo existe en la variante `play`: Google Sign-In y carpeta privada (`drive.appdata`).
-  Clientes Android en Google Cloud (proyecto PlayRetro, en estado Prueba): `com.playretro.tv` con la SHA-1 de la firma
+  Clientes Android en Google Cloud (proyecto PlayRetro, publicado el 2026-11-26: cualquier cuenta de Google puede entrar): `com.playretro.tv` con la SHA-1 de la firma
   de apps de Play y `com.playretro.tv.debug` con la de `debug.keystore` del repositorio. El método por código no sirve:
   Google rechaza `drive.appdata` con él (`invalid_scope`), aunque su documentación lo incluye.
 - Tema fijo en teléfono y TV (sin Material You): blanco para textos de acento, iconos e interruptores; la lupa y la nube de TV usan el verde del logo (`playretro_brand_green`, icono oscuro; blancas con foco)
@@ -334,7 +334,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   (`GameDetailsViewModel`: juego observado con `GameDao.observeById`, descripción de Wikipedia y "Más de
   [consola]"; `GameActionsHost`: las mismas acciones del menú, con el diálogo de nombre y el selector de carátula).
   TV: `tv/details/TVGameDetailsFragment.kt` (destino `navigation_game_details` del grafo de TV, se abre y cierra
-  sin animación; el cambio entre pestañas sí conserva su deslizamiento), captura con `TVBackdropView`, Jugar/Reanudar en píldora con nombre y el resto
+  con fundido `res/anim/tv_details_fade_*`, 300 ms; el cambio entre pestañas conserva su deslizamiento), captura con `TVBackdropView`, Jugar/Reanudar en píldora con nombre y el resto
   como iconos redondos cuyo nombre sale debajo al enfocarlos (la fila se desplaza hasta el enfocado si no cabe), Jugar/Continuar enfocado al abrir y al volver a la fila de botones desde la descripción o desde "Más de…" (`focusProperties { enter }` + `focusGroup`), "Configurar núcleo" abre el diálogo de opciones
   (`TVGameContextMenu.show(..., startWithCoreOptions = true)`). La ficha se muestra entera cuando están los datos
   locales (`State.isReady`); la descripción ocupa las líneas que necesita (hasta 4) y no se dibuja si no hay, así que lo
@@ -370,7 +370,7 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
   nunca lo tienen) se ve el título en texto.
 - **Menú de partida (L3 + R3):** el mismo en el móvil y en la TV (`mobile/feature/gamemenu/GameMenuActivity.kt`;
   la TV ya no usa el menú de Leanback): ventana modal centrada sobre el juego (`CenteredMenu`, hasta 520 dp de ancho y
-  560 dp de alto, fijo para que no crezca al aparecer; tocar fuera la cierra; se abre y cierra con fundido; sus subpantallas cambian sin fundido), con el juego
+  560 dp de alto; aparece con su tamaño, sin `animateContentSize`, que lo desplegaba de arriba abajo; tocar fuera la cierra; se abre y cierra con fundido; sus subpantallas cambian sin fundido con una pila propia de pantallas (`GameMenuRoute` + `rememberSaveableStateHolder`, `MenuScreen`), no con `NavHost`: este dibujaba la primera pantalla después del título y, al cambiar, las dos encimadas durante un fotograma; el grupo "Mandos" de Configuración (`LemuroidSettingsGroup`) es transparente para que la ventana tenga un solo color; margen de 8 dp a los lados y abajo para que el borde de la fila enfocada no quede cortado por las esquinas), con el juego
   y `consola · núcleo` centrados arriba y sin botón de cerrar (solo la flecha en las subpantallas). Atrás vuelve o
   cierra con una pulsación (`dispatchKeyEvent`: Compose la usaba antes para sacar el foco de cada grupo). Orden: Salir del juego,
   Reiniciar, Guardar, Cargar, Silenciar audio, Avance rápido, Editar controles y Sensor de inclinación (no en la TV),
@@ -438,7 +438,6 @@ No se sincroniza con Lemuroid: el código es propio y va por su cuenta.
 ## Pendientes conocidos
 
 - Confirmar con el uso que PPSSPP ya no se cierra al guardar o cargar partidas (núcleo de `pr-1.0.2`).
-- Publicar el proyecto de Google Cloud antes de abrir Drive a todos (en estado Prueba solo entran los usuarios de prueba).
 - Actualización automática de cores en `PlayRetroCores`: acción de GitHub que descargue periódicamente del buildbot
   de libretro los cores que usa la app y los suba a una rama aparte (`updates`) para probarlos antes de pasarlos
   a `master` y crear una etiqueta nueva. Acordado implementarlo más adelante.

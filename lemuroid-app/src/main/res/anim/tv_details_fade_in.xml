@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Crossfade between the TV screens and the details of a game, like the mobile navigation. -->
+<alpha xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="@integer/tv_details_fade_duration"
+    android:fromAlpha="0"
+    android:interpolator="@android:interpolator/decelerate_quad"
+    android:toAlpha="1" />

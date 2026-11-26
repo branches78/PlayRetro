@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import com.alorma.compose.settings.storage.memory.rememberMemoryBooleanSettingState
 import com.alorma.compose.settings.storage.memory.rememberMemoryIntSettingState
 import com.swordfish.lemuroid.R
@@ -29,7 +28,7 @@ import kotlin.reflect.KFunction1
  */
 @Composable
 fun GameMenuHomeScreen(
-    navController: NavController,
+    navigate: (GameMenuRoute) -> Unit,
     gameMenuRequest: GameMenuActivity.GameMenuRequest,
     isTV: Boolean,
     onResult: KFunction1<Intent.() -> Unit, Unit>,
@@ -70,7 +69,7 @@ fun GameMenuHomeScreen(
                         contentDescription = stringResource(id = R.string.game_menu_save),
                     )
                 },
-                onClick = { navController.navigateToRoute(GameMenuRoute.SAVE) },
+                onClick = { navigate(GameMenuRoute.SAVE) },
             )
 
             LemuroidSettingsMenuLink(
@@ -81,7 +80,7 @@ fun GameMenuHomeScreen(
                         contentDescription = stringResource(id = R.string.game_menu_load),
                     )
                 },
-                onClick = { navController.navigateToRoute(GameMenuRoute.LOAD) },
+                onClick = { navigate(GameMenuRoute.LOAD) },
             )
         }
 
@@ -189,7 +188,7 @@ fun GameMenuHomeScreen(
                         contentDescription = stringResource(id = R.string.game_menu_settings),
                     )
                 },
-                onClick = { navController.navigateToRoute(GameMenuRoute.OPTIONS) },
+                onClick = { navigate(GameMenuRoute.OPTIONS) },
             )
         }
     }
